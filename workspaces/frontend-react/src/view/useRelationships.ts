@@ -1,13 +1,31 @@
-import { useSyncExternalStore } from 'react';
-import { relationshipStorage } from '../deps';
+import { useEffect, useState } from 'react';
+import { relationshipStorage, taskStorage } from '../deps';
 import { Relationship } from '../model/Relationship';
+import { readRelationships } from '../usecase/readRelationships';
 
-export function useRelationships(): ReadonlyMap<string, Relationship> {
-    return useSyncExternalStore(
-        (callback) => {
-            relationshipStorage.addListener(callback);
-            return () => relationshipStorage.removeListener(callback);
-        },
-        () => relationshipStorage.readAll(),
+export function useRelationships(includeArchivedTaskRelationships: boolean = false): ReadonlyMap<string, Relationship> {
+    const [relationships, setRelationships] = useState<ReadonlyMap<string, Relationship>>(() =>
+        readRelationships(includeArchivedTaskRelationships),
     );
+
+    useEffect(() => {
+        const callback = () => setRelationships(readRelationships(includeArchivedTaskRelationships));
+
+        taskStorage.addListener(callback);
+        relationshipStorage.addListener(callback);
+        return () => {
+            taskStorage.removeListener(callback);
+            relationshipStorage.removeListener(callback);
+        };
+    }, [includeArchivedTaskRelationships]);
+
+    const [prevIncludeArchivedTaskRelationships, setPrevIncludeArchivedTaskRelationships] = useState(
+        includeArchivedTaskRelationships,
+    );
+    if (includeArchivedTaskRelationships !== prevIncludeArchivedTaskRelationships) {
+        setRelationships(readRelationships(includeArchivedTaskRelationships));
+        setPrevIncludeArchivedTaskRelationships(includeArchivedTaskRelationships);
+    }
+
+    return relationships;
 }

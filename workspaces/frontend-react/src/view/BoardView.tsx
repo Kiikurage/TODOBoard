@@ -4,14 +4,16 @@ import { useTasks } from './useTasks';
 import { TaskView } from './TaskView';
 import { css } from '@emotion/react';
 import { throwError } from '../lib/throwError';
-import { relationshipStorage, taskStorage } from '../deps';
+import { globalConfigStorage, relationshipStorage, taskStorage } from '../deps';
 import { Relationship } from '../model/Relationship';
 import { useRelationships } from './useRelationships';
 import { RelationshipView } from './RelationshipView';
+import { useGlobalConfig } from './useGlobalConfig';
 
 export function BoardView() {
-    const tasks = useTasks();
-    const relationships = useRelationships();
+    const globalConfig = useGlobalConfig();
+    const tasks = useTasks(globalConfig.showArchivedTasks);
+    const relationships = useRelationships(globalConfig.showArchivedTasks);
 
     const [title, setTitle] = useState('');
     const [taskId1, setTaskId1] = useState('');
@@ -25,6 +27,7 @@ export function BoardView() {
                 title,
                 completed: false,
                 description: '',
+                isArchived: false,
                 x: 0,
                 y: 0,
             }),
@@ -94,6 +97,16 @@ export function BoardView() {
                         onChange={(ev) => setTaskId2(ev.target.value)}
                     />
                     <button onClick={handleAddDependencyButtonClick}>Dependencyの追加</button>
+                </div>
+                <div>
+                    <input
+                        type="checkbox"
+                        checked={globalConfig.showArchivedTasks}
+                        onChange={(ev) => {
+                            globalConfigStorage.save(globalConfig.copy({ showArchivedTasks: ev.target.checked }));
+                        }}
+                    />
+                    非表示のタスクもすべて表示する
                 </div>
             </div>
         </div>

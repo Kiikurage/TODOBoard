@@ -19,20 +19,24 @@ export class TaskStorage {
         this.callbacks.delete(callback);
     }
 
-    readAll(): ReadonlyMap<string, Task> {
-        return this.tasks;
+    readAll(includeArchivedTasks: boolean = false): ReadonlyMap<string, Task> {
+        if (includeArchivedTasks) {
+            return this.tasks;
+        }
+
+        const map = new Map<string, Task>();
+        for (const task of this.tasks.values()) {
+            if (task.isArchived) continue;
+
+            map.set(task.id, task);
+        }
+
+        return map;
     }
 
     save(task: Task) {
         this.tasks = new Map(this.tasks);
         this.tasks.set(task.id, task);
-
-        this.callbacks.forEach((callback) => callback());
-    }
-
-    deleteById(taskId: string) {
-        this.tasks = new Map(this.tasks);
-        this.tasks.delete(taskId);
 
         this.callbacks.forEach((callback) => callback());
     }
@@ -54,6 +58,7 @@ export class TaskStorage {
             title: task.title,
             completed: task.completed,
             description: task.description,
+            isArchived: task.isArchived,
             x: task.x,
             y: task.y,
         };
@@ -64,7 +69,8 @@ export class TaskStorage {
             id: serializedTask.id,
             title: serializedTask.title,
             completed: serializedTask.completed,
-            description: serializedTask.description ?? '',
+            description: serializedTask.description,
+            isArchived: serializedTask.isArchived ?? false,
             x: serializedTask.x,
             y: serializedTask.y,
         });
@@ -98,6 +104,7 @@ interface SerializedTask {
     title: string;
     completed: boolean;
     description: string;
+    isArchived: boolean;
     x: number;
     y: number;
 }

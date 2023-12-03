@@ -1,13 +1,15 @@
-import { relationshipStorage, taskStorage } from '../deps';
+import { taskStorage } from '../deps';
+import { throwError } from '../lib/throwError';
 
 export function deleteTask(taskId: string) {
-    const relationships = relationshipStorage.readAll();
+    const task = taskStorage.readAll().get(taskId) ?? throwError(`Task ${taskId} is not found`);
+    // const relationships = relationshipStorage.readAll();
+    //
+    // for (const relationship of relationships.values()) {
+    //     if (relationship.sourceTaskId === taskId || relationship.destinationTaskId === taskId) {
+    //         relationshipStorage.deleteById(relationship.id);
+    //     }
+    // }
 
-    for (const relationship of relationships.values()) {
-        if (relationship.sourceTaskId === taskId || relationship.destinationTaskId === taskId) {
-            relationshipStorage.deleteById(relationship.id);
-        }
-    }
-
-    taskStorage.deleteById(taskId);
+    taskStorage.save(task.copy({ isArchived: true }));
 }

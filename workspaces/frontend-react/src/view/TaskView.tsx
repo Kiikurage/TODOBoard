@@ -89,19 +89,40 @@ export function TaskView({ task }: { task: Task }) {
                     }}
                 />
             </div>
-            <button
-                css={css`
-                    flex: 0 0 auto;
-                    vertical-align: middle;
-                    background: none;
-                    border: none;
-                    color: #a00;
-                    cursor: pointer;
-                `}
-                onClick={() => deleteTask(task.id)}
-            >
-                <span className="material-symbols-outlined">delete</span>
-            </button>
+            {!task.isArchived && (
+                <button
+                    css={css`
+                        flex: 0 0 auto;
+                        display: flex;
+                        flex-direction: row;
+                        align-items: center;
+                        background: none;
+                        border: none;
+                        color: #a00;
+                        cursor: pointer;
+                    `}
+                    onClick={() => deleteTask(task.id)}
+                >
+                    <span className="material-symbols-outlined">archive</span> 削除
+                </button>
+            )}
+            {task.isArchived && (
+                <button
+                    css={css`
+                        flex: 0 0 auto;
+                        display: flex;
+                        flex-direction: row;
+                        align-items: center;
+                        background: none;
+                        border: none;
+                        color: #888;
+                        cursor: pointer;
+                    `}
+                    onClick={() => deleteTask(task.id)}
+                >
+                    <span className="material-symbols-outlined">unarchive</span> 復元
+                </button>
+            )}
         </div>
     );
 }
