@@ -2,29 +2,52 @@ import { useState } from 'react';
 import { Task } from '../model/Task';
 import { useDeleteTask, useSaveTask } from './useTasks';
 import { css } from '@emotion/react';
+import { useDrag } from './useDrag';
 
 export function TaskView({ task }: { task: Task }) {
     const saveTask = useSaveTask();
     const deleteTask = useDeleteTask();
+    const [dragState, handleDragHandleMouseDown] = useDrag({
+        onDragEnd: (dragState) => {
+            saveTask(
+                task.copy({
+                    y: task.y + (dragState.currentY - dragState.startY),
+                    x: task.x + (dragState.currentX - dragState.startX),
+                }),
+            );
+        },
+    });
 
     return (
         <div
             css={css`
                 position: absolute;
-                top: ${task.y}px;
-                left: ${task.x}px;
+                top: ${task.y + (dragState.currentY - dragState.startY)}px;
+                left: ${task.x + (dragState.currentX - dragState.startX)}px;
                 display: flex;
                 flex-direction: row;
                 align-items: flex-start;
                 gap: 16px;
-                margin-bottom: 16px;
-                padding: 16px;
+                padding: 16px 16px 16px 0;
                 border-radius: 4px;
                 width: 400px;
                 border: 1px solid #000;
                 background: #fff;
             `}
         >
+            <div
+                css={css`
+                    flex: 0 0 auto;
+                    display: flex;
+                    flex-direction: column;
+                    justify-content: center;
+                    align-self: stretch;
+                    cursor: move;
+                `}
+                onMouseDown={handleDragHandleMouseDown}
+            >
+                <span className="material-symbols-outlined">drag_indicator</span>
+            </div>
             <div
                 css={css`
                     flex: 0 0 auto;
