@@ -1,20 +1,13 @@
 import { useRef, useState } from 'react';
 import { Task } from '../model/Task';
-import { useDeleteTask, useMoveTaskToFront, useSaveTask, useTasks } from './useTasks';
+import { useDeleteTask, useMoveTaskToFront, useSaveTask } from './useTasks';
 import { css } from '@emotion/react';
 import { useDrag } from './useDrag';
-import { isNotNull } from '../lib/isNotNull';
 
 export function TaskView({ task }: { task: Task }) {
     const saveTask = useSaveTask();
     const deleteTask = useDeleteTask();
     const moveTaskToFront = useMoveTaskToFront();
-
-    const tasks = useTasks();
-
-    const dependentTasks = [...task.dependencies]
-        .map((dependentTaskId) => tasks.get(dependentTaskId))
-        .filter(isNotNull);
 
     const originalTaskPositionRef = useRef<{ x: number; y: number }>({ x: task.x, y: task.y });
     const handleDragHandleMouseDown = useDrag({
@@ -98,12 +91,6 @@ export function TaskView({ task }: { task: Task }) {
                         saveTask(task.copy({ description }));
                     }}
                 />
-                <ul>
-                    依存しているタスク:
-                    {dependentTasks.map((dependentTask) => (
-                        <li key={dependentTask.id}>{dependentTask.title}</li>
-                    ))}
-                </ul>
             </div>
             <button
                 css={css`
