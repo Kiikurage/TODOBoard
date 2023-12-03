@@ -4,7 +4,7 @@ import { css } from '@emotion/react';
 import { useDrag } from './useDrag';
 import { taskStorage } from '../deps';
 
-export function TaskView({ task }: { task: Task }) {
+export function TaskCard({ task }: { task: Task }) {
     const originalTaskPositionRef = useRef<{ x: number; y: number }>({ x: task.x, y: task.y });
     const handleDragHandleMouseDown = useDrag({
         onDragStart: () => {

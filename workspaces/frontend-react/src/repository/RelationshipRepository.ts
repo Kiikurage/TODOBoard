@@ -2,7 +2,7 @@ import { Relationship } from '../model/Relationship';
 
 const LOCAL_STORAGE_KEY = 'RelationshipStorage';
 
-export class RelationshipStorage {
+export class RelationshipRepository {
     private readonly callbacks = new Set<() => void>();
     private models = new Map<string, Relationship>();
 

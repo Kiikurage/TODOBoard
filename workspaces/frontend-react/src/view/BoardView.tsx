@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { Task } from '../model/Task';
 import { useTasks } from './useTasks';
-import { TaskView } from './TaskView';
+import { TaskCard } from './TaskCard';
 import { css } from '@emotion/react';
 import { throwError } from '../lib/throwError';
 import { globalConfigStorage, relationshipStorage, taskStorage } from '../deps';
@@ -71,7 +71,7 @@ export function BoardView() {
                     <RelationshipView relationship={relationship} key={relationship.id} />
                 ))}
                 {[...tasks.values()].map((task) => (
-                    <TaskView task={task} key={task.id} />
+                    <TaskCard task={task} key={task.id} />
                 ))}
             </div>
 

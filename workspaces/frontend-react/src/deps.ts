@@ -1,7 +1,7 @@
-import { TaskStorage } from './storage/TaskStorage';
-import { RelationshipStorage } from './storage/RelationshipStorage';
-import { GlobalConfigStorage } from './storage/GlobalConfigStorage';
+import { TaskRepository } from './repository/TaskRepository';
+import { RelationshipRepository } from './repository/RelationshipRepository';
+import { GlobalConfigRepository } from './repository/GlobalConfigRepository';
 
-export const taskStorage = new TaskStorage();
-export const relationshipStorage = new RelationshipStorage();
-export const globalConfigStorage = new GlobalConfigStorage();
+export const taskStorage = new TaskRepository();
+export const relationshipStorage = new RelationshipRepository();
+export const globalConfigStorage = new GlobalConfigRepository();

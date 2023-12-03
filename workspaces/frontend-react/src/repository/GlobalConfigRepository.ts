@@ -1,6 +1,6 @@
 import { GlobalConfig } from '../model/GlobalConfig';
 
-export class GlobalConfigStorage {
+export class GlobalConfigRepository {
     private readonly callbacks = new Set<() => void>();
     private config = GlobalConfig.DEFAULT;
 

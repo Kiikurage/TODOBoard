@@ -2,7 +2,7 @@ import { Task } from '../model/Task';
 
 const LOCAL_STORAGE_KEY = 'TaskStorage';
 
-export class TaskStorage {
+export class TaskRepository {
     private readonly callbacks = new Set<() => void>();
     private tasks = new Map<string, Task>();
 
