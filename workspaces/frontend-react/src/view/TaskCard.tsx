@@ -2,7 +2,7 @@ import { useRef, useState } from 'react';
 import { Task } from '../model/Task';
 import { css } from '@emotion/react';
 import { useDrag } from './useDrag';
-import { taskStorage } from '../deps';
+import { updateTask } from '../usecase/updateTask';
 
 export function TaskCard({ task }: { task: Task }) {
     const originalTaskPositionRef = useRef<{ x: number; y: number }>({ x: task.x, y: task.y });
@@ -11,20 +11,16 @@ export function TaskCard({ task }: { task: Task }) {
             originalTaskPositionRef.current = { x: task.x, y: task.y };
         },
         onDragEnd: (dragState) => {
-            taskStorage.save(
-                task.copy({
-                    y: originalTaskPositionRef.current.y + (dragState.currentY - dragState.startY),
-                    x: originalTaskPositionRef.current.x + (dragState.currentX - dragState.startX),
-                }),
-            );
+            updateTask(task.id, {
+                x: originalTaskPositionRef.current.x + (dragState.currentX - dragState.startX),
+                y: originalTaskPositionRef.current.y + (dragState.currentY - dragState.startY),
+            });
         },
         onDragMove: (dragState) => {
-            taskStorage.save(
-                task.copy({
-                    y: originalTaskPositionRef.current.y + (dragState.currentY - dragState.startY),
-                    x: originalTaskPositionRef.current.x + (dragState.currentX - dragState.startX),
-                }),
-            );
+            updateTask(task.id, {
+                x: originalTaskPositionRef.current.x + (dragState.currentX - dragState.startX),
+                y: originalTaskPositionRef.current.y + (dragState.currentY - dragState.startY),
+            });
         },
     });
 
@@ -45,7 +41,6 @@ export function TaskCard({ task }: { task: Task }) {
                     0 1px 3px rgba(0, 0, 0, 0.12),
                     0 1px 2px rgba(0, 0, 0, 0.24);
             `}
-            // onMouseDown={() => taskStorage.moveTaskToFront(task.id)}
         >
             <div
                 css={css`
@@ -86,13 +81,11 @@ export function TaskCard({ task }: { task: Task }) {
                 <TitleForm
                     value={task.title}
                     completed={task.completed}
-                    onChange={(title) => taskStorage.save(task.copy({ title }))}
+                    onChange={(title) => updateTask(task.id, { title })}
                 />
                 <DescriptionForm
                     value={task.description}
-                    onChange={(description) => {
-                        taskStorage.save(task.copy({ description }));
-                    }}
+                    onChange={(description) => updateTask(task.id, { description })}
                 />
             </div>
             <div
@@ -103,7 +96,7 @@ export function TaskCard({ task }: { task: Task }) {
                 <input
                     type="checkbox"
                     checked={task.completed}
-                    onChange={(ev) => taskStorage.save(task.copy({ completed: ev.target.checked }))}
+                    onChange={(ev) => updateTask(task.id, { completed: ev.target.checked })}
                 />
             </div>
             {/*{!task.isArchived && (*/}

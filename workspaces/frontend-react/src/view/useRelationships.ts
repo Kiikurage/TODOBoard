@@ -3,13 +3,11 @@ import { relationshipStorage, taskStorage } from '../deps';
 import { Relationship } from '../model/Relationship';
 import { readRelationships } from '../usecase/readRelationships';
 
-export function useRelationships(includeArchivedTaskRelationships: boolean = false): ReadonlyMap<string, Relationship> {
-    const [relationships, setRelationships] = useState<ReadonlyMap<string, Relationship>>(() =>
-        readRelationships(includeArchivedTaskRelationships),
-    );
+export function useRelationships(): ReadonlyMap<string, Relationship> {
+    const [relationships, setRelationships] = useState<ReadonlyMap<string, Relationship>>(() => readRelationships());
 
     useEffect(() => {
-        const callback = () => setRelationships(readRelationships(includeArchivedTaskRelationships));
+        const callback = () => setRelationships(readRelationships());
 
         taskStorage.addListener(callback);
         relationshipStorage.addListener(callback);
@@ -17,15 +15,7 @@ export function useRelationships(includeArchivedTaskRelationships: boolean = fal
             taskStorage.removeListener(callback);
             relationshipStorage.removeListener(callback);
         };
-    }, [includeArchivedTaskRelationships]);
-
-    const [prevIncludeArchivedTaskRelationships, setPrevIncludeArchivedTaskRelationships] = useState(
-        includeArchivedTaskRelationships,
-    );
-    if (includeArchivedTaskRelationships !== prevIncludeArchivedTaskRelationships) {
-        setRelationships(readRelationships(includeArchivedTaskRelationships));
-        setPrevIncludeArchivedTaskRelationships(includeArchivedTaskRelationships);
-    }
+    }, []);
 
     return relationships;
 }

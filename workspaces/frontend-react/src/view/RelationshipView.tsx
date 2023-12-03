@@ -2,11 +2,9 @@ import { useTasks } from './useTasks';
 import { Relationship } from '../model/Relationship';
 import { throwError } from '../lib/throwError';
 import { css } from '@emotion/react';
-import { useGlobalConfig } from './useGlobalConfig';
 
 export function RelationshipView({ relationship }: { relationship: Relationship }) {
-    const globalConfig = useGlobalConfig();
-    const tasks = useTasks(globalConfig.showArchivedTasks);
+    const tasks = useTasks();
 
     const sourceTask = tasks.get(relationship.sourceTaskId) ?? throwError('Source task is not found');
     const destinationTask = tasks.get(relationship.destinationTaskId) ?? throwError('Destination task is not found');

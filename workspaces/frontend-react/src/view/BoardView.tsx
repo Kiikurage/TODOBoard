@@ -1,19 +1,16 @@
 import { useState } from 'react';
-import { Task } from '../model/Task';
 import { useTasks } from './useTasks';
 import { TaskCard } from './TaskCard';
 import { css } from '@emotion/react';
 import { throwError } from '../lib/throwError';
-import { globalConfigStorage, relationshipStorage, taskStorage } from '../deps';
-import { Relationship } from '../model/Relationship';
 import { useRelationships } from './useRelationships';
 import { RelationshipView } from './RelationshipView';
-import { useGlobalConfig } from './useGlobalConfig';
+import { createAndSaveNewTask } from '../usecase/createAndSaveNewTask';
+import { createAndSaveNewRelationship } from '../usecase/createAndSaveNewRelationship';
 
 export function BoardView() {
-    const globalConfig = useGlobalConfig();
-    const tasks = useTasks(globalConfig.showArchivedTasks);
-    const relationships = useRelationships(globalConfig.showArchivedTasks);
+    const tasks = useTasks();
+    const relationships = useRelationships();
 
     const [title, setTitle] = useState('');
     const [taskId1, setTaskId1] = useState('');
@@ -21,17 +18,8 @@ export function BoardView() {
 
     const handleAddTaskButtonClick = () => {
         if (title.trim() === '') return;
-        taskStorage.save(
-            Task.create({
-                id: taskStorage.getNextId(),
-                title,
-                completed: false,
-                description: '',
-                isArchived: false,
-                x: 0,
-                y: 0,
-            }),
-        );
+
+        createAndSaveNewTask({ title });
         setTitle('');
     };
 
@@ -39,12 +27,10 @@ export function BoardView() {
         const task1 = tasks.get(taskId1) ?? throwError(`Task ${taskId1} is not found`);
         const task2 = tasks.get(taskId2) ?? throwError(`Task ${taskId2} is not found`);
 
-        relationshipStorage.save(
-            Relationship.create({
-                sourceTaskId: task1.id,
-                destinationTaskId: task2.id,
-            }),
-        );
+        createAndSaveNewRelationship({
+            sourceTaskId: task1.id,
+            destinationTaskId: task2.id,
+        });
     };
 
     return (
@@ -99,16 +85,6 @@ export function BoardView() {
                         onChange={(ev) => setTaskId2(ev.target.value)}
                     />
                     <button onClick={handleAddDependencyButtonClick}>Dependencyの追加</button>
-                </div>
-                <div>
-                    <input
-                        type="checkbox"
-                        checked={globalConfig.showArchivedTasks}
-                        onChange={(ev) => {
-                            globalConfigStorage.save(globalConfig.copy({ showArchivedTasks: ev.target.checked }));
-                        }}
-                    />
-                    削除済みのタスクもすべて表示する
                 </div>
             </div>
         </div>

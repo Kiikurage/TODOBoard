@@ -1,10 +1,8 @@
 import { relationshipStorage, taskStorage } from '../deps';
 import { Relationship } from '../model/Relationship';
 
-export function readRelationships(
-    includeArchivedTaskRelationships: boolean = false,
-): ReadonlyMap<string, Relationship> {
-    const tasks = taskStorage.readAll(includeArchivedTaskRelationships);
+export function readRelationships(): ReadonlyMap<string, Relationship> {
+    const tasks = taskStorage.readAll();
     const relationships = relationshipStorage.readAll();
 
     const map = new Map<string, Relationship>();
