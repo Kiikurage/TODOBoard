@@ -34,11 +34,12 @@ export class TaskStorage {
         return {
             id: task.id,
             title: task.title,
+            completed: task.completed,
         };
     }
 
     private deserializeTask(serializedTask: SerializedTask): Task {
-        return new Task(serializedTask.id, serializedTask.title);
+        return new Task(serializedTask.id, serializedTask.title, serializedTask.completed ?? false);
     }
 
     private saveToLS() {
@@ -67,4 +68,5 @@ export class TaskStorage {
 interface SerializedTask {
     id: string;
     title: string;
+    completed?: boolean;
 }

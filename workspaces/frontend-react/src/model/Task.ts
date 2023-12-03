@@ -2,10 +2,11 @@ export class Task {
     constructor(
         public readonly id: string,
         public readonly title: string,
+        public readonly completed: boolean,
     ) {}
 
-    setTitle(title: string): Task {
-        return this.copy({ title });
+    setCompleted(completed: boolean): Task {
+        return this.copy({ completed });
     }
 
     copy(props: Partial<typeof ownProps>): Task {

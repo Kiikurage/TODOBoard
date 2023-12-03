@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { Task } from '../model/Task';
 import { useSaveTask, useTasks } from './useTasks';
+import { css } from '@emotion/react';
 
 export function TodoList() {
     const tasks = useTasks();
@@ -10,7 +11,7 @@ export function TodoList() {
 
     const handleAddTaskButtonClick = () => {
         if (title.trim() === '') return;
-        saveTask(new Task('' + Math.random(), title));
+        saveTask(new Task('' + Math.random(), title, false));
         setTitle('');
     };
 
@@ -25,7 +26,23 @@ export function TodoList() {
 
             <ul>
                 {[...tasks.values()].map((task) => (
-                    <li key={task.id}>{task.title}</li>
+                    <li key={task.id}>
+                        <input
+                            type="checkbox"
+                            checked={task.completed}
+                            onChange={(ev) => saveTask(task.setCompleted(ev.target.checked))}
+                        />
+                        <span
+                            css={css`
+                                ${task.completed &&
+                                css`
+                                    text-decoration-line: line-through;
+                                `}
+                            `}
+                        >
+                            {task.title}
+                        </span>
+                    </li>
                 ))}
             </ul>
         </div>
