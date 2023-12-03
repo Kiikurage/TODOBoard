@@ -1,4 +1,4 @@
-import { TaskStorage } from './TaskStorage';
+import { TaskStorage } from '../TaskStorage';
 import { Task } from '../model/Task';
 import { useCallback, useSyncExternalStore } from 'react';
 

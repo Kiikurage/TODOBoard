@@ -1,4 +1,4 @@
-import { Task } from '../model/Task';
+import { Task } from './model/Task';
 
 const LOCAL_STORAGE_KEY = 'TaskStorage';
 
@@ -42,11 +42,17 @@ export class TaskStorage {
             id: task.id,
             title: task.title,
             completed: task.completed,
+            description: task.description,
         };
     }
 
     private deserializeTask(serializedTask: SerializedTask): Task {
-        return new Task(serializedTask.id, serializedTask.title, serializedTask.completed ?? false);
+        return Task.create({
+            id: serializedTask.id,
+            title: serializedTask.title,
+            completed: serializedTask.completed,
+            description: serializedTask.description ?? '',
+        });
     }
 
     private saveToLS() {
@@ -75,5 +81,6 @@ export class TaskStorage {
 interface SerializedTask {
     id: string;
     title: string;
-    completed?: boolean;
+    completed: boolean;
+    description?: string;
 }
