@@ -3,7 +3,8 @@ import { Task } from '../model/Task';
 import { css } from '@emotion/react';
 import { useDrag } from './useDrag';
 import { taskStorage } from '../deps';
-import { deleteTask } from '../usecase/deleteTask';
+import { archiveTask } from '../usecase/archiveTask';
+import { unarchiveTask } from '../usecase/unarchiveTask';
 
 export function TaskView({ task }: { task: Task }) {
     const originalTaskPositionRef = useRef<{ x: number; y: number }>({ x: task.x, y: task.y });
@@ -45,7 +46,7 @@ export function TaskView({ task }: { task: Task }) {
                 border: 1px solid #000;
                 background: #fff;
             `}
-            onMouseDown={() => taskStorage.moveTaskToFront(task.id)}
+            // onMouseDown={() => taskStorage.moveTaskToFront(task.id)}
         >
             <div
                 css={css`
@@ -101,7 +102,7 @@ export function TaskView({ task }: { task: Task }) {
                         color: #a00;
                         cursor: pointer;
                     `}
-                    onClick={() => deleteTask(task.id)}
+                    onClick={() => archiveTask(task.id)}
                 >
                     <span className="material-symbols-outlined">archive</span> 削除
                 </button>
@@ -118,7 +119,10 @@ export function TaskView({ task }: { task: Task }) {
                         color: #888;
                         cursor: pointer;
                     `}
-                    onClick={() => deleteTask(task.id)}
+                    onClick={() => {
+                        console.log('click unarchiveTask');
+                        unarchiveTask(task.id);
+                    }}
                 >
                     <span className="material-symbols-outlined">unarchive</span> 復元
                 </button>

@@ -37,6 +37,7 @@ export class TaskStorage {
     save(task: Task) {
         this.tasks = new Map(this.tasks);
         this.tasks.set(task.id, task);
+        console.log('save', task);
 
         this.callbacks.forEach((callback) => callback());
     }

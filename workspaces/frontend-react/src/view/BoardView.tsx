@@ -106,7 +106,7 @@ export function BoardView() {
                             globalConfigStorage.save(globalConfig.copy({ showArchivedTasks: ev.target.checked }));
                         }}
                     />
-                    非表示のタスクもすべて表示する
+                    削除済みのタスクもすべて表示する
                 </div>
             </div>
         </div>
