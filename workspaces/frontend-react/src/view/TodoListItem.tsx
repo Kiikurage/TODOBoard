@@ -23,18 +23,11 @@ export function TodoListItem({ task }: { task: Task }) {
                 onChange={(ev) => saveTask(task.setCompleted(ev.target.checked))}
             />
             <div>
-                <div
-                    css={css`
-                        font-weight: bold;
-                        ${task.completed &&
-                        css`
-                            color: #888;
-                            text-decoration-line: line-through;
-                        `}
-                    `}
-                >
-                    {task.title}
-                </div>
+                <TitleForm
+                    value={task.title}
+                    completed={task.completed}
+                    onChange={(title) => saveTask(task.copy({ title }))}
+                />
                 <DescriptionForm
                     value={task.description}
                     onChange={(description) => {
@@ -55,23 +48,69 @@ export function TodoListItem({ task }: { task: Task }) {
     );
 }
 
-function DescriptionForm({ value, onChange }: { value: string; onChange: (value: string) => void }) {
-    const [isDescriptionEditing, setDescriptionEditing] = useState(false);
+function TitleForm({
+    value,
+    completed,
+    onChange,
+}: {
+    value: string;
+    completed: boolean;
+    onChange: (value: string) => void;
+}) {
+    const [isEditing, setEditing] = useState(false);
     const [draftValue, setDraftValue] = useState(value);
 
     const handleBlur = () => {
-        setDescriptionEditing(false);
+        setEditing(false);
         onChange(draftValue);
     };
 
-    if (!isDescriptionEditing) {
+    if (!isEditing) {
+        return (
+            <div
+                css={css`
+                    font-weight: bold;
+                    ${completed &&
+                    css`
+                        color: #888;
+                        text-decoration-line: line-through;
+                    `}
+                `}
+                onDoubleClick={() => setEditing(true)}
+            >
+                {value}
+            </div>
+        );
+    }
+
+    return (
+        <input
+            type="text"
+            value={draftValue}
+            autoFocus
+            onBlur={handleBlur}
+            onChange={(ev) => setDraftValue(ev.target.value)}
+        />
+    );
+}
+
+function DescriptionForm({ value, onChange }: { value: string; onChange: (value: string) => void }) {
+    const [isEditing, setEditing] = useState(false);
+    const [draftValue, setDraftValue] = useState(value);
+
+    const handleBlur = () => {
+        setEditing(false);
+        onChange(draftValue);
+    };
+
+    if (!isEditing) {
         return (
             <div
                 css={css`
                     font-size: 0.875em;
-                    color: ${isDescriptionEditing ? '#f00' : '#666'};
+                    color: ${isEditing ? '#f00' : '#666'};
                 `}
-                onDoubleClick={() => setDescriptionEditing(true)}
+                onDoubleClick={() => setEditing(true)}
             >
                 {value === '' ? '説明文を追加' : value}
             </div>
