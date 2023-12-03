@@ -1,17 +1,16 @@
-import { FC, useState } from 'react';
-import { Task } from './model/Task';
+import { useState } from 'react';
+import { Task } from '../model/Task';
+import { useSaveTask, useTasks } from './useTasks';
 
-export const App: FC = () => {
-    return <TodoList />;
-};
+export function TodoList() {
+    const tasks = useTasks();
+    const saveTask = useSaveTask();
 
-function TodoList() {
-    const [tasks, setTasks] = useState<Task[]>([]);
     const [title, setTitle] = useState('');
 
     const handleAddTaskButtonClick = () => {
         if (title.trim() === '') return;
-        setTasks((oldState) => [...oldState, new Task('' + Math.random(), title)]);
+        saveTask(new Task('' + Math.random(), title));
         setTitle('');
     };
 
@@ -25,7 +24,7 @@ function TodoList() {
             </div>
 
             <ul>
-                {tasks.map((task) => (
+                {[...tasks.values()].map((task) => (
                     <li key={task.id}>{task.title}</li>
                 ))}
             </ul>
