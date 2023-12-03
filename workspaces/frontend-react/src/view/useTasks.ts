@@ -19,3 +19,9 @@ export function useSaveTask() {
         storage.save(task);
     }, []);
 }
+
+export function useDeleteTask() {
+    return useCallback((taskId: string) => {
+        storage.deleteById(taskId);
+    }, []);
+}

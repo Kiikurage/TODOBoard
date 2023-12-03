@@ -8,6 +8,7 @@ export class TaskStorage {
 
     constructor() {
         this.tasks = this.loadFromLS();
+        this.addListener(() => this.saveToLS());
     }
 
     addListener(callback: () => void) {
@@ -26,7 +27,13 @@ export class TaskStorage {
         this.tasks = new Map(this.tasks);
         this.tasks.set(task.id, task);
 
-        this.saveToLS();
+        this.callbacks.forEach((callback) => callback());
+    }
+
+    deleteById(taskId: string) {
+        this.tasks = new Map(this.tasks);
+        this.tasks.delete(taskId);
+
         this.callbacks.forEach((callback) => callback());
     }
 

@@ -1,11 +1,12 @@
 import { useState } from 'react';
 import { Task } from '../model/Task';
-import { useSaveTask, useTasks } from './useTasks';
+import { useDeleteTask, useSaveTask, useTasks } from './useTasks';
 import { css } from '@emotion/react';
 
 export function TodoList() {
     const tasks = useTasks();
     const saveTask = useSaveTask();
+    const deleteTask = useDeleteTask();
 
     const [title, setTitle] = useState('');
 
@@ -42,6 +43,7 @@ export function TodoList() {
                         >
                             {task.title}
                         </span>
+                        <button onClick={() => deleteTask(task.id)}>削除</button>
                     </li>
                 ))}
             </ul>
