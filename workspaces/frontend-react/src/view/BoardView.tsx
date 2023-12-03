@@ -40,7 +40,7 @@ export function BoardView() {
                 `}
             >
                 {[...tasks.values()].map((task) => (
-                    <TaskView task={task} key={task.id}></TaskView>
+                    <TaskView task={task} key={task.id} />
                 ))}
             </div>
 

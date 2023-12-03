@@ -37,6 +37,17 @@ export class TaskStorage {
         this.callbacks.forEach((callback) => callback());
     }
 
+    moveTaskToFront(taskId: string) {
+        const task = this.tasks.get(taskId);
+        if (task === undefined) return;
+
+        this.tasks = new Map(this.tasks);
+        this.tasks.delete(taskId);
+        this.tasks.set(taskId, task);
+
+        this.callbacks.forEach((callback) => callback());
+    }
+
     private serializeTask(task: Task): SerializedTask {
         return {
             id: task.id,

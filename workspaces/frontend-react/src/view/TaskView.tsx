@@ -1,12 +1,14 @@
 import { useState } from 'react';
 import { Task } from '../model/Task';
-import { useDeleteTask, useSaveTask } from './useTasks';
+import { useDeleteTask, useMoveTaskToFront, useSaveTask } from './useTasks';
 import { css } from '@emotion/react';
 import { useDrag } from './useDrag';
 
 export function TaskView({ task }: { task: Task }) {
     const saveTask = useSaveTask();
     const deleteTask = useDeleteTask();
+    const moveTaskToFront = useMoveTaskToFront();
+
     const [dragState, handleDragHandleMouseDown] = useDrag({
         onDragEnd: (dragState) => {
             saveTask(
@@ -34,6 +36,7 @@ export function TaskView({ task }: { task: Task }) {
                 border: 1px solid #000;
                 background: #fff;
             `}
+            onMouseDown={() => moveTaskToFront(task.id)}
         >
             <div
                 css={css`

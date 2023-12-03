@@ -25,3 +25,9 @@ export function useDeleteTask() {
         storage.deleteById(taskId);
     }, []);
 }
+
+export function useMoveTaskToFront() {
+    return useCallback((taskId: string) => {
+        storage.moveTaskToFront(taskId);
+    }, []);
+}
