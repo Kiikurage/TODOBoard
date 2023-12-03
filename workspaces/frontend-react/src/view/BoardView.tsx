@@ -23,7 +23,7 @@ export function BoardView() {
         if (title.trim() === '') return;
         taskStorage.save(
             Task.create({
-                id: '' + Math.random(),
+                id: taskStorage.getNextId(),
                 title,
                 completed: false,
                 description: '',
@@ -39,13 +39,8 @@ export function BoardView() {
         const task1 = tasks.get(taskId1) ?? throwError(`Task ${taskId1} is not found`);
         const task2 = tasks.get(taskId2) ?? throwError(`Task ${taskId2} is not found`);
 
-        console.log(`${task1.title} から ${task2.title} へ依存関係`);
-        console.dir(task1);
-        console.dir(task2);
-
         relationshipStorage.save(
             Relationship.create({
-                id: '' + Math.random(),
                 sourceTaskId: task1.id,
                 destinationTaskId: task2.id,
             }),

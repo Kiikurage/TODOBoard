@@ -39,7 +39,6 @@ export class RelationshipStorage {
 
     private serialize(model: Relationship): SerializedRelationship {
         return {
-            id: model.id,
             sourceTaskId: model.sourceTaskId,
             destinationTaskId: model.destinationTaskId,
         };
@@ -47,7 +46,6 @@ export class RelationshipStorage {
 
     private deserialize(serializedModel: SerializedRelationship): Relationship {
         return Relationship.create({
-            id: serializedModel.id,
             sourceTaskId: serializedModel.sourceTaskId,
             destinationTaskId: serializedModel.destinationTaskId,
         });
@@ -77,7 +75,6 @@ export class RelationshipStorage {
 }
 
 interface SerializedRelationship {
-    id: string;
     sourceTaskId: string;
     destinationTaskId: string;
 }

@@ -11,6 +11,10 @@ export class TaskStorage {
         this.addListener(() => this.saveToLS());
     }
 
+    getNextId(): string {
+        return '' + (this.tasks.size + 1);
+    }
+
     addListener(callback: () => void) {
         this.callbacks.add(callback);
     }
