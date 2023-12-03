@@ -54,6 +54,8 @@ export function useDrag({
     }, [dragState, dragState.isDragging, onDragEnd]);
 
     const handleDragHandleMouseDown: MouseEventHandler<HTMLDivElement> = useCallback((ev) => {
+        ev.preventDefault();
+
         setDragState({
             isDragging: true,
             startX: ev.clientX,
