@@ -48,13 +48,19 @@ export function BoardView() {
     };
 
     return (
-        <div>
+        <div
+            css={css`
+                position: fixed;
+                inset: 0;
+                z-index: 0;
+                pointer-events: none;
+                background: #f8faff;
+            `}
+        >
             <div
                 css={css`
-                    position: fixed;
+                    position: absolute;
                     inset: 0;
-                    z-index: 0;
-                    pointer-events: none;
 
                     * {
                         pointer-events: auto;
@@ -72,6 +78,7 @@ export function BoardView() {
             <div
                 css={css`
                     z-index: 1;
+                    pointer-events: all;
                 `}
             >
                 <div>

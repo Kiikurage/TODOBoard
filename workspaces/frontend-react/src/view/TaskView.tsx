@@ -3,8 +3,6 @@ import { Task } from '../model/Task';
 import { css } from '@emotion/react';
 import { useDrag } from './useDrag';
 import { taskStorage } from '../deps';
-import { archiveTask } from '../usecase/archiveTask';
-import { unarchiveTask } from '../usecase/unarchiveTask';
 
 export function TaskView({ task }: { task: Task }) {
     const originalTaskPositionRef = useRef<{ x: number; y: number }>({ x: task.x, y: task.y });
@@ -39,12 +37,13 @@ export function TaskView({ task }: { task: Task }) {
                 display: flex;
                 flex-direction: row;
                 align-items: flex-start;
-                gap: 16px;
-                padding: 16px 16px 16px 0;
+                padding: 10px 16px 10px 0;
                 border-radius: 4px;
                 width: 400px;
-                border: 1px solid #000;
                 background: #fff;
+                box-shadow:
+                    0 1px 3px rgba(0, 0, 0, 0.12),
+                    0 1px 2px rgba(0, 0, 0, 0.24);
             `}
             // onMouseDown={() => taskStorage.moveTaskToFront(task.id)}
         >
@@ -56,28 +55,34 @@ export function TaskView({ task }: { task: Task }) {
                     justify-content: center;
                     align-self: stretch;
                     cursor: move;
+                    padding-right: 4px;
                 `}
                 onMouseDown={handleDragHandleMouseDown}
             >
-                <span className="material-symbols-outlined">drag_indicator</span>
-            </div>
-            <div
-                css={css`
-                    flex: 0 0 auto;
-                `}
-            >
-                <input
-                    type="checkbox"
-                    checked={task.completed}
-                    onChange={(ev) => taskStorage.save(task.copy({ completed: ev.target.checked }))}
-                />
+                <span
+                    className="material-symbols-outlined"
+                    css={css`
+                        font-size: 20px;
+                        color: #888;
+                    `}
+                >
+                    drag_indicator
+                </span>
             </div>
             <div
                 css={css`
                     flex: 1 1 0;
+                    min-width: 0;
                 `}
             >
-                <span>{task.id}</span>
+                <span
+                    css={css`
+                        font-size: 0.75em;
+                        color: #666;
+                    `}
+                >
+                    #{task.id}
+                </span>
                 <TitleForm
                     value={task.title}
                     completed={task.completed}
@@ -90,43 +95,54 @@ export function TaskView({ task }: { task: Task }) {
                     }}
                 />
             </div>
-            {!task.isArchived && (
-                <button
-                    css={css`
-                        flex: 0 0 auto;
-                        display: flex;
-                        flex-direction: row;
-                        align-items: center;
-                        background: none;
-                        border: none;
-                        color: #a00;
-                        cursor: pointer;
-                    `}
-                    onClick={() => archiveTask(task.id)}
-                >
-                    <span className="material-symbols-outlined">archive</span> 削除
-                </button>
-            )}
-            {task.isArchived && (
-                <button
-                    css={css`
-                        flex: 0 0 auto;
-                        display: flex;
-                        flex-direction: row;
-                        align-items: center;
-                        background: none;
-                        border: none;
-                        color: #888;
-                        cursor: pointer;
-                    `}
-                    onClick={() => {
-                        console.log('click unarchiveTask');
-                        unarchiveTask(task.id);
-                    }}
-                >
-                    <span className="material-symbols-outlined">unarchive</span> 復元
-                </button>
-            )}
+            <div
+                css={css`
+                    flex: 0 0 auto;
+                `}
+            >
+                <input
+                    type="checkbox"
+                    checked={task.completed}
+                    onChange={(ev) => taskStorage.save(task.copy({ completed: ev.target.checked }))}
+                />
+            </div>
+            {/*{!task.isArchived && (*/}
+            {/*    <button*/}
+            {/*        css={css`*/}
+            {/*            flex: 0 0 auto;*/}
+            {/*            display: flex;*/}
+            {/*            flex-direction: row;*/}
+            {/*            align-items: center;*/}
+            {/*            background: none;*/}
+            {/*            border: none;*/}
+            {/*            color: #a00;*/}
+            {/*            cursor: pointer;*/}
+            {/*        `}*/}
+            {/*        onClick={() => archiveTask(task.id)}*/}
+            {/*    >*/}
+            {/*        <span className="material-symbols-outlined">archive</span> 削除*/}
+            {/*    </button>*/}
+            {/*)}*/}
+            {/*{task.isArchived && (*/}
+            {/*    <button*/}
+            {/*        css={css`*/}
+            {/*            flex: 0 0 auto;*/}
+            {/*            display: flex;*/}
+            {/*            flex-direction: row;*/}
+            {/*            align-items: center;*/}
+            {/*            background: none;*/}
+            {/*            border: none;*/}
+            {/*            color: #888;*/}
+            {/*            cursor: pointer;*/}
+            {/*        `}*/}
+            {/*        onClick={() => {*/}
+            {/*            console.log('click unarchiveTask');*/}
+            {/*            unarchiveTask(task.id);*/}
+            {/*        }}*/}
+            {/*    >*/}
+            {/*        <span className="material-symbols-outlined">unarchive</span> 復元*/}
+            {/*    </button>*/}
+            {/*)}*/}
         </div>
     );
 }
@@ -153,6 +169,10 @@ function TitleForm({
             <div
                 css={css`
                     font-weight: bold;
+                    overflow: hidden;
+                    text-overflow: ellipsis;
+                    white-space: nowrap;
+
                     ${completed &&
                     css`
                         color: #888;
@@ -167,13 +187,15 @@ function TitleForm({
     }
 
     return (
-        <input
-            type="text"
-            value={draftValue}
-            autoFocus
-            onBlur={handleBlur}
-            onChange={(ev) => setDraftValue(ev.target.value)}
-        />
+        <div>
+            <input
+                type="text"
+                value={draftValue}
+                autoFocus
+                onBlur={handleBlur}
+                onChange={(ev) => setDraftValue(ev.target.value)}
+            />
+        </div>
     );
 }
 
@@ -190,8 +212,13 @@ function DescriptionForm({ value, onChange }: { value: string; onChange: (value:
         return (
             <div
                 css={css`
+                    display: -webkit-box;
+                    overflow: hidden;
+                    -webkit-line-clamp: 3;
+                    -webkit-box-orient: vertical;
+                    text-overflow: ellipsis;
                     font-size: 0.875em;
-                    color: ${isEditing ? '#f00' : '#666'};
+                    color: #666;
                 `}
                 onDoubleClick={() => setEditing(true)}
             >
