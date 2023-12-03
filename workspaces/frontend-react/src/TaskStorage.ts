@@ -56,6 +56,7 @@ export class TaskStorage {
             description: task.description,
             x: task.x,
             y: task.y,
+            dependencies: [...task.dependencies],
         };
     }
 
@@ -67,6 +68,7 @@ export class TaskStorage {
             description: serializedTask.description ?? '',
             x: serializedTask.x,
             y: serializedTask.y,
+            dependencies: new Set(serializedTask.dependencies ?? []),
         });
     }
 
@@ -100,4 +102,5 @@ interface SerializedTask {
     description: string;
     x: number;
     y: number;
+    dependencies?: string[];
 }

@@ -6,10 +6,17 @@ export class Task {
         public readonly description: string,
         public readonly x: number,
         public readonly y: number,
+        public readonly dependencies: ReadonlySet<string>,
     ) {}
 
     setDescription(description: string): Task {
         return this.copy({ description });
+    }
+
+    addDependency(taskId: string): Task {
+        return this.copy({
+            dependencies: new Set([...this.dependencies, taskId]),
+        });
     }
     setCompleted(completed: boolean): Task {
         return this.copy({ completed });

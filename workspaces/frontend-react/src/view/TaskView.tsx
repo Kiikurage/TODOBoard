@@ -1,13 +1,20 @@
 import { useState } from 'react';
 import { Task } from '../model/Task';
-import { useDeleteTask, useMoveTaskToFront, useSaveTask } from './useTasks';
+import { useDeleteTask, useMoveTaskToFront, useSaveTask, useTasks } from './useTasks';
 import { css } from '@emotion/react';
 import { useDrag } from './useDrag';
+import { isNotNull } from '../lib/isNotNull';
 
 export function TaskView({ task }: { task: Task }) {
     const saveTask = useSaveTask();
     const deleteTask = useDeleteTask();
     const moveTaskToFront = useMoveTaskToFront();
+
+    const tasks = useTasks();
+
+    const dependentTasks = [...task.dependencies]
+        .map((dependentTaskId) => tasks.get(dependentTaskId))
+        .filter(isNotNull);
 
     const [dragState, handleDragHandleMouseDown] = useDrag({
         onDragEnd: (dragState) => {
@@ -67,6 +74,7 @@ export function TaskView({ task }: { task: Task }) {
                     flex: 1 1 0;
                 `}
             >
+                <span>{task.id}</span>
                 <TitleForm
                     value={task.title}
                     completed={task.completed}
@@ -78,6 +86,12 @@ export function TaskView({ task }: { task: Task }) {
                         saveTask(task.copy({ description }));
                     }}
                 />
+                <ul>
+                    依存しているタスク:
+                    {dependentTasks.map((dependentTask) => (
+                        <li key={dependentTask.id}>{dependentTask.title}</li>
+                    ))}
+                </ul>
             </div>
             <button
                 css={css`
