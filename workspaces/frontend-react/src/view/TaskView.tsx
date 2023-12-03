@@ -25,12 +25,22 @@ export function TaskView({ task }: { task: Task }) {
                 background: #fff;
             `}
         >
-            <input
-                type="checkbox"
-                checked={task.completed}
-                onChange={(ev) => saveTask(task.setCompleted(ev.target.checked))}
-            />
-            <div>
+            <div
+                css={css`
+                    flex: 0 0 auto;
+                `}
+            >
+                <input
+                    type="checkbox"
+                    checked={task.completed}
+                    onChange={(ev) => saveTask(task.setCompleted(ev.target.checked))}
+                />
+            </div>
+            <div
+                css={css`
+                    flex: 1 1 0;
+                `}
+            >
                 <TitleForm
                     value={task.title}
                     completed={task.completed}
@@ -45,12 +55,16 @@ export function TaskView({ task }: { task: Task }) {
             </div>
             <button
                 css={css`
-                    line-height: 24px;
+                    flex: 0 0 auto;
                     vertical-align: middle;
+                    background: none;
+                    border: none;
+                    color: #a00;
+                    cursor: pointer;
                 `}
                 onClick={() => deleteTask(task.id)}
             >
-                削除
+                <span className="material-symbols-outlined">delete</span>
             </button>
         </div>
     );

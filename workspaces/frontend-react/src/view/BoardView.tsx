@@ -27,20 +27,30 @@ export function BoardView() {
 
     return (
         <div>
-            <div>
-                <input type="text" value={title} onChange={(ev) => setTitle(ev.target.value)} />
-                <button onClick={handleAddTaskButtonClick}>追加</button>
-            </div>
-
             <div
                 css={css`
                     position: fixed;
                     inset: 0;
+                    z-index: 0;
+                    pointer-events: none;
+
+                    * {
+                        pointer-events: auto;
+                    }
                 `}
             >
                 {[...tasks.values()].map((task) => (
                     <TaskView task={task} key={task.id}></TaskView>
                 ))}
+            </div>
+
+            <div
+                css={css`
+                    z-index: 1;
+                `}
+            >
+                <input type="text" value={title} onChange={(ev) => setTitle(ev.target.value)} />
+                <button onClick={handleAddTaskButtonClick}>追加</button>
             </div>
         </div>
     );
