@@ -1,21 +1,18 @@
 import { useRef, useState } from 'react';
 import { Task } from '../model/Task';
-import { useDeleteTask, useMoveTaskToFront, useSaveTask } from './useTasks';
 import { css } from '@emotion/react';
 import { useDrag } from './useDrag';
+import { taskStorage } from '../deps';
+import { deleteTask } from '../usecase/deleteTask';
 
 export function TaskView({ task }: { task: Task }) {
-    const saveTask = useSaveTask();
-    const deleteTask = useDeleteTask();
-    const moveTaskToFront = useMoveTaskToFront();
-
     const originalTaskPositionRef = useRef<{ x: number; y: number }>({ x: task.x, y: task.y });
     const handleDragHandleMouseDown = useDrag({
         onDragStart: () => {
             originalTaskPositionRef.current = { x: task.x, y: task.y };
         },
         onDragEnd: (dragState) => {
-            saveTask(
+            taskStorage.save(
                 task.copy({
                     y: originalTaskPositionRef.current.y + (dragState.currentY - dragState.startY),
                     x: originalTaskPositionRef.current.x + (dragState.currentX - dragState.startX),
@@ -23,7 +20,7 @@ export function TaskView({ task }: { task: Task }) {
             );
         },
         onDragMove: (dragState) => {
-            saveTask(
+            taskStorage.save(
                 task.copy({
                     y: originalTaskPositionRef.current.y + (dragState.currentY - dragState.startY),
                     x: originalTaskPositionRef.current.x + (dragState.currentX - dragState.startX),
@@ -48,7 +45,7 @@ export function TaskView({ task }: { task: Task }) {
                 border: 1px solid #000;
                 background: #fff;
             `}
-            onMouseDown={() => moveTaskToFront(task.id)}
+            onMouseDown={() => taskStorage.moveTaskToFront(task.id)}
         >
             <div
                 css={css`
@@ -71,7 +68,7 @@ export function TaskView({ task }: { task: Task }) {
                 <input
                     type="checkbox"
                     checked={task.completed}
-                    onChange={(ev) => saveTask(task.setCompleted(ev.target.checked))}
+                    onChange={(ev) => taskStorage.save(task.copy({ completed: ev.target.checked }))}
                 />
             </div>
             <div
@@ -83,12 +80,12 @@ export function TaskView({ task }: { task: Task }) {
                 <TitleForm
                     value={task.title}
                     completed={task.completed}
-                    onChange={(title) => saveTask(task.copy({ title }))}
+                    onChange={(title) => taskStorage.save(task.copy({ title }))}
                 />
                 <DescriptionForm
                     value={task.description}
                     onChange={(description) => {
-                        saveTask(task.copy({ description }));
+                        taskStorage.save(task.copy({ description }));
                     }}
                 />
             </div>

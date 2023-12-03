@@ -1,10 +1,10 @@
 import { useState } from 'react';
 import { Task } from '../model/Task';
-import { useSaveTask, useTasks } from './useTasks';
+import { useTasks } from './useTasks';
 import { TaskView } from './TaskView';
 import { css } from '@emotion/react';
 import { throwError } from '../lib/throwError';
-import { relationshipStorage } from '../deps';
+import { relationshipStorage, taskStorage } from '../deps';
 import { Relationship } from '../model/Relationship';
 import { useRelationships } from './useRelationships';
 import { RelationshipView } from './RelationshipView';
@@ -12,7 +12,6 @@ import { RelationshipView } from './RelationshipView';
 export function BoardView() {
     const tasks = useTasks();
     const relationships = useRelationships();
-    const saveTask = useSaveTask();
 
     const [title, setTitle] = useState('');
     const [taskId1, setTaskId1] = useState('');
@@ -20,7 +19,7 @@ export function BoardView() {
 
     const handleAddTaskButtonClick = () => {
         if (title.trim() === '') return;
-        saveTask(
+        taskStorage.save(
             Task.create({
                 id: '' + Math.random(),
                 title,
@@ -28,7 +27,6 @@ export function BoardView() {
                 description: '',
                 x: 0,
                 y: 0,
-                dependencies: new Set(),
             }),
         );
         setTitle('');

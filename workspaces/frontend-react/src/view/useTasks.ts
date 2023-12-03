@@ -1,6 +1,5 @@
-import { TaskStorage } from '../storage/TaskStorage';
 import { Task } from '../model/Task';
-import { useCallback, useSyncExternalStore } from 'react';
+import { useSyncExternalStore } from 'react';
 import { taskStorage } from '../deps';
 
 export function useTasks(): ReadonlyMap<string, Task> {
@@ -11,22 +10,4 @@ export function useTasks(): ReadonlyMap<string, Task> {
         },
         () => taskStorage.readAll(),
     );
-}
-
-export function useSaveTask() {
-    return useCallback((task: Task) => {
-        taskStorage.save(task);
-    }, []);
-}
-
-export function useDeleteTask() {
-    return useCallback((taskId: string) => {
-        taskStorage.deleteById(taskId);
-    }, []);
-}
-
-export function useMoveTaskToFront() {
-    return useCallback((taskId: string) => {
-        taskStorage.moveTaskToFront(taskId);
-    }, []);
 }
