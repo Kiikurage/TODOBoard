@@ -3,18 +3,26 @@ import { Task } from '../model/Task';
 import { useDeleteTask, useSaveTask } from './useTasks';
 import { css } from '@emotion/react';
 
-export function TodoListItem({ task }: { task: Task }) {
+export function TaskView({ task }: { task: Task }) {
     const saveTask = useSaveTask();
     const deleteTask = useDeleteTask();
 
     return (
-        <li
+        <div
             css={css`
+                position: absolute;
+                top: ${task.y}px;
+                left: ${task.x}px;
                 display: flex;
                 flex-direction: row;
                 align-items: flex-start;
                 gap: 16px;
                 margin-bottom: 16px;
+                padding: 16px;
+                border-radius: 4px;
+                width: 400px;
+                border: 1px solid #000;
+                background: #fff;
             `}
         >
             <input
@@ -44,7 +52,7 @@ export function TodoListItem({ task }: { task: Task }) {
             >
                 削除
             </button>
-        </li>
+        </div>
     );
 }
 

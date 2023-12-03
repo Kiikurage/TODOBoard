@@ -43,6 +43,8 @@ export class TaskStorage {
             title: task.title,
             completed: task.completed,
             description: task.description,
+            x: task.x,
+            y: task.y,
         };
     }
 
@@ -52,6 +54,8 @@ export class TaskStorage {
             title: serializedTask.title,
             completed: serializedTask.completed,
             description: serializedTask.description ?? '',
+            x: serializedTask.x,
+            y: serializedTask.y,
         });
     }
 
@@ -82,5 +86,7 @@ interface SerializedTask {
     id: string;
     title: string;
     completed: boolean;
-    description?: string;
+    description: string;
+    x: number;
+    y: number;
 }

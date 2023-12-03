@@ -4,6 +4,8 @@ export class Task {
         public readonly title: string,
         public readonly completed: boolean,
         public readonly description: string,
+        public readonly x: number,
+        public readonly y: number,
     ) {}
 
     setDescription(description: string): Task {

@@ -1,6 +1,6 @@
 import { FC } from 'react';
-import { TodoList } from './TodoList';
+import { BoardView } from './BoardView';
 
 export const App: FC = () => {
-    return <TodoList />;
+    return <BoardView />;
 };
