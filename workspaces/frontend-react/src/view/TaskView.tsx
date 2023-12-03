@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useRef, useState } from 'react';
 import { Task } from '../model/Task';
 import { useDeleteTask, useMoveTaskToFront, useSaveTask, useTasks } from './useTasks';
 import { css } from '@emotion/react';
@@ -16,12 +16,24 @@ export function TaskView({ task }: { task: Task }) {
         .map((dependentTaskId) => tasks.get(dependentTaskId))
         .filter(isNotNull);
 
-    const [dragState, handleDragHandleMouseDown] = useDrag({
+    const originalTaskPositionRef = useRef<{ x: number; y: number }>({ x: task.x, y: task.y });
+    const handleDragHandleMouseDown = useDrag({
+        onDragStart: () => {
+            originalTaskPositionRef.current = { x: task.x, y: task.y };
+        },
         onDragEnd: (dragState) => {
             saveTask(
                 task.copy({
-                    y: task.y + (dragState.currentY - dragState.startY),
-                    x: task.x + (dragState.currentX - dragState.startX),
+                    y: originalTaskPositionRef.current.y + (dragState.currentY - dragState.startY),
+                    x: originalTaskPositionRef.current.x + (dragState.currentX - dragState.startX),
+                }),
+            );
+        },
+        onDragMove: (dragState) => {
+            saveTask(
+                task.copy({
+                    y: originalTaskPositionRef.current.y + (dragState.currentY - dragState.startY),
+                    x: originalTaskPositionRef.current.x + (dragState.currentX - dragState.startX),
                 }),
             );
         },
@@ -31,8 +43,8 @@ export function TaskView({ task }: { task: Task }) {
         <div
             css={css`
                 position: absolute;
-                top: ${task.y + (dragState.currentY - dragState.startY)}px;
-                left: ${task.x + (dragState.currentX - dragState.startX)}px;
+                top: ${task.y}px;
+                left: ${task.x}px;
                 display: flex;
                 flex-direction: row;
                 align-items: flex-start;

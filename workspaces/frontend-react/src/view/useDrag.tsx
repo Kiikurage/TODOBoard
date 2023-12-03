@@ -9,8 +9,12 @@ export interface DragState {
 }
 
 export function useDrag({
+    onDragStart,
+    onDragMove,
     onDragEnd,
 }: {
+    onDragStart?: (dragState: DragState) => void;
+    onDragMove?: (dragState: DragState) => void;
     onDragEnd?: (dragState: DragState) => void;
 } = {}) {
     const [dragState, setDragState] = useState<DragState>({
@@ -24,6 +28,11 @@ export function useDrag({
     useEffect(() => {
         function handleWindowMouseMove(ev: MouseEvent) {
             if (!dragState.isDragging) return;
+            onDragMove?.({
+                ...dragState,
+                currentX: ev.clientX,
+                currentY: ev.clientY,
+            });
             setDragState((oldState) => {
                 return {
                     ...oldState,
@@ -51,19 +60,25 @@ export function useDrag({
             window.removeEventListener('mousemove', handleWindowMouseMove);
             window.removeEventListener('mouseup', handleWindowMouseUp);
         };
-    }, [dragState, dragState.isDragging, onDragEnd]);
+    }, [dragState, dragState.isDragging, onDragEnd, onDragMove]);
 
-    const handleDragHandleMouseDown: MouseEventHandler<HTMLDivElement> = useCallback((ev) => {
-        ev.preventDefault();
+    const handleDragHandleMouseDown: MouseEventHandler<HTMLDivElement> = useCallback(
+        (ev) => {
+            ev.preventDefault();
 
-        setDragState({
-            isDragging: true,
-            startX: ev.clientX,
-            startY: ev.clientY,
-            currentX: ev.clientX,
-            currentY: ev.clientY,
-        });
-    }, []);
+            const dragState = {
+                isDragging: true,
+                startX: ev.clientX,
+                startY: ev.clientY,
+                currentX: ev.clientX,
+                currentY: ev.clientY,
+            };
 
-    return [dragState, handleDragHandleMouseDown] as const;
+            onDragStart?.(dragState);
+            setDragState(dragState);
+        },
+        [onDragStart],
+    );
+
+    return handleDragHandleMouseDown;
 }

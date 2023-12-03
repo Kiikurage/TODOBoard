@@ -1,33 +1,32 @@
-import { TaskStorage } from '../TaskStorage';
+import { TaskStorage } from '../storage/TaskStorage';
 import { Task } from '../model/Task';
 import { useCallback, useSyncExternalStore } from 'react';
-
-const storage = new TaskStorage();
+import { taskStorage } from '../deps';
 
 export function useTasks(): ReadonlyMap<string, Task> {
     return useSyncExternalStore(
         (callback) => {
-            storage.addListener(callback);
-            return () => storage.removeListener(callback);
+            taskStorage.addListener(callback);
+            return () => taskStorage.removeListener(callback);
         },
-        () => storage.readAll(),
+        () => taskStorage.readAll(),
     );
 }
 
 export function useSaveTask() {
     return useCallback((task: Task) => {
-        storage.save(task);
+        taskStorage.save(task);
     }, []);
 }
 
 export function useDeleteTask() {
     return useCallback((taskId: string) => {
-        storage.deleteById(taskId);
+        taskStorage.deleteById(taskId);
     }, []);
 }
 
 export function useMoveTaskToFront() {
     return useCallback((taskId: string) => {
-        storage.moveTaskToFront(taskId);
+        taskStorage.moveTaskToFront(taskId);
     }, []);
 }

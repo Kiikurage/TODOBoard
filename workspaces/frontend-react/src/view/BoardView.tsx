@@ -4,9 +4,14 @@ import { useSaveTask, useTasks } from './useTasks';
 import { TaskView } from './TaskView';
 import { css } from '@emotion/react';
 import { throwError } from '../lib/throwError';
+import { relationshipStorage } from '../deps';
+import { Relationship } from '../model/Relationship';
+import { useRelationships } from './useRelationships';
+import { RelationshipView } from './RelationshipView';
 
 export function BoardView() {
     const tasks = useTasks();
+    const relationships = useRelationships();
     const saveTask = useSaveTask();
 
     const [title, setTitle] = useState('');
@@ -36,7 +41,14 @@ export function BoardView() {
         console.log(`${task1.title} から ${task2.title} へ依存関係`);
         console.dir(task1);
         console.dir(task2);
-        saveTask(task1.addDependency(task2.id));
+
+        relationshipStorage.save(
+            Relationship.create({
+                id: '' + Math.random(),
+                sourceTaskId: task1.id,
+                destinationTaskId: task2.id,
+            }),
+        );
     };
 
     return (
@@ -53,6 +65,9 @@ export function BoardView() {
                     }
                 `}
             >
+                {[...relationships.values()].map((relationship) => (
+                    <RelationshipView relationship={relationship} key={relationship.id} />
+                ))}
                 {[...tasks.values()].map((task) => (
                     <TaskView task={task} key={task.id} />
                 ))}
