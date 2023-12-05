@@ -1,12 +1,12 @@
 import { useState } from 'react';
 import { useTasks } from './hooks/useTasks';
 import { TaskCard } from './TaskCard';
-import { throwError } from '../lib/throwError';
 import { useRelationships } from './hooks/useRelationships';
 import { RelationshipView } from './RelationshipView';
 import { createAndSaveNewTask } from '../usecase/createAndSaveNewTask';
 import { createAndSaveNewRelationship } from '../usecase/createAndSaveNewRelationship';
 import { useDrag } from './hooks/useDrag';
+import { COLOR_ACTIVE } from './styles/Colors';
 
 export function BoardView() {
     const tasks = useTasks();
@@ -70,7 +70,7 @@ export function BoardView() {
                 position: 'fixed',
                 inset: 0,
                 zIndex: 0,
-                pointerEvents: 'none',
+                userSelect: 'none',
                 background: '#f8faff',
             }}
         >
@@ -78,11 +78,8 @@ export function BoardView() {
                 css={{
                     position: 'absolute',
                     inset: 0,
-
-                    '*': {
-                        pointerEvents: 'auto',
-                    },
                 }}
+                onDoubleClick={() => console.log('DOUBLE CLICK')}
             >
                 {linkHandleDragState.isDragging && linkDraftX1 && linkDraftY1 && (
                     <svg
@@ -90,7 +87,7 @@ export function BoardView() {
                         height={window.innerHeight}
                         strokeWidth={2}
                         strokeDasharray={isLinkDraftReady ? 'none' : '4 4'}
-                        stroke={isLinkDraftReady ? '#4d90fe' : '#bbb'}
+                        stroke={isLinkDraftReady ? COLOR_ACTIVE : '#aaa'}
                         css={{
                             position: 'fixed',
                             inset: 0,

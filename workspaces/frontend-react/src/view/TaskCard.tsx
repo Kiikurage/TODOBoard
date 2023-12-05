@@ -2,8 +2,9 @@ import { MouseEventHandler, useRef, useState } from 'react';
 import { Task } from '../model/Task';
 import { useDrag } from './hooks/useDrag';
 import { updateTask } from '../usecase/updateTask';
-import { CardStyle } from './styles/card';
+import { STYLE_CARD, STYLE_CARD__ACTIVE } from './styles/card';
 import { useResizeObserver } from './hooks/useResizeObserver';
+import { COLOR_ACTIVE } from './styles/Colors';
 
 export function TaskCard({
     task,
@@ -51,7 +52,7 @@ export function TaskCard({
         <div
             ref={cardRef}
             css={{
-                ...CardStyle,
+                ...STYLE_CARD,
                 position: 'absolute',
                 top: task.y,
                 left: task.x,
@@ -60,7 +61,11 @@ export function TaskCard({
                 alignItems: 'flex-start',
                 padding: '10px 0',
                 width: 400,
-                outline: active ? '2px solid #4d90fe' : 'none',
+                transition: 'transform 160ms ease-in',
+                ...(active && {
+                    ...STYLE_CARD__ACTIVE,
+                    outline: `2px solid ${COLOR_ACTIVE}`,
+                }),
             }}
             onMouseDown={handleMouseDown}
             onMouseEnter={onMouseEnter}
@@ -98,6 +103,7 @@ export function TaskCard({
                     css={{
                         fontSize: '0.75em',
                         color: '#666',
+                        userSelect: 'text',
                     }}
                 >
                     #{task.id}
@@ -152,12 +158,14 @@ function TitleForm({
                     overflow: 'hidden',
                     textOverflow: 'ellipsis',
                     whiteSpace: 'nowrap',
+                    userSelect: 'text',
 
                     ...(completed && {
                         color: '#888',
                         textDecorationLine: 'line-through',
                     }),
                 }}
+                onMouseDown={(ev) => ev.stopPropagation()}
                 onDoubleClick={() => setEditing(true)}
             >
                 {value}
@@ -198,7 +206,9 @@ function DescriptionForm({ value, onChange }: { value: string; onChange: (value:
                     textOverflow: 'ellipsis',
                     fontSize: '0.875em',
                     color: '#666',
+                    userSelect: 'text',
                 }}
+                onMouseDown={(ev) => ev.stopPropagation()}
                 onDoubleClick={() => setEditing(true)}
             >
                 {value === '' ? '説明文を追加' : value}
