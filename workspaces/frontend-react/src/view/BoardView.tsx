@@ -1,15 +1,15 @@
 import { MouseEvent, useState } from 'react';
-import { useTasks } from './hooks/useTasks';
+import { useTasks } from './hook/useTasks';
 import { TaskCard } from './TaskCard';
-import { useLink } from './hooks/useLink';
+import { useLink } from './hook/useLink';
 import { LinkView } from './LinkView';
 import { createAndSaveNewTask, TaskDraft } from '../usecase/createAndSaveNewTask';
-import { useDrag } from './hooks/useDrag';
+import { useDrag } from './hook/useDrag';
 import { CreateNewTaskFormCard } from './CreateNewTaskFormCard';
 import { useLinkDraftSession } from './useLinkDraftSession';
 import { LinkDraftLayer } from './LinkDraftLayer';
 import { Task } from '../model/Task';
-import { useFlow } from './hooks/useFlow';
+import { useFlow } from './hook/useFlow';
 
 export function BoardView() {
     const tasks = useTasks();

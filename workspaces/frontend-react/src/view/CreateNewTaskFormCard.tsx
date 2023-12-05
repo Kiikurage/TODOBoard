@@ -1,6 +1,6 @@
 import { useRef, useState } from 'react';
-import { STYLE_CARD__ACTIVE } from './styles/card';
-import { useDrag } from './hooks/useDrag';
+import { STYLE_CARD__ACTIVE } from './style/card';
+import { useDrag } from './hook/useDrag';
 import { TaskDraft } from '../usecase/createAndSaveNewTask';
 
 export function CreateNewTaskFormCard({

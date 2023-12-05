@@ -1,7 +1,7 @@
-import { DragState } from './hooks/useDrag';
-import { COLOR_ACTIVE } from './styles/Colors';
+import { DragState } from './hook/useDrag';
+import { COLOR_ACTIVE } from './style/Colors';
 import { LinkDraftSession } from './useLinkDraftSession';
-import { useFlow } from './hooks/useFlow';
+import { useFlow } from './hook/useFlow';
 
 export function LinkDraftLayer({
     linkDraftSession,

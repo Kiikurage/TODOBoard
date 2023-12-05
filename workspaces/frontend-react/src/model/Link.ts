@@ -13,10 +13,6 @@ export class Link {
         return Object.assign(Object.create(Link.prototype), { ...this, ...props });
     }
 
-    equalTo(other: Link): boolean {
-        return (Object.keys({ ...this }) as (keyof Link)[]).every((key) => this[key] === other[key]);
-    }
-
     static create(props: typeof ownProps): Link {
         return Object.assign(Object.create(Link.prototype), props);
     }

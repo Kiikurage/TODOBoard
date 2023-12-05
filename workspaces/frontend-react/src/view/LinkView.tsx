@@ -1,4 +1,4 @@
-import { useTasks } from './hooks/useTasks';
+import { useTasks } from './hook/useTasks';
 import { Link } from '../model/Link';
 import { throwError } from '../lib/throwError';
 

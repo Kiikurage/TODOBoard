@@ -1,10 +1,10 @@
 import { MouseEventHandler, useRef, useState } from 'react';
 import { Task } from '../model/Task';
-import { useDrag } from './hooks/useDrag';
+import { useDrag } from './hook/useDrag';
 import { updateTask } from '../usecase/updateTask';
-import { STYLE_CARD, STYLE_CARD__ACTIVE } from './styles/card';
-import { useResizeObserver } from './hooks/useResizeObserver';
-import { COLOR_ACTIVE } from './styles/Colors';
+import { STYLE_CARD, STYLE_CARD__ACTIVE } from './style/card';
+import { useResizeObserver } from './hook/useResizeObserver';
+import { COLOR_ACTIVE } from './style/Colors';
 
 export function TaskCard({
     task,
