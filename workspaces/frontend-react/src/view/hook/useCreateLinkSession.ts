@@ -1,9 +1,9 @@
 import { useState } from 'react';
-import { LinkDraft } from '../model/LinkDraft';
-import { taskStorage } from '../deps';
-import { createAndSaveNewLink } from '../usecase/createAndSaveNewLink';
-import { Flow, flow } from '../lib/flow/Flow';
-import { Task } from '../model/Task';
+import { LinkDraft } from '../../model/LinkDraft';
+import { taskStorage } from '../../deps';
+import { createAndSaveNewLink } from '../../usecase/createAndSaveNewLink';
+import { Flow, flow } from '../../lib/flow/Flow';
+import { Task } from '../../model/Task';
 
 export interface LinkDraftDetail {
     sourceTask: Task | null;
@@ -13,9 +13,9 @@ export interface LinkDraftDetail {
     isActiveTask(taskId: string): boolean;
 }
 
-export class LinkDraftSession {
+export class CreateLinkSession {
     public readonly draft = flow(LinkDraft.empty());
-    public readonly detail = LinkDraftSession.getLinkDraftDetail(this.draft);
+    public readonly detail = CreateLinkSession.getLinkDraftDetail(this.draft);
 
     start(sourceTaskId: string) {
         this.draft.set(LinkDraft.start(sourceTaskId));
@@ -68,8 +68,8 @@ export class LinkDraftSession {
     }
 }
 
-export function useLinkDraftSession() {
-    const [session] = useState(() => new LinkDraftSession());
+export function useCreateLinkSession() {
+    const [session] = useState(() => new CreateLinkSession());
 
     return session;
 }

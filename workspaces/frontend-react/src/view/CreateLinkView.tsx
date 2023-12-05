@@ -1,13 +1,13 @@
 import { DragState } from './hook/useDrag';
 import { COLOR_ACTIVE } from './style/Colors';
-import { LinkDraftSession } from './useLinkDraftSession';
+import { CreateLinkSession } from './hook/useCreateLinkSession';
 import { useFlow } from './hook/useFlow';
 
-export function LinkDraftLayer({
+export function CreateLinkView({
     linkDraftSession,
     linkHandleDragState,
 }: {
-    linkDraftSession: LinkDraftSession;
+    linkDraftSession: CreateLinkSession;
     linkHandleDragState: DragState;
 }) {
     const { isLinkDraftReady, destinationTask, sourceTask } = useFlow(linkDraftSession.detail);

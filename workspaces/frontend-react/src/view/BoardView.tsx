@@ -6,8 +6,8 @@ import { LinkView } from './LinkView';
 import { createAndSaveNewTask, TaskDraft } from '../usecase/createAndSaveNewTask';
 import { useDrag } from './hook/useDrag';
 import { CreateNewTaskFormCard } from './CreateNewTaskFormCard';
-import { useLinkDraftSession } from './useLinkDraftSession';
-import { LinkDraftLayer } from './LinkDraftLayer';
+import { useCreateLinkSession } from './hook/useCreateLinkSession';
+import { CreateLinkView } from './CreateLinkView';
 import { Task } from '../model/Task';
 import { useFlow } from './hook/useFlow';
 
@@ -15,7 +15,7 @@ export function BoardView() {
     const tasks = useTasks();
     const links = useLink();
 
-    const linkDraftSession = useLinkDraftSession();
+    const linkDraftSession = useCreateLinkSession();
     const linkDraftDetail = useFlow(linkDraftSession.detail);
 
     const { dragState: linkHandleDragState, handleMouseDown: handleDraftStart } = useDrag({
@@ -59,7 +59,7 @@ export function BoardView() {
                 }
             >
                 {linkHandleDragState.isDragging && (
-                    <LinkDraftLayer linkHandleDragState={linkHandleDragState} linkDraftSession={linkDraftSession} />
+                    <CreateLinkView linkHandleDragState={linkHandleDragState} linkDraftSession={linkDraftSession} />
                 )}
                 {[...links.values()].map((link) => (
                     <LinkView link={link} key={link.id} />
