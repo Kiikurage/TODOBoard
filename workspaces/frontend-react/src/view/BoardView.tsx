@@ -6,14 +6,13 @@ import { useRelationships } from './hooks/useRelationships';
 import { RelationshipView } from './RelationshipView';
 import { createAndSaveNewTask } from '../usecase/createAndSaveNewTask';
 import { createAndSaveNewRelationship } from '../usecase/createAndSaveNewRelationship';
+import { useDrag } from './hooks/useDrag';
 
 export function BoardView() {
     const tasks = useTasks();
     const relationships = useRelationships();
 
     const [title, setTitle] = useState('');
-    const [taskId1, setTaskId1] = useState('');
-    const [taskId2, setTaskId2] = useState('');
 
     const handleAddTaskButtonClick = () => {
         if (title.trim() === '') return;
@@ -22,15 +21,48 @@ export function BoardView() {
         setTitle('');
     };
 
-    const handleAddDependencyButtonClick = () => {
-        const task1 = tasks.get(taskId1) ?? throwError(`Task ${taskId1} is not found`);
-        const task2 = tasks.get(taskId2) ?? throwError(`Task ${taskId2} is not found`);
+    const [linkDraft, setLinkDraft] = useState<{
+        sourceTaskId: string | null;
+        destinationTaskId: string | null;
+    }>({ sourceTaskId: null, destinationTaskId: null });
+    const { dragState: linkHandleDragState, handleMouseDown: handleTaskCardMouseDown } = useDrag({
+        onDragEnd() {
+            try {
+                const { sourceTaskId, destinationTaskId } = linkDraft;
+                if (sourceTaskId === null || destinationTaskId === null || sourceTaskId === destinationTaskId) {
+                    return;
+                }
 
-        createAndSaveNewRelationship({
-            sourceTaskId: task1.id,
-            destinationTaskId: task2.id,
-        });
-    };
+                createAndSaveNewRelationship({ sourceTaskId, destinationTaskId });
+            } finally {
+                setLinkDraft({ sourceTaskId: null, destinationTaskId: null });
+            }
+        },
+    });
+
+    const linkDraftSourceTask = linkHandleDragState.isDragging
+        ? linkDraft.sourceTaskId === null
+            ? null
+            : tasks.get(linkDraft.sourceTaskId) ?? null
+        : null;
+    const linkDraftDestinationTask = linkHandleDragState.isDragging
+        ? linkDraft.destinationTaskId === null
+            ? null
+            : tasks.get(linkDraft.destinationTaskId) ?? null
+        : null;
+
+    const linkDraftX1 = linkDraftSourceTask ? linkDraftSourceTask.x + linkDraftSourceTask.width / 2 : null;
+    const linkDraftY1 = linkDraftSourceTask ? linkDraftSourceTask.y + linkDraftSourceTask.height / 2 : null;
+    const linkDraftX2 = linkDraftDestinationTask
+        ? linkDraftDestinationTask.x + linkDraftDestinationTask.width / 2
+        : linkHandleDragState.currentX;
+    const linkDraftY2 = linkDraftDestinationTask
+        ? linkDraftDestinationTask.y + linkDraftDestinationTask.height / 2
+        : linkHandleDragState.currentY;
+    const isLinkDraftReady =
+        linkDraft.sourceTaskId !== null &&
+        linkDraft.destinationTaskId !== null &&
+        linkDraft.sourceTaskId !== linkDraft.destinationTaskId;
 
     return (
         <div
@@ -52,11 +84,44 @@ export function BoardView() {
                     },
                 }}
             >
+                {linkHandleDragState.isDragging && linkDraftX1 && linkDraftY1 && (
+                    <svg
+                        width={window.innerWidth}
+                        height={window.innerHeight}
+                        strokeWidth={2}
+                        strokeDasharray={isLinkDraftReady ? 'none' : '4 4'}
+                        stroke={isLinkDraftReady ? '#4d90fe' : '#bbb'}
+                        css={{
+                            position: 'fixed',
+                            inset: 0,
+                            pointerEvents: 'none',
+                        }}
+                    >
+                        <line x1={linkDraftX1} y1={linkDraftY1} x2={linkDraftX2} y2={linkDraftY2} />
+                    </svg>
+                )}
                 {[...relationships.values()].map((relationship) => (
                     <RelationshipView relationship={relationship} key={relationship.id} />
                 ))}
                 {[...tasks.values()].map((task) => (
-                    <TaskCard task={task} key={task.id} />
+                    <TaskCard
+                        task={task}
+                        key={task.id}
+                        active={
+                            isLinkDraftReady &&
+                            (linkDraft.sourceTaskId === task.id || linkDraft.destinationTaskId === task.id)
+                        }
+                        onMouseDown={(ev) => {
+                            setLinkDraft((oldState) => ({ ...oldState, sourceTaskId: task.id }));
+                            handleTaskCardMouseDown(ev);
+                        }}
+                        onMouseEnter={() => {
+                            setLinkDraft((oldState) => ({ ...oldState, destinationTaskId: task.id }));
+                        }}
+                        onMouseLeave={() => {
+                            setLinkDraft((oldState) => ({ ...oldState, destinationTaskId: null }));
+                        }}
+                    />
                 ))}
             </div>
 
@@ -69,21 +134,6 @@ export function BoardView() {
                 <div>
                     <input type="text" value={title} onChange={(ev) => setTitle(ev.target.value)} />
                     <button onClick={handleAddTaskButtonClick}>追加</button>
-                </div>
-                <div>
-                    <input
-                        type="text"
-                        placeholder="依存元のタスクID"
-                        value={taskId1}
-                        onChange={(ev) => setTaskId1(ev.target.value)}
-                    />
-                    <input
-                        type="text"
-                        placeholder="依存先のタスクID"
-                        value={taskId2}
-                        onChange={(ev) => setTaskId2(ev.target.value)}
-                    />
-                    <button onClick={handleAddDependencyButtonClick}>Dependencyの追加</button>
                 </div>
             </div>
         </div>

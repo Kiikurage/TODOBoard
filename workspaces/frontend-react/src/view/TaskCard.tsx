@@ -1,13 +1,25 @@
-import { useRef, useState } from 'react';
+import { MouseEventHandler, useRef, useState } from 'react';
 import { Task } from '../model/Task';
 import { useDrag } from './hooks/useDrag';
 import { updateTask } from '../usecase/updateTask';
 import { CardStyle } from './styles/card';
 import { useResizeObserver } from './hooks/useResizeObserver';
 
-export function TaskCard({ task }: { task: Task }) {
+export function TaskCard({
+    task,
+    active = false,
+    onMouseEnter,
+    onMouseLeave,
+    onMouseDown,
+}: {
+    task: Task;
+    active?: boolean;
+    onMouseDown?: MouseEventHandler;
+    onMouseEnter?: MouseEventHandler;
+    onMouseLeave?: MouseEventHandler;
+}) {
     const originalTaskPositionRef = useRef<{ x: number; y: number }>({ x: task.x, y: task.y });
-    const handleDragHandleMouseDown = useDrag({
+    const { handleMouseDown: handleDragHandleMouseDown } = useDrag({
         onDragStart: () => {
             originalTaskPositionRef.current = { x: task.x, y: task.y };
         },
@@ -30,6 +42,11 @@ export function TaskCard({ task }: { task: Task }) {
         updateTask(task.id, { width: entry.contentRect.width, height: entry.contentRect.height });
     });
 
+    const handleMouseDown: MouseEventHandler<HTMLDivElement> = (ev) => {
+        ev.preventDefault();
+        onMouseDown?.(ev);
+    };
+
     return (
         <div
             ref={cardRef}
@@ -41,9 +58,13 @@ export function TaskCard({ task }: { task: Task }) {
                 display: 'flex',
                 flexDirection: 'row',
                 alignItems: 'flex-start',
-                padding: '10px 16px 10px 0',
+                padding: '10px 0',
                 width: 400,
+                outline: active ? '2px solid #4d90fe' : 'none',
             }}
+            onMouseDown={handleMouseDown}
+            onMouseEnter={onMouseEnter}
+            onMouseLeave={onMouseLeave}
         >
             <div
                 css={{

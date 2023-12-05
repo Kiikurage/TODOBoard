@@ -6,7 +6,7 @@ export class Relationship {
     ) {}
 
     get id(): string {
-        return `${this.sourceTaskId}_${this.destinationTaskId}`;
+        return Relationship.getId(this.sourceTaskId, this.destinationTaskId);
     }
 
     copy(props: Partial<typeof ownProps>): Relationship {
@@ -19,6 +19,10 @@ export class Relationship {
 
     static create(props: typeof ownProps): Relationship {
         return Object.assign(Object.create(Relationship.prototype), props);
+    }
+
+    static getId(sourceTaskId: string, destinationTaskId: string): string {
+        return `${sourceTaskId}_${destinationTaskId}`;
     }
 }
 

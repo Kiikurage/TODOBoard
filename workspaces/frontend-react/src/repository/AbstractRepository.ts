@@ -25,6 +25,10 @@ export abstract class AbstractRepository<T, SerializedT> {
         );
     }
 
+    findById(id: string): T | undefined {
+        return this.models.get(id);
+    }
+
     save(model: T) {
         this.models = new Map(this.models);
         this.models.set(this.getId(model), model);

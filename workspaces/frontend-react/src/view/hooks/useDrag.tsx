@@ -16,7 +16,7 @@ export function useDrag({
     onDragStart?: (dragState: DragState) => void;
     onDragMove?: (dragState: DragState) => void;
     onDragEnd?: (dragState: DragState) => void;
-} = {}) {
+} = {}): { dragState: DragState; handleMouseDown: MouseEventHandler } {
     const [dragState, setDragState] = useState<DragState>({
         isDragging: false,
         startX: 0,
@@ -62,7 +62,7 @@ export function useDrag({
         };
     }, [dragState, dragState.isDragging, onDragEnd, onDragMove]);
 
-    const handleDragHandleMouseDown: MouseEventHandler<HTMLDivElement> = useCallback(
+    const handleMouseDown: MouseEventHandler<HTMLDivElement> = useCallback(
         (ev) => {
             ev.preventDefault();
 
@@ -80,5 +80,5 @@ export function useDrag({
         [onDragStart],
     );
 
-    return handleDragHandleMouseDown;
+    return { dragState, handleMouseDown };
 }
