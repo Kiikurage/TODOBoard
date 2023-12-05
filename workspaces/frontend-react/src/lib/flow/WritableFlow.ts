@@ -1,7 +1,7 @@
 import { AbstractFlow } from './AbstractFlow';
 
 export class WritableFlow<T> extends AbstractFlow<T> {
-    constructor(public value: T) {
+    constructor(private value: T) {
         super();
     }
 

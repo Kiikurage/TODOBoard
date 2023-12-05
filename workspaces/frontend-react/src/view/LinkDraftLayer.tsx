@@ -1,28 +1,22 @@
 import { DragState } from './hooks/useDrag';
 import { COLOR_ACTIVE } from './styles/Colors';
-import { Task } from '../model/Task';
+import { LinkDraftSession } from './useLinkDraftSession';
+import { useFlow } from './hooks/useFlow';
 
 export function LinkDraftLayer({
+    linkDraftSession,
     linkHandleDragState,
-    linkDraftSourceTask,
-    linkDraftDestinationTask,
-    isLinkDraftReady,
 }: {
+    linkDraftSession: LinkDraftSession;
     linkHandleDragState: DragState;
-    linkDraftSourceTask: Task | null;
-    linkDraftDestinationTask: Task | null;
-    isLinkDraftReady: boolean;
 }) {
-    if (linkDraftSourceTask === null) return null;
+    const { isLinkDraftReady, destinationTask, sourceTask } = useFlow(linkDraftSession.detail);
+    if (sourceTask === null) return null;
 
-    const linkDraftX1 = linkDraftSourceTask.x + linkDraftSourceTask.width / 2;
-    const linkDraftY1 = linkDraftSourceTask.y + linkDraftSourceTask.height / 2;
-    const linkDraftX2 = linkDraftDestinationTask
-        ? linkDraftDestinationTask.x + linkDraftDestinationTask.width / 2
-        : linkHandleDragState.currentX;
-    const linkDraftY2 = linkDraftDestinationTask
-        ? linkDraftDestinationTask.y + linkDraftDestinationTask.height / 2
-        : linkHandleDragState.currentY;
+    const linkDraftX1 = sourceTask.x + sourceTask.width / 2;
+    const linkDraftY1 = sourceTask.y + sourceTask.height / 2;
+    const linkDraftX2 = destinationTask ? destinationTask.x + destinationTask.width / 2 : linkHandleDragState.currentX;
+    const linkDraftY2 = destinationTask ? destinationTask.y + destinationTask.height / 2 : linkHandleDragState.currentY;
 
     return (
         <svg

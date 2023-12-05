@@ -6,32 +6,26 @@ import { RelationshipView } from './RelationshipView';
 import { createAndSaveNewTask, TaskDraft } from '../usecase/createAndSaveNewTask';
 import { useDrag } from './hooks/useDrag';
 import { CreateNewTaskFormCard } from './CreateNewTaskFormCard';
-import { useLinkDraft } from './useLinkDraft';
+import { useLinkDraftSession } from './useLinkDraftSession';
 import { LinkDraftLayer } from './LinkDraftLayer';
 import { Task } from '../model/Task';
+import { useFlow } from './hooks/useFlow';
 
 export function BoardView() {
     const tasks = useTasks();
     const relationships = useRelationships();
 
-    const {
-        linkDraft,
-        startLinkDraftSession,
-        finishLinkDraftSession,
-        setLinkDraftDestination,
-        linkDraftSourceTask,
-        linkDraftDestinationTask,
-        isLinkDraftReady,
-    } = useLinkDraft();
+    const linkDraftSession = useLinkDraftSession();
+    const linkDraftDetail = useFlow(linkDraftSession.detail);
 
     const { dragState: linkHandleDragState, handleMouseDown: handleDraftStart } = useDrag({
         onDragEnd() {
-            finishLinkDraftSession();
+            linkDraftSession.finish();
         },
     });
 
     const handleTaskCardMouseDown = (ev: MouseEvent, task: Task) => {
-        startLinkDraftSession(task.id);
+        linkDraftSession.start(task.id);
         handleDraftStart(ev);
     };
 
@@ -65,12 +59,7 @@ export function BoardView() {
                 }
             >
                 {linkHandleDragState.isDragging && (
-                    <LinkDraftLayer
-                        linkHandleDragState={linkHandleDragState}
-                        linkDraftSourceTask={linkDraftSourceTask}
-                        linkDraftDestinationTask={linkDraftDestinationTask}
-                        isLinkDraftReady={isLinkDraftReady}
-                    />
+                    <LinkDraftLayer linkHandleDragState={linkHandleDragState} linkDraftSession={linkDraftSession} />
                 )}
                 {[...relationships.values()].map((relationship) => (
                     <RelationshipView relationship={relationship} key={relationship.id} />
@@ -79,13 +68,10 @@ export function BoardView() {
                     <TaskCard
                         task={task}
                         key={task.id}
-                        active={
-                            isLinkDraftReady &&
-                            (linkDraft.sourceTaskId === task.id || linkDraft.destinationTaskId === task.id)
-                        }
+                        active={linkDraftDetail.isActiveTask(task.id)}
                         onMouseDown={(ev) => handleTaskCardMouseDown(ev, task)}
-                        onMouseEnter={() => setLinkDraftDestination(task.id)}
-                        onMouseLeave={() => setLinkDraftDestination(null)}
+                        onMouseEnter={() => linkDraftSession.setDestination(task.id)}
+                        onMouseLeave={() => linkDraftSession.setDestination(null)}
                     />
                 ))}
                 {taskDraft.x !== -1 && taskDraft.y !== -1 && (
