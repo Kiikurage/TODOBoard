@@ -17,6 +17,8 @@ export function updateTask(
     const oldTask = taskStorage.readAll().get(taskId) ?? throwError(`Task #${taskId} is not found`);
     const newTask = oldTask.copy(props);
 
+    if (newTask.equalTo(oldTask)) return oldTask;
+
     taskStorage.save(newTask);
 
     return newTask;

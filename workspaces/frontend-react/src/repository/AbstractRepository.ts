@@ -1,22 +1,28 @@
+import { asFlow, Flow } from '../lib/flow/Flow';
+
 export abstract class AbstractRepository<T, SerializedT> {
     protected readonly callbacks = new Set<() => void>();
     protected models = new Map<string, T>();
 
     protected constructor(protected readonly localStorageKey: string) {
         this.models = this.loadFromLocalStorage();
-        this.addListener(() => this.saveToLocalStorage());
+        this.subscribe(() => this.saveToLocalStorage());
     }
 
-    addListener(callback: () => void) {
+    subscribe(callback: () => void) {
         this.callbacks.add(callback);
-    }
-
-    removeListener(callback: () => void) {
-        this.callbacks.delete(callback);
+        return () => this.callbacks.delete(callback);
     }
 
     readAll(): ReadonlyMap<string, T> {
         return this.models;
+    }
+
+    readAllAsFlow(): Flow<ReadonlyMap<string, T>> {
+        return asFlow(
+            (callback) => this.subscribe(callback),
+            () => this.readAll(),
+        );
     }
 
     save(model: T) {

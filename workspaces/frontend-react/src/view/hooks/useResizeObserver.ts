@@ -10,7 +10,7 @@ class ResizeObserverWrapper {
     }
 
     private readonly handleResize = (entries: ResizeObserverEntry[]) => {
-        entries.forEach((entry) => this.callbacks.get(entry.target)?.(entry));
+        requestIdleCallback(() => entries.forEach((entry) => this.callbacks.get(entry.target)?.(entry)));
     };
 
     observe(target: Element, callback: (entry: ResizeObserverEntry) => void) {

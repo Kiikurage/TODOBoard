@@ -1,7 +1,6 @@
 import { useState } from 'react';
 import { useTasks } from './hooks/useTasks';
 import { TaskCard } from './TaskCard';
-import { css } from '@emotion/react';
 import { throwError } from '../lib/throwError';
 import { useRelationships } from './hooks/useRelationships';
 import { RelationshipView } from './RelationshipView';

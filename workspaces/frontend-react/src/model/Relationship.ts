@@ -13,6 +13,10 @@ export class Relationship {
         return Object.assign(Object.create(Relationship.prototype), { ...this, ...props });
     }
 
+    equalTo(other: Relationship): boolean {
+        return (Object.keys({ ...this }) as (keyof Relationship)[]).every((key) => this[key] === other[key]);
+    }
+
     static create(props: typeof ownProps): Relationship {
         return Object.assign(Object.create(Relationship.prototype), props);
     }

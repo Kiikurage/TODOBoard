@@ -14,6 +14,10 @@ export class Task {
         return Object.assign(Object.create(Task.prototype), { ...this, ...props });
     }
 
+    equalTo(other: Task): boolean {
+        return (Object.keys({ ...this }) as (keyof Task)[]).every((key) => this[key] === other[key]);
+    }
+
     static create(props: typeof ownProps): Task {
         return Object.assign(Object.create(Task.prototype), props);
     }
