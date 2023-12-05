@@ -1,12 +1,12 @@
 import { useTasks } from './hooks/useTasks';
-import { Relationship } from '../model/Relationship';
+import { Link } from '../model/Link';
 import { throwError } from '../lib/throwError';
 
-export function RelationshipView({ relationship }: { relationship: Relationship }) {
+export function LinkView({ link }: { link: Link }) {
     const tasks = useTasks();
 
-    const sourceTask = tasks.get(relationship.sourceTaskId) ?? throwError('Source task is not found');
-    const destinationTask = tasks.get(relationship.destinationTaskId) ?? throwError('Destination task is not found');
+    const sourceTask = tasks.get(link.sourceTaskId) ?? throwError('Source task is not found');
+    const destinationTask = tasks.get(link.destinationTaskId) ?? throwError('Destination task is not found');
 
     return (
         <svg

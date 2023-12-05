@@ -1,5 +1,5 @@
 import { TaskRepository } from './repository/TaskRepository';
-import { RelationshipRepository } from './repository/RelationshipRepository';
+import { LinkRepository } from './repository/LinkRepository';
 
 export const taskStorage = new TaskRepository();
-export const relationshipStorage = new RelationshipRepository();
+export const linkStorage = new LinkRepository();

@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { LinkDraft } from '../model/LinkDraft';
 import { taskStorage } from '../deps';
-import { createAndSaveNewRelationship } from '../usecase/createAndSaveNewRelationship';
+import { createAndSaveNewLink } from '../usecase/createAndSaveNewLink';
 import { Flow, flow } from '../lib/flow/Flow';
 import { Task } from '../model/Task';
 
@@ -28,7 +28,7 @@ export class LinkDraftSession {
                 return;
             }
 
-            createAndSaveNewRelationship({ sourceTaskId, destinationTaskId });
+            createAndSaveNewLink({ sourceTaskId, destinationTaskId });
         } finally {
             this.draft.set(LinkDraft.empty());
         }

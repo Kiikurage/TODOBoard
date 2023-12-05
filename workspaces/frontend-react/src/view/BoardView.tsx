@@ -1,8 +1,8 @@
 import { MouseEvent, useState } from 'react';
 import { useTasks } from './hooks/useTasks';
 import { TaskCard } from './TaskCard';
-import { useRelationships } from './hooks/useRelationships';
-import { RelationshipView } from './RelationshipView';
+import { useLink } from './hooks/useLink';
+import { LinkView } from './LinkView';
 import { createAndSaveNewTask, TaskDraft } from '../usecase/createAndSaveNewTask';
 import { useDrag } from './hooks/useDrag';
 import { CreateNewTaskFormCard } from './CreateNewTaskFormCard';
@@ -13,7 +13,7 @@ import { useFlow } from './hooks/useFlow';
 
 export function BoardView() {
     const tasks = useTasks();
-    const relationships = useRelationships();
+    const links = useLink();
 
     const linkDraftSession = useLinkDraftSession();
     const linkDraftDetail = useFlow(linkDraftSession.detail);
@@ -61,8 +61,8 @@ export function BoardView() {
                 {linkHandleDragState.isDragging && (
                     <LinkDraftLayer linkHandleDragState={linkHandleDragState} linkDraftSession={linkDraftSession} />
                 )}
-                {[...relationships.values()].map((relationship) => (
-                    <RelationshipView relationship={relationship} key={relationship.id} />
+                {[...links.values()].map((link) => (
+                    <LinkView link={link} key={link.id} />
                 ))}
                 {[...tasks.values()].map((task) => (
                     <TaskCard
