@@ -7,6 +7,8 @@ export function updateTask(
     props: Partial<{
         x: number;
         y: number;
+        width: number;
+        height: number;
         title: string;
         description: string;
         completed: boolean;

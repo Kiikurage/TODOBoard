@@ -1,9 +1,9 @@
 import { useState } from 'react';
-import { useTasks } from './useTasks';
+import { useTasks } from './hooks/useTasks';
 import { TaskCard } from './TaskCard';
 import { css } from '@emotion/react';
 import { throwError } from '../lib/throwError';
-import { useRelationships } from './useRelationships';
+import { useRelationships } from './hooks/useRelationships';
 import { RelationshipView } from './RelationshipView';
 import { createAndSaveNewTask } from '../usecase/createAndSaveNewTask';
 import { createAndSaveNewRelationship } from '../usecase/createAndSaveNewRelationship';
@@ -35,23 +35,23 @@ export function BoardView() {
 
     return (
         <div
-            css={css`
-                position: fixed;
-                inset: 0;
-                z-index: 0;
-                pointer-events: none;
-                background: #f8faff;
-            `}
+            css={{
+                position: 'fixed',
+                inset: 0,
+                zIndex: 0,
+                pointerEvents: 'none',
+                background: '#f8faff',
+            }}
         >
             <div
-                css={css`
-                    position: absolute;
-                    inset: 0;
+                css={{
+                    position: 'absolute',
+                    inset: 0,
 
-                    * {
-                        pointer-events: auto;
-                    }
-                `}
+                    '*': {
+                        pointerEvents: 'auto',
+                    },
+                }}
             >
                 {[...relationships.values()].map((relationship) => (
                     <RelationshipView relationship={relationship} key={relationship.id} />
@@ -62,10 +62,10 @@ export function BoardView() {
             </div>
 
             <div
-                css={css`
-                    z-index: 1;
-                    pointer-events: all;
-                `}
+                css={{
+                    zIndex: 1,
+                    pointerEvents: 'all',
+                }}
             >
                 <div>
                     <input type="text" value={title} onChange={(ev) => setTitle(ev.target.value)} />

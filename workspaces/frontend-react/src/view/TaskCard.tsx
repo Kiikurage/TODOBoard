@@ -1,8 +1,9 @@
 import { useRef, useState } from 'react';
 import { Task } from '../model/Task';
-import { css } from '@emotion/react';
-import { useDrag } from './useDrag';
+import { useDrag } from './hooks/useDrag';
 import { updateTask } from '../usecase/updateTask';
+import { CardStyle } from './styles/card';
+import { useResizeObserver } from './hooks/useResizeObserver';
 
 export function TaskCard({ task }: { task: Task }) {
     const originalTaskPositionRef = useRef<{ x: number; y: number }>({ x: task.x, y: task.y });
@@ -24,57 +25,59 @@ export function TaskCard({ task }: { task: Task }) {
         },
     });
 
+    const cardRef = useRef<HTMLDivElement | null>(null);
+    useResizeObserver(cardRef, (entry) => {
+        updateTask(task.id, { width: entry.contentRect.width, height: entry.contentRect.height });
+    });
+
     return (
         <div
-            css={css`
-                position: absolute;
-                top: ${task.y}px;
-                left: ${task.x}px;
-                display: flex;
-                flex-direction: row;
-                align-items: flex-start;
-                padding: 10px 16px 10px 0;
-                border-radius: 4px;
-                width: 400px;
-                background: #fff;
-                box-shadow:
-                    0 1px 3px rgba(0, 0, 0, 0.12),
-                    0 1px 2px rgba(0, 0, 0, 0.24);
-            `}
+            ref={cardRef}
+            css={{
+                ...CardStyle,
+                position: 'absolute',
+                top: task.y,
+                left: task.x,
+                display: 'flex',
+                flexDirection: 'row',
+                alignItems: 'flex-start',
+                padding: '10px 16px 10px 0',
+                width: 400,
+            }}
         >
             <div
-                css={css`
-                    flex: 0 0 auto;
-                    display: flex;
-                    flex-direction: column;
-                    justify-content: center;
-                    align-self: stretch;
-                    cursor: move;
-                    padding-right: 4px;
-                `}
+                css={{
+                    flex: '0 0 auto',
+                    display: 'flex',
+                    flexDirection: 'column',
+                    justifyContent: 'center',
+                    alignSelf: 'stretch',
+                    cursor: 'move',
+                    paddingRight: 4,
+                }}
                 onMouseDown={handleDragHandleMouseDown}
             >
                 <span
                     className="material-symbols-outlined"
-                    css={css`
-                        font-size: 20px;
-                        color: #888;
-                    `}
+                    css={{
+                        fontSize: 20,
+                        color: '#888',
+                    }}
                 >
                     drag_indicator
                 </span>
             </div>
             <div
-                css={css`
-                    flex: 1 1 0;
-                    min-width: 0;
-                `}
+                css={{
+                    flex: '1 1 0',
+                    minWidth: 0,
+                }}
             >
                 <span
-                    css={css`
-                        font-size: 0.75em;
-                        color: #666;
-                    `}
+                    css={{
+                        fontSize: '0.75em',
+                        color: '#666',
+                    }}
                 >
                     #{task.id}
                 </span>
@@ -89,9 +92,9 @@ export function TaskCard({ task }: { task: Task }) {
                 />
             </div>
             <div
-                css={css`
-                    flex: 0 0 auto;
-                `}
+                css={{
+                    flex: '0 0 auto',
+                }}
             >
                 <input
                     type="checkbox"
@@ -99,43 +102,6 @@ export function TaskCard({ task }: { task: Task }) {
                     onChange={(ev) => updateTask(task.id, { completed: ev.target.checked })}
                 />
             </div>
-            {/*{!task.isArchived && (*/}
-            {/*    <button*/}
-            {/*        css={css`*/}
-            {/*            flex: 0 0 auto;*/}
-            {/*            display: flex;*/}
-            {/*            flex-direction: row;*/}
-            {/*            align-items: center;*/}
-            {/*            background: none;*/}
-            {/*            border: none;*/}
-            {/*            color: #a00;*/}
-            {/*            cursor: pointer;*/}
-            {/*        `}*/}
-            {/*        onClick={() => archiveTask(task.id)}*/}
-            {/*    >*/}
-            {/*        <span className="material-symbols-outlined">archive</span> 削除*/}
-            {/*    </button>*/}
-            {/*)}*/}
-            {/*{task.isArchived && (*/}
-            {/*    <button*/}
-            {/*        css={css`*/}
-            {/*            flex: 0 0 auto;*/}
-            {/*            display: flex;*/}
-            {/*            flex-direction: row;*/}
-            {/*            align-items: center;*/}
-            {/*            background: none;*/}
-            {/*            border: none;*/}
-            {/*            color: #888;*/}
-            {/*            cursor: pointer;*/}
-            {/*        `}*/}
-            {/*        onClick={() => {*/}
-            {/*            console.log('click unarchiveTask');*/}
-            {/*            unarchiveTask(task.id);*/}
-            {/*        }}*/}
-            {/*    >*/}
-            {/*        <span className="material-symbols-outlined">unarchive</span> 復元*/}
-            {/*    </button>*/}
-            {/*)}*/}
         </div>
     );
 }
@@ -160,18 +126,17 @@ function TitleForm({
     if (!isEditing) {
         return (
             <div
-                css={css`
-                    font-weight: bold;
-                    overflow: hidden;
-                    text-overflow: ellipsis;
-                    white-space: nowrap;
+                css={{
+                    fontWeight: 'bold',
+                    overflow: 'hidden',
+                    textOverflow: 'ellipsis',
+                    whiteSpace: 'nowrap',
 
-                    ${completed &&
-                    css`
-                        color: #888;
-                        text-decoration-line: line-through;
-                    `}
-                `}
+                    ...(completed && {
+                        color: '#888',
+                        textDecorationLine: 'line-through',
+                    }),
+                }}
                 onDoubleClick={() => setEditing(true)}
             >
                 {value}
@@ -204,15 +169,15 @@ function DescriptionForm({ value, onChange }: { value: string; onChange: (value:
     if (!isEditing) {
         return (
             <div
-                css={css`
-                    display: -webkit-box;
-                    overflow: hidden;
-                    -webkit-line-clamp: 3;
-                    -webkit-box-orient: vertical;
-                    text-overflow: ellipsis;
-                    font-size: 0.875em;
-                    color: #666;
-                `}
+                css={{
+                    display: '-webkit-box',
+                    overflow: 'hidden',
+                    '-webkit-line-clamp': '3',
+                    '-webkit-box-orient': 'vertical',
+                    textOverflow: 'ellipsis',
+                    fontSize: '0.875em',
+                    color: '#666',
+                }}
                 onDoubleClick={() => setEditing(true)}
             >
                 {value === '' ? '説明文を追加' : value}

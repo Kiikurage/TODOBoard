@@ -1,7 +1,6 @@
-import { useTasks } from './useTasks';
+import { useTasks } from './hooks/useTasks';
 import { Relationship } from '../model/Relationship';
 import { throwError } from '../lib/throwError';
-import { css } from '@emotion/react';
 
 export function RelationshipView({ relationship }: { relationship: Relationship }) {
     const tasks = useTasks();
@@ -14,13 +13,18 @@ export function RelationshipView({ relationship }: { relationship: Relationship 
             width={window.innerWidth}
             height={window.innerHeight}
             stroke="#000"
-            css={css`
-                position: fixed;
-                inset: 0;
-                pointer-events: none;
-            `}
+            css={{
+                position: 'fixed',
+                inset: 0,
+                pointerEvents: 'none',
+            }}
         >
-            <line x1={sourceTask.x} y1={sourceTask.y} x2={destinationTask.x} y2={destinationTask.y} />
+            <line
+                x1={sourceTask.x + sourceTask.width / 2}
+                y1={sourceTask.y + sourceTask.height / 2}
+                x2={destinationTask.x + destinationTask.width / 2}
+                y2={destinationTask.y + destinationTask.height / 2}
+            />
         </svg>
     );
 }

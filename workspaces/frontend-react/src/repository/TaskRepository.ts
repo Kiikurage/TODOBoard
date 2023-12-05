@@ -22,6 +22,8 @@ export class TaskRepository extends AbstractRepository<Task, SerializedTask> {
             description: model.description,
             x: model.x,
             y: model.y,
+            width: model.width,
+            height: model.height,
         };
     }
 
@@ -33,6 +35,8 @@ export class TaskRepository extends AbstractRepository<Task, SerializedTask> {
             description: serializedModel.description,
             x: serializedModel.x,
             y: serializedModel.y,
+            width: serializedModel.width ?? 100,
+            height: serializedModel.height ?? 100,
         });
     }
 
@@ -48,4 +52,6 @@ interface SerializedTask {
     description: string;
     x: number;
     y: number;
+    width: number;
+    height: number;
 }

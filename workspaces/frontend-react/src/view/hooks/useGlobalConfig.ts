@@ -1,6 +1,6 @@
 import { useSyncExternalStore } from 'react';
-import { globalConfigStorage } from '../deps';
-import { GlobalConfig } from '../model/GlobalConfig';
+import { globalConfigStorage } from '../../deps';
+import { GlobalConfig } from '../../model/GlobalConfig';
 
 export function useGlobalConfig(): GlobalConfig {
     return useSyncExternalStore(

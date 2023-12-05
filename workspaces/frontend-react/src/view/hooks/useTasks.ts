@@ -1,6 +1,6 @@
-import { Task } from '../model/Task';
+import { Task } from '../../model/Task';
 import { useEffect, useState } from 'react';
-import { taskStorage } from '../deps';
+import { taskStorage } from '../../deps';
 
 export function useTasks(): ReadonlyMap<string, Task> {
     const [tasks, setTasks] = useState<ReadonlyMap<string, Task>>(() => taskStorage.readAll());

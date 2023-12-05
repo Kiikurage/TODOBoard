@@ -6,6 +6,8 @@ export class Task {
         public readonly description: string,
         public readonly x: number,
         public readonly y: number,
+        public readonly width: number,
+        public readonly height: number,
     ) {}
 
     copy(props: Partial<typeof ownProps>): Task {
