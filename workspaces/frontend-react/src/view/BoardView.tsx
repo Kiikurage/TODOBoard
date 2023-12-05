@@ -3,23 +3,15 @@ import { useTasks } from './hooks/useTasks';
 import { TaskCard } from './TaskCard';
 import { useRelationships } from './hooks/useRelationships';
 import { RelationshipView } from './RelationshipView';
-import { createAndSaveNewTask } from '../usecase/createAndSaveNewTask';
+import { createAndSaveNewTask, TaskDraft } from '../usecase/createAndSaveNewTask';
 import { createAndSaveNewRelationship } from '../usecase/createAndSaveNewRelationship';
 import { useDrag } from './hooks/useDrag';
 import { COLOR_ACTIVE } from './styles/Colors';
+import { CreateNewTaskFormCard } from './CreateNewTaskFormCard';
 
 export function BoardView() {
     const tasks = useTasks();
     const relationships = useRelationships();
-
-    const [title, setTitle] = useState('');
-
-    const handleAddTaskButtonClick = () => {
-        if (title.trim() === '') return;
-
-        createAndSaveNewTask({ title });
-        setTitle('');
-    };
 
     const [linkDraft, setLinkDraft] = useState<{
         sourceTaskId: string | null;
@@ -64,12 +56,18 @@ export function BoardView() {
         linkDraft.destinationTaskId !== null &&
         linkDraft.sourceTaskId !== linkDraft.destinationTaskId;
 
+    const [taskDraft, setTaskDraft] = useState<TaskDraft>({
+        title: '',
+        description: '',
+        x: -1,
+        y: -1,
+    });
+
     return (
         <div
             css={{
                 position: 'fixed',
                 inset: 0,
-                zIndex: 0,
                 userSelect: 'none',
                 background: '#f8faff',
             }}
@@ -79,7 +77,13 @@ export function BoardView() {
                     position: 'absolute',
                     inset: 0,
                 }}
-                onDoubleClick={() => console.log('DOUBLE CLICK')}
+                onDoubleClick={(ev) =>
+                    setTaskDraft((oldState) => ({
+                        ...oldState,
+                        x: ev.clientX,
+                        y: ev.clientY,
+                    }))
+                }
             >
                 {linkHandleDragState.isDragging && linkDraftX1 && linkDraftY1 && (
                     <svg
@@ -120,18 +124,31 @@ export function BoardView() {
                         }}
                     />
                 ))}
+                {taskDraft.x !== -1 && taskDraft.y !== -1 && (
+                    <CreateNewTaskFormCard
+                        taskDraft={taskDraft}
+                        onChange={(taskDraft) => setTaskDraft(taskDraft)}
+                        onSubmit={(taskDraft) => {
+                            createAndSaveNewTask(taskDraft);
+                            setTaskDraft({
+                                title: '',
+                                description: '',
+                                x: -1,
+                                y: -1,
+                            });
+                        }}
+                    />
+                )}
             </div>
 
             <div
                 css={{
-                    zIndex: 1,
-                    pointerEvents: 'all',
+                    position: 'absolute',
+                    top: 0,
+                    userSelect: 'text',
                 }}
             >
-                <div>
-                    <input type="text" value={title} onChange={(ev) => setTitle(ev.target.value)} />
-                    <button onClick={handleAddTaskButtonClick}>追加</button>
-                </div>
+                {/* Overlay UI layer */}
             </div>
         </div>
     );

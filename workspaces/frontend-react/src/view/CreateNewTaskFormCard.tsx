@@ -1,75 +1,66 @@
-import { MouseEventHandler, useRef, useState } from 'react';
-import { Task } from '../model/Task';
+import { useRef, useState } from 'react';
+import { STYLE_CARD__ACTIVE } from './styles/card';
 import { useDrag } from './hooks/useDrag';
-import { updateTask } from '../usecase/updateTask';
-import { STYLE_CARD, STYLE_CARD__ACTIVE } from './styles/card';
-import { useResizeObserver } from './hooks/useResizeObserver';
-import { COLOR_ACTIVE } from './styles/Colors';
+import { TaskDraft } from '../usecase/createAndSaveNewTask';
 
-export function TaskCard({
-    task,
-    active = false,
-    onMouseEnter,
-    onMouseLeave,
-    onMouseDown,
+export function CreateNewTaskFormCard({
+    taskDraft,
+    onChange,
+    onSubmit,
 }: {
-    task: Task;
-    active?: boolean;
-    onMouseDown?: MouseEventHandler;
-    onMouseEnter?: MouseEventHandler;
-    onMouseLeave?: MouseEventHandler;
+    taskDraft: TaskDraft;
+    onChange?: (taskDraft: TaskDraft) => void;
+    onSubmit?: (taskDraft: TaskDraft) => void;
 }) {
-    const originalTaskPositionRef = useRef<{ x: number; y: number }>({ x: task.x, y: task.y });
+    const originalTaskPositionRef = useRef<{ x: number; y: number }>({ x: taskDraft.x, y: taskDraft.y });
     const { handleMouseDown: handleDragHandleMouseDown } = useDrag({
         onDragStart: () => {
-            originalTaskPositionRef.current = { x: task.x, y: task.y };
+            originalTaskPositionRef.current = { x: taskDraft.x, y: taskDraft.y };
         },
         onDragEnd: (dragState) => {
-            updateTask(task.id, {
+            onChange?.({
+                ...taskDraft,
                 x: originalTaskPositionRef.current.x + (dragState.currentX - dragState.startX),
                 y: originalTaskPositionRef.current.y + (dragState.currentY - dragState.startY),
             });
         },
         onDragMove: (dragState) => {
-            updateTask(task.id, {
+            onChange?.({
+                ...taskDraft,
                 x: originalTaskPositionRef.current.x + (dragState.currentX - dragState.startX),
                 y: originalTaskPositionRef.current.y + (dragState.currentY - dragState.startY),
             });
         },
     });
 
-    const cardRef = useRef<HTMLDivElement | null>(null);
-    useResizeObserver(cardRef, (entry) => {
-        updateTask(task.id, { width: entry.contentRect.width, height: entry.contentRect.height });
-    });
+    // const cardRef = useRef<HTMLDivElement | null>(null);
+    // useResizeObserver(cardRef, (entry) => {
+    //     updateTask(task.id, {width: entry.contentRect.width, height: entry.contentRect.height});
+    // });
 
-    const handleMouseDown: MouseEventHandler<HTMLDivElement> = (ev) => {
-        ev.preventDefault();
-        onMouseDown?.(ev);
-    };
+    // const handleMouseDown: MouseEventHandler<HTMLDivElement> = (ev) => {
+    //     ev.preventDefault();
+    //     onMouseDown?.(ev);
+    // };
 
     return (
         <div
-            ref={cardRef}
+            // ref={cardRef}
             css={{
-                ...STYLE_CARD,
+                ...STYLE_CARD__ACTIVE,
                 position: 'absolute',
-                top: task.y,
-                left: task.x,
+                top: taskDraft.y,
+                left: taskDraft.x,
                 display: 'flex',
                 flexDirection: 'row',
                 alignItems: 'flex-start',
                 padding: '10px 16px 10px 0',
                 width: 400,
                 transition: 'transform 160ms ease-in',
-                ...(active && {
-                    ...STYLE_CARD__ACTIVE,
-                    outline: `2px solid ${COLOR_ACTIVE}`,
-                }),
             }}
-            onMouseDown={handleMouseDown}
-            onMouseEnter={onMouseEnter}
-            onMouseLeave={onMouseLeave}
+            // onMouseDown={handleMouseDown}
+            // onMouseEnter={onMouseEnter}
+            // onMouseLeave={onMouseLeave}
         >
             <div
                 css={{
@@ -99,34 +90,39 @@ export function TaskCard({
                     minWidth: 0,
                 }}
             >
-                <span
+                <div
                     css={{
-                        fontSize: '0.75em',
-                        color: '#666',
-                        userSelect: 'text',
+                        display: 'flex',
+                        flexDirection: 'row',
+                        alignItems: 'flex-start',
                     }}
                 >
-                    #{task.id}
-                </span>
-                <TitleForm
-                    value={task.title}
-                    completed={task.completed}
-                    onChange={(title) => updateTask(task.id, { title })}
-                />
+                    <div
+                        css={{
+                            flex: '1 1 0',
+                        }}
+                    >
+                        <span
+                            css={{
+                                fontSize: '0.75em',
+                                color: '#666',
+                                userSelect: 'text',
+                            }}
+                        >
+                            新しいタスク
+                        </span>
+                        <TitleForm
+                            value={taskDraft.title}
+                            completed={false}
+                            onChange={(title) => onChange?.({ ...taskDraft, title })}
+                            autoFocus
+                        />
+                    </div>
+                    <button onClick={() => onSubmit?.(taskDraft)}>作成</button>
+                </div>
                 <DescriptionForm
-                    value={task.description}
-                    onChange={(description) => updateTask(task.id, { description })}
-                />
-            </div>
-            <div
-                css={{
-                    flex: '0 0 auto',
-                }}
-            >
-                <input
-                    type="checkbox"
-                    checked={task.completed}
-                    onChange={(ev) => updateTask(task.id, { completed: ev.target.checked })}
+                    value={taskDraft.description}
+                    onChange={(description) => onChange?.({ ...taskDraft, description })}
                 />
             </div>
         </div>
@@ -137,17 +133,19 @@ function TitleForm({
     value,
     completed,
     onChange,
+    autoFocus = false,
 }: {
     value: string;
     completed: boolean;
-    onChange: (value: string) => void;
+    onChange?: (value: string) => void;
+    autoFocus?: boolean;
 }) {
-    const [isEditing, setEditing] = useState(false);
+    const [isEditing, setEditing] = useState(autoFocus);
     const [draftValue, setDraftValue] = useState(value);
 
     const handleBlur = () => {
         setEditing(false);
-        onChange(draftValue);
+        onChange?.(draftValue);
     };
 
     if (!isEditing) {
@@ -181,8 +179,9 @@ function TitleForm({
             <input
                 type="text"
                 value={draftValue}
-                autoFocus
                 onBlur={handleBlur}
+                autoFocus
+                placeholder="タスクのタイトル"
                 onChange={(ev) => setDraftValue(ev.target.value)}
             />
         </div>
@@ -211,6 +210,7 @@ function DescriptionForm({ value, onChange }: { value: string; onChange: (value:
                     color: '#666',
                     userSelect: 'text',
                 }}
+                placeholder="説明文を追加"
                 onMouseDown={(ev) => ev.stopPropagation()}
                 onDoubleClick={(ev) => {
                     ev.stopPropagation();
