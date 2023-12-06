@@ -1,13 +1,9 @@
 import { taskStorage } from '../deps';
-import { flow } from '../lib/flow/Flow';
 import { Task } from '../model/Task';
+import { singleton } from '../lib/singleton';
 
-export function readTasks() {
-    const tasksFlow = taskStorage.readAllAsFlow();
-
-    return flow((get) => {
-        const tasks = get(tasksFlow);
-
+export const readTasks = singleton(() => {
+    return taskStorage.onChange.map((tasks) => {
         const map = new Map<string, Task>();
         for (const task of tasks.values()) {
             if (task.completed) continue;
@@ -17,4 +13,4 @@ export function readTasks() {
 
         return map as ReadonlyMap<string, Task>;
     });
-}
+});

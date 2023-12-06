@@ -1,7 +1,7 @@
 import { DragState } from './hook/useDrag';
 import { COLOR_ACTIVE } from './style/Colors';
 import { CreateLinkSession } from './hook/useCreateLinkSession';
-import { useFlow } from './hook/useFlow';
+import { useDataChannel } from './hook/useDataChannel';
 
 export function CreateLinkView({
     linkDraftSession,
@@ -10,7 +10,7 @@ export function CreateLinkView({
     linkDraftSession: CreateLinkSession;
     linkHandleDragState: DragState;
 }) {
-    const { isLinkDraftReady, destinationTask, sourceTask } = useFlow(linkDraftSession.detail);
+    const { isLinkDraftReady, destinationTask, sourceTask } = useDataChannel(linkDraftSession.detail);
     if (sourceTask === null) return null;
 
     const linkDraftX1 = sourceTask.x + sourceTask.width / 2;

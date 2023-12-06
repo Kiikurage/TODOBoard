@@ -1,28 +1,19 @@
-import { asFlow, Flow } from '../lib/flow/Flow';
+import { DataChannel } from '../lib/Channel/DataChannel';
+import { ch } from '../lib/Channel/ch';
 
 export abstract class AbstractRepository<T, SerializedT> {
-    protected readonly callbacks = new Set<() => void>();
+    public readonly onChange: DataChannel<ReadonlyMap<string, T>>;
+
     protected models = new Map<string, T>();
 
     protected constructor(protected readonly localStorageKey: string) {
         this.models = this.loadFromLocalStorage();
-        this.subscribe(() => this.saveToLocalStorage());
-    }
-
-    subscribe(callback: () => void) {
-        this.callbacks.add(callback);
-        return () => this.callbacks.delete(callback);
+        this.onChange = ch.data<ReadonlyMap<string, T>>(this.models);
+        this.onChange.addListener(() => this.saveToLocalStorage());
     }
 
     readAll(): ReadonlyMap<string, T> {
         return this.models;
-    }
-
-    readAllAsFlow(): Flow<ReadonlyMap<string, T>> {
-        return asFlow(
-            (callback) => this.subscribe(callback),
-            () => this.readAll(),
-        );
     }
 
     findById(id: string): T | undefined {
@@ -33,14 +24,14 @@ export abstract class AbstractRepository<T, SerializedT> {
         this.models = new Map(this.models);
         this.models.set(this.getId(model), model);
 
-        this.callbacks.forEach((callback) => callback());
+        this.onChange.fire(this.models);
     }
 
     deleteById(modelId: string) {
         this.models = new Map(this.models);
         this.models.delete(modelId);
 
-        this.callbacks.forEach((callback) => callback());
+        this.onChange.fire(this.models);
     }
 
     protected abstract getId(model: T): string;

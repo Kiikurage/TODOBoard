@@ -1,16 +1,15 @@
 import { linkStorage, taskStorage } from '../deps';
 import { Link } from '../model/Link';
-import { flow } from '../lib/flow/Flow';
+import { ch } from '../lib/Channel/ch';
+import { singleton } from '../lib/singleton';
 
-export function readLinks() {
-    const tasksFlow = taskStorage.readAllAsFlow();
-    const linksFlow = linkStorage.readAllAsFlow();
-
-    return flow((get) => {
-        const tasks = get(tasksFlow);
-        const links = get(linksFlow);
+export const readLinks = singleton(() => {
+    return ch.reactive((get) => {
+        const tasks = get(taskStorage.onChange);
+        const links = get(linkStorage.onChange);
 
         const map = new Map<string, Link>();
+
         for (const link of links.values()) {
             const sourceTask = tasks.get(link.sourceTaskId);
             const destinationTask = tasks.get(link.destinationTaskId);
@@ -20,6 +19,6 @@ export function readLinks() {
             map.set(link.id, link);
         }
 
-        return map as ReadonlyMap<string, Link>;
+        return map;
     });
-}
+});

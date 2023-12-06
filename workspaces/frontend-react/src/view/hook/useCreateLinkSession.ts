@@ -1,9 +1,10 @@
 import { useState } from 'react';
 import { LinkDraft } from '../../model/LinkDraft';
-import { taskStorage } from '../../deps';
 import { createAndSaveNewLink } from '../../usecase/createAndSaveNewLink';
-import { Flow, flow } from '../../lib/flow/Flow';
 import { Task } from '../../model/Task';
+import { DataChannel } from '../../lib/Channel/DataChannel';
+import { readTasks } from '../../usecase/readTasks';
+import { ch } from '../../lib/Channel/ch';
 
 export interface LinkDraftDetail {
     sourceTask: Task | null;
@@ -14,40 +15,17 @@ export interface LinkDraftDetail {
 }
 
 export class CreateLinkSession {
-    public readonly draft = flow(LinkDraft.empty());
-    public readonly detail = CreateLinkSession.getLinkDraftDetail(this.draft);
+    public readonly draft = ch.data(LinkDraft.empty());
+    public readonly detail: DataChannel<LinkDraftDetail>;
 
-    start(sourceTaskId: string) {
-        this.draft.set(LinkDraft.start(sourceTaskId));
-    }
+    constructor() {
+        this.detail = ch.reactive((get) => {
+            const draft = get(this.draft);
+            const tasks = get(readTasks());
 
-    finish() {
-        try {
-            const { sourceTaskId, destinationTaskId } = this.draft.get();
-            if (sourceTaskId === null || destinationTaskId === null || sourceTaskId === destinationTaskId) {
-                return;
-            }
-
-            createAndSaveNewLink({ sourceTaskId, destinationTaskId });
-        } finally {
-            this.draft.set(LinkDraft.empty());
-        }
-    }
-
-    setDestination(taskId: string | null) {
-        this.draft.set(this.draft.get().setDestination(taskId));
-    }
-
-    private static getLinkDraftDetail(linkDraftFlow: Flow<LinkDraft>): Flow<LinkDraftDetail> {
-        const taskFlow = taskStorage.readAllAsFlow();
-
-        return flow((get) => {
-            const linkDraft = get(linkDraftFlow);
-            const tasks = get(taskFlow);
-
-            const sourceTask = linkDraft.sourceTaskId === null ? null : tasks.get(linkDraft.sourceTaskId) ?? null;
+            const sourceTask = draft.sourceTaskId === null ? null : tasks.get(draft.sourceTaskId) ?? null;
             const destinationTask =
-                linkDraft.destinationTaskId === null ? null : tasks.get(linkDraft.destinationTaskId) ?? null;
+                draft.destinationTaskId === null ? null : tasks.get(draft.destinationTaskId) ?? null;
 
             const isLinkDraftReady =
                 sourceTask !== null && destinationTask !== null && sourceTask.id !== destinationTask.id;
@@ -65,6 +43,27 @@ export class CreateLinkSession {
                 isActiveTask,
             };
         });
+    }
+
+    start(sourceTaskId: string) {
+        this.draft.fire(LinkDraft.start(sourceTaskId));
+    }
+
+    finish() {
+        try {
+            const { sourceTaskId, destinationTaskId } = this.draft.get();
+            if (sourceTaskId === null || destinationTaskId === null || sourceTaskId === destinationTaskId) {
+                return;
+            }
+
+            createAndSaveNewLink({ sourceTaskId, destinationTaskId });
+        } finally {
+            this.draft.fire(LinkDraft.empty());
+        }
+    }
+
+    setDestination(taskId: string | null) {
+        this.draft.fire(this.draft.get().setDestination(taskId));
     }
 }
 

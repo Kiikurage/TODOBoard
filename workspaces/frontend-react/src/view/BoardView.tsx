@@ -1,7 +1,7 @@
 import { MouseEvent, useState } from 'react';
 import { useTasks } from './hook/useTasks';
 import { TaskCard } from './TaskCard';
-import { useLink } from './hook/useLink';
+import { useLinks } from './hook/useLinks';
 import { LinkView } from './LinkView';
 import { createAndSaveNewTask, TaskDraft } from '../usecase/createAndSaveNewTask';
 import { useDrag } from './hook/useDrag';
@@ -9,14 +9,14 @@ import { CreateNewTaskFormCard } from './CreateNewTaskFormCard';
 import { useCreateLinkSession } from './hook/useCreateLinkSession';
 import { CreateLinkView } from './CreateLinkView';
 import { Task } from '../model/Task';
-import { useFlow } from './hook/useFlow';
+import { useDataChannel } from './hook/useDataChannel';
 
 export function BoardView() {
     const tasks = useTasks();
-    const links = useLink();
+    const links = useLinks();
 
     const linkDraftSession = useCreateLinkSession();
-    const linkDraftDetail = useFlow(linkDraftSession.detail);
+    const linkDraftDetail = useDataChannel(linkDraftSession.detail);
 
     const { dragState: linkHandleDragState, handleMouseDown: handleDraftStart } = useDrag({
         onDragEnd() {
