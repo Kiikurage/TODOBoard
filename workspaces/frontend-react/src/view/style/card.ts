@@ -1,4 +1,5 @@
-import { CSSObject } from '@emotion/serialize/dist/declarations/types'; // https://codepen.io/sdthornton/pen/wBZdXq
+import { CSSObject } from '@emotion/serialize/dist/declarations/types';
+import { COLOR_ACTIVE } from './Colors'; // https://codepen.io/sdthornton/pen/wBZdXq
 
 // https://codepen.io/sdthornton/pen/wBZdXq
 
@@ -12,4 +13,9 @@ export const STYLE_CARD: CSSObject = {
 export const STYLE_CARD__ACTIVE: CSSObject = {
     ...STYLE_CARD,
     boxShadow: '0 14px 28px rgba(0,0,0,0.25), 0 10px 10px rgba(0,0,0,0.22)',
+};
+
+export const STYLE_CARD__ACTIVE_BORDERED: CSSObject = {
+    ...STYLE_CARD__ACTIVE,
+    outline: `2px solid ${COLOR_ACTIVE}`,
 };

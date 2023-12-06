@@ -2,9 +2,9 @@ import { MouseEventHandler, useRef, useState } from 'react';
 import { Task } from '../model/Task';
 import { useDrag } from './hook/useDrag';
 import { updateTask } from '../usecase/updateTask';
-import { STYLE_CARD, STYLE_CARD__ACTIVE } from './style/card';
+import { STYLE_CARD, STYLE_CARD__ACTIVE_BORDERED } from './style/card';
 import { useResizeObserver } from './hook/useResizeObserver';
-import { COLOR_ACTIVE } from './style/Colors';
+import { STYLE_INPUT, STYLE_INPUT_FOCUSED } from './style/input';
 
 export function TaskCard({
     task,
@@ -40,8 +40,7 @@ export function TaskCard({
                 width: 400,
                 transition: 'transform 160ms ease-in',
                 ...(active && {
-                    ...STYLE_CARD__ACTIVE,
-                    outline: `2px solid ${COLOR_ACTIVE}`,
+                    ...STYLE_CARD__ACTIVE_BORDERED,
                 }),
             }}
             onMouseDown={(ev) => {
@@ -118,42 +117,35 @@ function TitleForm({
         onChange(draftValue);
     };
 
-    if (!isEditing) {
-        return (
-            <div
-                css={{
-                    fontWeight: 'bold',
-                    overflow: 'hidden',
-                    textOverflow: 'ellipsis',
-                    whiteSpace: 'nowrap',
-                    userSelect: 'text',
-
-                    ...(completed && {
-                        color: '#888',
-                        textDecorationLine: 'line-through',
-                    }),
-                }}
-                onMouseDown={(ev) => ev.stopPropagation()}
-                onDoubleClick={(ev) => {
-                    ev.stopPropagation();
-                    setEditing(true);
-                }}
-            >
-                {value === '' ? 'タイトルを追加' : value}
-            </div>
-        );
-    }
-
     return (
-        <div>
-            <input
-                type="text"
-                value={draftValue}
-                autoFocus
-                onBlur={handleBlur}
-                onChange={(ev) => setDraftValue(ev.target.value)}
-            />
-        </div>
+        <input
+            type="text"
+            tabIndex={isEditing ? 0 : -1}
+            readOnly={!isEditing}
+            css={{
+                ...STYLE_INPUT,
+                borderBottomColor: 'transparent',
+
+                ...(completed && {
+                    textDecoration: 'line-through',
+                }),
+                ...(isEditing && STYLE_INPUT_FOCUSED),
+            }}
+            placeholder="タイトルを入力"
+            value={draftValue}
+            autoFocus
+            onBlur={handleBlur}
+            onChange={(ev) => setDraftValue(ev.target.value)}
+            onMouseDown={(ev) => ev.stopPropagation()}
+            onDoubleClick={
+                isEditing
+                    ? undefined
+                    : (ev) => {
+                          ev.stopPropagation();
+                          setEditing(true);
+                      }
+            }
+        />
     );
 }
 

@@ -56,8 +56,8 @@ export function BoardView() {
                 onDoubleClick={(ev) =>
                     setTaskDraft((oldState) => ({
                         ...oldState,
-                        x: ev.clientX,
-                        y: ev.clientY,
+                        left: ev.clientX,
+                        top: ev.clientY,
                     }))
                 }
             >
@@ -79,13 +79,18 @@ export function BoardView() {
                         taskDraft={taskDraft}
                         onChange={(taskDraft) => setTaskDraft(taskDraft)}
                         onSubmit={(taskDraft) => {
-                            createAndSaveNewTask(taskDraft);
-                            setTaskDraft({
-                                title: '',
-                                description: '',
-                                left: -1,
-                                top: -1,
-                            });
+                            try {
+                                if (taskDraft.title === '') return;
+
+                                createAndSaveNewTask(taskDraft);
+                            } finally {
+                                setTaskDraft({
+                                    title: '',
+                                    description: '',
+                                    left: -1,
+                                    top: -1,
+                                });
+                            }
                         }}
                     />
                 )}
