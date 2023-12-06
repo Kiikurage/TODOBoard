@@ -19,34 +19,10 @@ export function TaskCard({
     onMouseEnter?: MouseEventHandler;
     onMouseLeave?: MouseEventHandler;
 }) {
-    const originalTaskPositionRef = useRef<{ x: number; y: number }>({ x: task.x, y: task.y });
-    const { handleMouseDown: handleDragHandleMouseDown } = useDrag({
-        onDragStart: () => {
-            originalTaskPositionRef.current = { x: task.x, y: task.y };
-        },
-        onDragEnd: (dragState) => {
-            updateTask(task.id, {
-                x: originalTaskPositionRef.current.x + (dragState.currentX - dragState.startX),
-                y: originalTaskPositionRef.current.y + (dragState.currentY - dragState.startY),
-            });
-        },
-        onDragMove: (dragState) => {
-            updateTask(task.id, {
-                x: originalTaskPositionRef.current.x + (dragState.currentX - dragState.startX),
-                y: originalTaskPositionRef.current.y + (dragState.currentY - dragState.startY),
-            });
-        },
-    });
-
     const cardRef = useRef<HTMLDivElement | null>(null);
     useResizeObserver(cardRef, (entry) => {
         updateTask(task.id, { width: entry.contentRect.width, height: entry.contentRect.height });
     });
-
-    const handleMouseDown: MouseEventHandler<HTMLDivElement> = (ev) => {
-        ev.preventDefault();
-        onMouseDown?.(ev);
-    };
 
     return (
         <div
@@ -67,35 +43,14 @@ export function TaskCard({
                     outline: `2px solid ${COLOR_ACTIVE}`,
                 }),
             }}
-            onMouseDown={handleMouseDown}
+            onMouseDown={(ev) => {
+                ev.preventDefault();
+                onMouseDown?.(ev);
+            }}
             onMouseEnter={onMouseEnter}
             onMouseLeave={onMouseLeave}
         >
-            <div
-                css={{
-                    flex: '0 0 auto',
-                    display: 'flex',
-                    flexDirection: 'column',
-                    justifyContent: 'center',
-                    alignSelf: 'stretch',
-                    cursor: 'move',
-                    paddingRight: 4,
-                }}
-                onMouseDown={(ev) => {
-                    ev.stopPropagation();
-                    handleDragHandleMouseDown(ev);
-                }}
-            >
-                <span
-                    className="material-symbols-outlined"
-                    css={{
-                        fontSize: 20,
-                        color: '#888',
-                    }}
-                >
-                    drag_indicator
-                </span>
-            </div>
+            <DragHandle task={task} />
             <div
                 css={{
                     flex: '1 1 0',
@@ -174,7 +129,7 @@ function TitleForm({
                     setEditing(true);
                 }}
             >
-                {value}
+                {value === '' ? 'タイトルを追加' : value}
             </div>
         );
     }
@@ -227,5 +182,54 @@ function DescriptionForm({ value, onChange }: { value: string; onChange: (value:
 
     return (
         <textarea value={draftValue} autoFocus onBlur={handleBlur} onChange={(ev) => setDraftValue(ev.target.value)} />
+    );
+}
+
+function DragHandle({ task }: { task: Task }) {
+    const originalTaskPositionRef = useRef<{ x: number; y: number }>({ x: task.x, y: task.y });
+    const { handleMouseDown: handleDragHandleMouseDown } = useDrag({
+        onDragStart: () => {
+            originalTaskPositionRef.current = { x: task.x, y: task.y };
+        },
+        onDragEnd: (dragState) => {
+            updateTask(task.id, {
+                x: originalTaskPositionRef.current.x + (dragState.currentX - dragState.startX),
+                y: originalTaskPositionRef.current.y + (dragState.currentY - dragState.startY),
+            });
+        },
+        onDragMove: (dragState) => {
+            updateTask(task.id, {
+                x: originalTaskPositionRef.current.x + (dragState.currentX - dragState.startX),
+                y: originalTaskPositionRef.current.y + (dragState.currentY - dragState.startY),
+            });
+        },
+    });
+
+    return (
+        <div
+            css={{
+                flex: '0 0 auto',
+                display: 'flex',
+                flexDirection: 'column',
+                justifyContent: 'center',
+                alignSelf: 'stretch',
+                cursor: 'move',
+                paddingRight: 4,
+            }}
+            onMouseDown={(ev) => {
+                ev.stopPropagation();
+                handleDragHandleMouseDown(ev);
+            }}
+        >
+            <span
+                className="material-symbols-outlined"
+                css={{
+                    fontSize: 20,
+                    color: '#888',
+                }}
+            >
+                drag_indicator
+            </span>
+        </div>
     );
 }

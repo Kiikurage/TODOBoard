@@ -169,7 +169,7 @@ function TitleForm({
                     setEditing(true);
                 }}
             >
-                {value}
+                {value === '' ? 'タイトルを追加' : value}
             </div>
         );
     }
