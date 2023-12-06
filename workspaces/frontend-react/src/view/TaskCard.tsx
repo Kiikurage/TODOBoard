@@ -32,10 +32,6 @@ export function TaskCard({
                 position: 'absolute',
                 top: task.y,
                 left: task.x,
-                display: 'flex',
-                flexDirection: 'row',
-                alignItems: 'flex-start',
-                padding: '10px 16px 10px 0',
                 width: 400,
                 transition: 'transform 160ms ease-in',
                 ...(active && {
@@ -50,42 +46,51 @@ export function TaskCard({
             onMouseEnter={onMouseEnter}
             onMouseLeave={onMouseLeave}
         >
-            <DragHandle task={task} />
             <div
                 css={{
-                    flex: '1 1 0',
-                    minWidth: 0,
+                    display: 'flex',
+                    flexDirection: 'row',
+                    alignItems: 'flex-start',
+                    padding: '10px 16px 10px 0',
                 }}
             >
-                <span
+                <DragHandle task={task} />
+                <div
                     css={{
-                        fontSize: '0.75em',
-                        color: '#666',
-                        userSelect: 'text',
+                        flex: '1 1 0',
+                        minWidth: 0,
                     }}
                 >
-                    #{task.id}
-                </span>
-                <TitleForm
-                    value={task.title}
-                    completed={task.completed}
-                    onChange={(title) => updateTask(task.id, { title })}
-                />
-                <DescriptionForm
-                    value={task.description}
-                    onChange={(description) => updateTask(task.id, { description })}
-                />
-            </div>
-            <div
-                css={{
-                    flex: '0 0 auto',
-                }}
-            >
-                <input
-                    type="checkbox"
-                    checked={task.completed}
-                    onChange={(ev) => updateTask(task.id, { completed: ev.target.checked })}
-                />
+                    <span
+                        css={{
+                            fontSize: '0.75em',
+                            color: '#666',
+                            userSelect: 'text',
+                        }}
+                    >
+                        #{task.id}
+                    </span>
+                    <TitleForm
+                        value={task.title}
+                        completed={task.completed}
+                        onChange={(title) => updateTask(task.id, { title })}
+                    />
+                    <DescriptionForm
+                        value={task.description}
+                        onChange={(description) => updateTask(task.id, { description })}
+                    />
+                </div>
+                <div
+                    css={{
+                        flex: '0 0 auto',
+                    }}
+                >
+                    <input
+                        type="checkbox"
+                        checked={task.completed}
+                        onChange={(ev) => updateTask(task.id, { completed: ev.target.checked })}
+                    />
+                </div>
             </div>
         </div>
     );

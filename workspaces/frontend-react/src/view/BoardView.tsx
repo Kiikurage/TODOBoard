@@ -61,7 +61,6 @@ export function BoardView() {
                     }))
                 }
             >
-                {createLinkSessionState.isEditing && <CreateLinkSessionView createLinkSession={createLinkSession} />}
                 {[...links.values()].map((link) => (
                     <LinkView link={link} key={link.id} />
                 ))}
@@ -90,6 +89,7 @@ export function BoardView() {
                         }}
                     />
                 )}
+                {createLinkSessionState.isEditing && <CreateLinkSessionView createLinkSession={createLinkSession} />}
             </div>
 
             <div
