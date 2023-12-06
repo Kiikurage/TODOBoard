@@ -81,7 +81,10 @@ export function TaskCard({
                     cursor: 'move',
                     paddingRight: 4,
                 }}
-                onMouseDown={handleDragHandleMouseDown}
+                onMouseDown={(ev) => {
+                    ev.stopPropagation();
+                    handleDragHandleMouseDown(ev);
+                }}
             >
                 <span
                     className="material-symbols-outlined"

@@ -28,7 +28,7 @@ export function BoardView() {
     });
 
     const handleTaskCardMouseDown = (ev: MouseEvent, task: Task) => {
-        createLinkSession.setSourceTaskId(task.id);
+        createLinkSession.start(task.id);
         handleDraftStart(ev);
     };
 

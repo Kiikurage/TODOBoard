@@ -3,7 +3,7 @@ import { ch } from '../../lib/Channel/ch';
 import { taskStorage } from '../../deps';
 import { createAndSaveNewLink } from '../../usecase/createAndSaveNewLink';
 
-class State {
+export class CreateLinkSessionState {
     constructor(
         public readonly isEditing: boolean,
         public readonly currentX: number,
@@ -14,7 +14,7 @@ class State {
         public readonly destinationTask: Task | null,
     ) {}
 
-    static readonly EMPTY = State.create({
+    static readonly EMPTY = CreateLinkSessionState.create({
         isEditing: false,
         currentX: 0,
         currentY: 0,
@@ -37,21 +37,21 @@ class State {
         return this.sourceTask?.id === taskId || this.destinationTask?.id === taskId;
     }
 
-    copy(props: Partial<typeof ownProps>): State {
-        return Object.assign(Object.create(State.prototype), this, props);
+    copy(props: Partial<typeof ownProps>): CreateLinkSessionState {
+        return Object.assign(Object.create(CreateLinkSessionState.prototype), this, props);
     }
 
-    static create(props: typeof ownProps): State {
-        return State.prototype.copy(props);
+    static create(props: typeof ownProps): CreateLinkSessionState {
+        return CreateLinkSessionState.prototype.copy(props);
     }
 }
 
-const ownProps = { ...State.prototype };
+const ownProps = { ...CreateLinkSessionState.prototype };
 
 export class CreateLinkSession {
-    public readonly state = ch.data(State.EMPTY);
+    public readonly state = ch.data(CreateLinkSessionState.EMPTY);
 
-    setSourceTaskId(sourceTaskId: string) {
+    start(sourceTaskId: string) {
         this.state.set((oldValue) =>
             oldValue.copy({
                 isEditing: true,
@@ -81,7 +81,7 @@ export class CreateLinkSession {
 
             createAndSaveNewLink({ sourceTaskId: sourceTaskId!, destinationTaskId: destinationTaskId! });
         } finally {
-            this.state.set(State.EMPTY);
+            this.state.set(CreateLinkSessionState.EMPTY);
         }
     }
 }
