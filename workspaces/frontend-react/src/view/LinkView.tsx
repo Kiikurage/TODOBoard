@@ -20,10 +20,10 @@ export function LinkView({ link }: { link: Link }) {
             }}
         >
             <line
-                x1={sourceTask.x + sourceTask.width / 2}
-                y1={sourceTask.y + sourceTask.height / 2}
-                x2={destinationTask.x + destinationTask.width / 2}
-                y2={destinationTask.y + destinationTask.height / 2}
+                x1={sourceTask.rect.center.x}
+                y1={sourceTask.rect.center.y}
+                x2={destinationTask.rect.center.x}
+                y2={destinationTask.rect.center.y}
             />
         </svg>
     );

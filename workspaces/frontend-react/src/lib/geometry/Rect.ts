@@ -31,6 +31,10 @@ export class Rect {
         return Point.create({ y: this.bottom, x: this.left });
     }
 
+    get center() {
+        return Point.create({ y: this.top + this.height / 2, x: this.left + this.width / 2 });
+    }
+
     copy(props: Partial<typeof ownProps>): Rect {
         return Object.assign(Object.create(Rect.prototype), this, props);
     }

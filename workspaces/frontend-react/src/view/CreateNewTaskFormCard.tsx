@@ -12,23 +12,23 @@ export function CreateNewTaskFormCard({
     onChange?: (taskDraft: TaskDraft) => void;
     onSubmit?: (taskDraft: TaskDraft) => void;
 }) {
-    const originalTaskPositionRef = useRef<{ x: number; y: number }>({ x: taskDraft.x, y: taskDraft.y });
+    const originalTaskPositionRef = useRef<{ x: number; y: number }>({ x: taskDraft.left, y: taskDraft.top });
     const { handleMouseDown: handleDragHandleMouseDown } = useDrag({
         onDragStart: () => {
-            originalTaskPositionRef.current = { x: taskDraft.x, y: taskDraft.y };
+            originalTaskPositionRef.current = { x: taskDraft.left, y: taskDraft.top };
         },
         onDragEnd: (dragState) => {
             onChange?.({
                 ...taskDraft,
-                x: originalTaskPositionRef.current.x + (dragState.currentX - dragState.startX),
-                y: originalTaskPositionRef.current.y + (dragState.currentY - dragState.startY),
+                left: originalTaskPositionRef.current.x + (dragState.currentX - dragState.startX),
+                top: originalTaskPositionRef.current.y + (dragState.currentY - dragState.startY),
             });
         },
         onDragMove: (dragState) => {
             onChange?.({
                 ...taskDraft,
-                x: originalTaskPositionRef.current.x + (dragState.currentX - dragState.startX),
-                y: originalTaskPositionRef.current.y + (dragState.currentY - dragState.startY),
+                left: originalTaskPositionRef.current.x + (dragState.currentX - dragState.startX),
+                top: originalTaskPositionRef.current.y + (dragState.currentY - dragState.startY),
             });
         },
     });
@@ -49,8 +49,8 @@ export function CreateNewTaskFormCard({
             css={{
                 ...STYLE_CARD__ACTIVE,
                 position: 'absolute',
-                top: taskDraft.y,
-                left: taskDraft.x,
+                top: taskDraft.top,
+                left: taskDraft.left,
                 display: 'flex',
                 flexDirection: 'row',
                 alignItems: 'flex-start',

@@ -21,7 +21,12 @@ export function TaskCard({
 }) {
     const cardRef = useRef<HTMLDivElement | null>(null);
     useResizeObserver(cardRef, (entry) => {
-        updateTask(task.id, { width: entry.contentRect.width, height: entry.contentRect.height });
+        updateTask(task.id, {
+            rect: task.rect.copy({
+                width: entry.contentRect.width,
+                height: entry.contentRect.height,
+            }),
+        });
     });
 
     return (
@@ -30,8 +35,8 @@ export function TaskCard({
             css={{
                 ...STYLE_CARD,
                 position: 'absolute',
-                top: task.y,
-                left: task.x,
+                top: task.rect.top,
+                left: task.rect.left,
                 width: 400,
                 transition: 'transform 160ms ease-in',
                 ...(active && {
@@ -191,21 +196,25 @@ function DescriptionForm({ value, onChange }: { value: string; onChange: (value:
 }
 
 function DragHandle({ task }: { task: Task }) {
-    const originalTaskPositionRef = useRef<{ x: number; y: number }>({ x: task.x, y: task.y });
+    const originalTaskPositionRef = useRef<{ x: number; y: number }>({ x: task.rect.left, y: task.rect.top });
     const { handleMouseDown: handleDragHandleMouseDown } = useDrag({
         onDragStart: () => {
-            originalTaskPositionRef.current = { x: task.x, y: task.y };
+            originalTaskPositionRef.current = { x: task.rect.left, y: task.rect.top };
         },
         onDragEnd: (dragState) => {
             updateTask(task.id, {
-                x: originalTaskPositionRef.current.x + (dragState.currentX - dragState.startX),
-                y: originalTaskPositionRef.current.y + (dragState.currentY - dragState.startY),
+                rect: task.rect.copy({
+                    left: originalTaskPositionRef.current.x + (dragState.currentX - dragState.startX),
+                    top: originalTaskPositionRef.current.y + (dragState.currentY - dragState.startY),
+                }),
             });
         },
         onDragMove: (dragState) => {
             updateTask(task.id, {
-                x: originalTaskPositionRef.current.x + (dragState.currentX - dragState.startX),
-                y: originalTaskPositionRef.current.y + (dragState.currentY - dragState.startY),
+                rect: task.rect.copy({
+                    left: originalTaskPositionRef.current.x + (dragState.currentX - dragState.startX),
+                    top: originalTaskPositionRef.current.y + (dragState.currentY - dragState.startY),
+                }),
             });
         },
     });

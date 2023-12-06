@@ -1,5 +1,6 @@
 import { Task } from '../model/Task';
 import { AbstractRepository } from './AbstractRepository';
+import { Rect } from '../lib/geometry/Rect';
 
 export class TaskRepository extends AbstractRepository<Task, SerializedTask> {
     constructor() {
@@ -20,10 +21,12 @@ export class TaskRepository extends AbstractRepository<Task, SerializedTask> {
             title: model.title,
             completed: model.completed,
             description: model.description,
-            x: model.x,
-            y: model.y,
-            width: model.width,
-            height: model.height,
+            rect: {
+                left: model.rect.left,
+                top: model.rect.top,
+                width: model.rect.width,
+                height: model.rect.height,
+            },
         };
     }
 
@@ -33,10 +36,7 @@ export class TaskRepository extends AbstractRepository<Task, SerializedTask> {
             title: serializedModel.title,
             completed: serializedModel.completed,
             description: serializedModel.description,
-            x: serializedModel.x,
-            y: serializedModel.y,
-            width: serializedModel.width ?? 100,
-            height: serializedModel.height ?? 100,
+            rect: Rect.create(serializedModel.rect),
         });
     }
 
@@ -50,8 +50,10 @@ interface SerializedTask {
     title: string;
     completed: boolean;
     description: string;
-    x: number;
-    y: number;
-    width: number;
-    height: number;
+    rect: {
+        top: number;
+        left: number;
+        width: number;
+        height: number;
+    };
 }

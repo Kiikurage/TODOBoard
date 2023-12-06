@@ -35,8 +35,8 @@ export function BoardView() {
     const [taskDraft, setTaskDraft] = useState<TaskDraft>({
         title: '',
         description: '',
-        x: -1,
-        y: -1,
+        left: -1,
+        top: -1,
     });
 
     return (
@@ -74,7 +74,7 @@ export function BoardView() {
                         onMouseLeave={() => createLinkSession.setDestinationTaskId(null)}
                     />
                 ))}
-                {taskDraft.x !== -1 && taskDraft.y !== -1 && (
+                {taskDraft.left !== -1 && taskDraft.top !== -1 && (
                     <CreateNewTaskFormCard
                         taskDraft={taskDraft}
                         onChange={(taskDraft) => setTaskDraft(taskDraft)}
@@ -83,8 +83,8 @@ export function BoardView() {
                             setTaskDraft({
                                 title: '',
                                 description: '',
-                                x: -1,
-                                y: -1,
+                                left: -1,
+                                top: -1,
                             });
                         }}
                     />

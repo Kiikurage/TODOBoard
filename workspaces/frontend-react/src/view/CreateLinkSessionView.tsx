@@ -3,7 +3,6 @@ import { useDataChannel } from './hook/useDataChannel';
 import { CreateLinkSession } from './model/CreateLinkSession';
 import { getIntersectionPointForLineSegmentAndRect } from '../lib/geometry/Line';
 import { Point } from '../lib/geometry/Point';
-import { Rect } from '../lib/geometry/Rect';
 import { LineSegment } from '../lib/geometry/LineSegment';
 
 export function CreateLinkSessionView({ createLinkSession }: { createLinkSession: CreateLinkSession }) {
@@ -12,30 +11,17 @@ export function CreateLinkSessionView({ createLinkSession }: { createLinkSession
     );
     if (sourceTask === null) return null;
 
-    const linkDraftX1 = sourceTask.x + sourceTask.width / 2;
-    const linkDraftY1 = sourceTask.y + sourceTask.height / 2;
-    const linkDraftX2 = destinationTask ? destinationTask.x + destinationTask.width / 2 : currentX;
-    const linkDraftY2 = destinationTask ? destinationTask.y + destinationTask.height / 2 : currentY;
+    const linkDraftP1 = sourceTask.rect.center;
+    const linkDraftP2 = destinationTask ? destinationTask.rect.center : Point.create({ x: currentX, y: currentY });
 
     const point1 = getIntersectionPointForLineSegmentAndRect(
-        LineSegment.create({
-            p1: Point.create({ x: linkDraftX1, y: linkDraftY1 }),
-            p2: Point.create({ x: linkDraftX2, y: linkDraftY2 }),
-        }),
-        Rect.create({ top: sourceTask.y, left: sourceTask.x, width: sourceTask.width, height: sourceTask.height }),
+        LineSegment.create({ p1: linkDraftP1, p2: linkDraftP2 }),
+        sourceTask.rect,
     );
     const point2 = destinationTask
         ? getIntersectionPointForLineSegmentAndRect(
-              LineSegment.create({
-                  p1: Point.create({ x: linkDraftX1, y: linkDraftY1 }),
-                  p2: Point.create({ x: linkDraftX2, y: linkDraftY2 }),
-              }),
-              Rect.create({
-                  top: destinationTask.y,
-                  left: destinationTask.x,
-                  width: destinationTask.width,
-                  height: destinationTask.height,
-              }),
+              LineSegment.create({ p1: linkDraftP1, p2: linkDraftP2 }),
+              destinationTask.rect,
           )
         : null;
 
@@ -53,10 +39,10 @@ export function CreateLinkSessionView({ createLinkSession }: { createLinkSession
             }}
         >
             <line
-                x1={point1?.x ?? linkDraftX1}
-                y1={point1?.y ?? linkDraftY1}
-                x2={point2?.x ?? linkDraftX2}
-                y2={point2?.y ?? linkDraftY2}
+                x1={point1?.x ?? linkDraftP1.x}
+                y1={point1?.y ?? linkDraftP1.y}
+                x2={point2?.x ?? linkDraftP2.x}
+                y2={point2?.y ?? linkDraftP2.y}
             />
         </svg>
     );

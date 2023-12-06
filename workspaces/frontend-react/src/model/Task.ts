@@ -1,13 +1,12 @@
+import { Rect } from '../lib/geometry/Rect';
+
 export class Task {
     protected constructor(
         public readonly id: string,
         public readonly title: string,
         public readonly completed: boolean,
         public readonly description: string,
-        public readonly x: number,
-        public readonly y: number,
-        public readonly width: number,
-        public readonly height: number,
+        public rect: Rect,
     ) {}
 
     copy(props: Partial<typeof ownProps>): Task {
