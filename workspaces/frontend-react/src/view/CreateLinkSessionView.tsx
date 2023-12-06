@@ -1,22 +1,17 @@
-import { DragState } from './hook/useDrag';
 import { COLOR_ACTIVE } from './style/Colors';
-import { CreateLinkSession } from './hook/useCreateLinkSession';
 import { useDataChannel } from './hook/useDataChannel';
+import { CreateLinkSession } from './model/CreateLinkSession';
 
-export function CreateLinkView({
-    linkDraftSession,
-    linkHandleDragState,
-}: {
-    linkDraftSession: CreateLinkSession;
-    linkHandleDragState: DragState;
-}) {
-    const { isLinkDraftReady, destinationTask, sourceTask } = useDataChannel(linkDraftSession.detail);
+export function CreateLinkSessionView({ createLinkSession }: { createLinkSession: CreateLinkSession }) {
+    const { isLinkDraftReady, destinationTask, sourceTask, currentX, currentY } = useDataChannel(
+        createLinkSession.state,
+    );
     if (sourceTask === null) return null;
 
     const linkDraftX1 = sourceTask.x + sourceTask.width / 2;
     const linkDraftY1 = sourceTask.y + sourceTask.height / 2;
-    const linkDraftX2 = destinationTask ? destinationTask.x + destinationTask.width / 2 : linkHandleDragState.currentX;
-    const linkDraftY2 = destinationTask ? destinationTask.y + destinationTask.height / 2 : linkHandleDragState.currentY;
+    const linkDraftX2 = destinationTask ? destinationTask.x + destinationTask.width / 2 : currentX;
+    const linkDraftY2 = destinationTask ? destinationTask.y + destinationTask.height / 2 : currentY;
 
     return (
         <svg

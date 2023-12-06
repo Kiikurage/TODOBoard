@@ -6,26 +6,29 @@ import { LinkView } from './LinkView';
 import { createAndSaveNewTask, TaskDraft } from '../usecase/createAndSaveNewTask';
 import { useDrag } from './hook/useDrag';
 import { CreateNewTaskFormCard } from './CreateNewTaskFormCard';
-import { useCreateLinkSession } from './hook/useCreateLinkSession';
-import { CreateLinkView } from './CreateLinkView';
+import { CreateLinkSessionView } from './CreateLinkSessionView';
 import { Task } from '../model/Task';
+import { CreateLinkSession } from './model/CreateLinkSession';
 import { useDataChannel } from './hook/useDataChannel';
 
 export function BoardView() {
     const tasks = useTasks();
     const links = useLinks();
 
-    const linkDraftSession = useCreateLinkSession();
-    const linkDraftDetail = useDataChannel(linkDraftSession.detail);
+    const createLinkSession = useState(() => new CreateLinkSession())[0];
+    const createLinkSessionState = useDataChannel(createLinkSession.state);
 
-    const { dragState: linkHandleDragState, handleMouseDown: handleDraftStart } = useDrag({
+    const { handleMouseDown: handleDraftStart } = useDrag({
+        onDragMove(ev) {
+            createLinkSession.setPosition(ev.currentX, ev.currentY);
+        },
         onDragEnd() {
-            linkDraftSession.finish();
+            createLinkSession.finish();
         },
     });
 
     const handleTaskCardMouseDown = (ev: MouseEvent, task: Task) => {
-        linkDraftSession.start(task.id);
+        createLinkSession.setSourceTaskId(task.id);
         handleDraftStart(ev);
     };
 
@@ -58,9 +61,7 @@ export function BoardView() {
                     }))
                 }
             >
-                {linkHandleDragState.isDragging && (
-                    <CreateLinkView linkHandleDragState={linkHandleDragState} linkDraftSession={linkDraftSession} />
-                )}
+                {createLinkSessionState.isEditing && <CreateLinkSessionView createLinkSession={createLinkSession} />}
                 {[...links.values()].map((link) => (
                     <LinkView link={link} key={link.id} />
                 ))}
@@ -68,10 +69,10 @@ export function BoardView() {
                     <TaskCard
                         task={task}
                         key={task.id}
-                        active={linkDraftDetail.isActiveTask(task.id)}
+                        active={createLinkSessionState.isActiveTask(task.id)}
                         onMouseDown={(ev) => handleTaskCardMouseDown(ev, task)}
-                        onMouseEnter={() => linkDraftSession.setDestination(task.id)}
-                        onMouseLeave={() => linkDraftSession.setDestination(null)}
+                        onMouseEnter={() => createLinkSession.setDestinationTaskId(task.id)}
+                        onMouseLeave={() => createLinkSession.setDestinationTaskId(null)}
                     />
                 ))}
                 {taskDraft.x !== -1 && taskDraft.y !== -1 && (
