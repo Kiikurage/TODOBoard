@@ -1,24 +1,30 @@
 import { MouseEventHandler, useRef, useState } from 'react';
 import { Task } from '../model/Task';
-import { useDrag } from './hook/useDrag';
-import { updateTask } from '../usecase/updateTask';
+import { UpdateTaskUseCase } from '../usecase/UpdateTaskUseCase';
 import { STYLE_CARD, STYLE_CARD__ACTIVE_BORDERED } from './style/card';
 import { useResizeObserver } from './hook/useResizeObserver';
 import { STYLE_INPUT, STYLE_INPUT_FOCUSED } from './style/input';
+import { BoardController } from '../controller/BoardController';
+import { Point } from '../lib/geometry/Point';
+import { taskRepository } from '../deps';
 
 export function TaskCard({
+    board,
     task,
     active = false,
     onMouseEnter,
     onMouseLeave,
     onMouseDown,
 }: {
+    board: BoardController;
     task: Task;
     active?: boolean;
     onMouseDown?: MouseEventHandler;
     onMouseEnter?: MouseEventHandler;
     onMouseLeave?: MouseEventHandler;
 }) {
+    const [updateTask] = useState(() => UpdateTaskUseCase(taskRepository()));
+
     const cardRef = useRef<HTMLDivElement | null>(null);
     useResizeObserver(cardRef, (entry) => {
         updateTask(task.id, {
@@ -58,7 +64,7 @@ export function TaskCard({
                     padding: '10px 16px 10px 0',
                 }}
             >
-                <DragHandle task={task} />
+                <DragHandle task={task} board={board} />
                 <div
                     css={{
                         flex: '1 1 0',
@@ -187,30 +193,7 @@ function DescriptionForm({ value, onChange }: { value: string; onChange: (value:
     );
 }
 
-function DragHandle({ task }: { task: Task }) {
-    const originalTaskPositionRef = useRef<{ x: number; y: number }>({ x: task.rect.left, y: task.rect.top });
-    const { handleMouseDown: handleDragHandleMouseDown } = useDrag({
-        onDragStart: () => {
-            originalTaskPositionRef.current = { x: task.rect.left, y: task.rect.top };
-        },
-        onDragEnd: (dragState) => {
-            updateTask(task.id, {
-                rect: task.rect.copy({
-                    left: originalTaskPositionRef.current.x + (dragState.currentX - dragState.startX),
-                    top: originalTaskPositionRef.current.y + (dragState.currentY - dragState.startY),
-                }),
-            });
-        },
-        onDragMove: (dragState) => {
-            updateTask(task.id, {
-                rect: task.rect.copy({
-                    left: originalTaskPositionRef.current.x + (dragState.currentX - dragState.startX),
-                    top: originalTaskPositionRef.current.y + (dragState.currentY - dragState.startY),
-                }),
-            });
-        },
-    });
-
+function DragHandle({ task, board }: { task: Task; board: BoardController }) {
     return (
         <div
             css={{
@@ -223,8 +206,8 @@ function DragHandle({ task }: { task: Task }) {
                 paddingRight: 4,
             }}
             onMouseDown={(ev) => {
+                board.handleTaskDragStart(task.id, Point.create({ x: ev.clientX, y: ev.clientY }));
                 ev.stopPropagation();
-                handleDragHandleMouseDown(ev);
             }}
         >
             <span

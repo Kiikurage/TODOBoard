@@ -1,43 +1,50 @@
-import { MouseEvent, useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useTasks } from './hook/useTasks';
 import { TaskCard } from './TaskCard';
 import { useLinks } from './hook/useLinks';
 import { LinkView } from './LinkView';
-import { createAndSaveNewTask, TaskDraft } from '../usecase/createAndSaveNewTask';
-import { useDrag } from './hook/useDrag';
-import { CreateNewTaskFormCard } from './CreateNewTaskFormCard';
-import { CreateLinkSessionView } from './CreateLinkSessionView';
-import { Task } from '../model/Task';
-import { CreateLinkSession } from './model/CreateLinkSession';
-import { useDataChannel } from './hook/useDataChannel';
+import { CreateTaskForm } from './CreateTaskForm';
+import { Point } from '../lib/geometry/Point';
+import { boardController, readLinks, readTasks } from '../deps';
+import { CreateLinkSession } from '../controller/CreateLinkSession';
+import { CreateLinkView } from './CreateLinkView';
+import { CreateTaskSession } from '../controller/CreateTaskSession';
 
 export function BoardView() {
-    const tasks = useTasks();
-    const links = useLinks();
+    const tasks = useTasks(readTasks());
+    const links = useLinks(readLinks());
 
-    const createLinkSession = useState(() => new CreateLinkSession())[0];
-    const createLinkSessionState = useDataChannel(createLinkSession.state);
+    const [createLinkSessions, setCreateLinkSessions] = useState<CreateLinkSession[]>([]);
+    useEffect(() => {
+        return boardController().onCreateLinkSessionStart.addListener((session) => {
+            setCreateLinkSessions((oldState) => [...oldState, session]);
+            session.onEnd.addListener(() => setCreateLinkSessions((oldState) => oldState.filter((s) => s !== session)));
+        });
+    }, []);
 
-    const { handleMouseDown: handleDraftStart } = useDrag({
-        onDragMove(ev) {
-            createLinkSession.setPosition(ev.currentX, ev.currentY);
-        },
-        onDragEnd() {
-            createLinkSession.finish();
-        },
-    });
+    const [createTaskSession, setCreateTaskSession] = useState<CreateTaskSession | null>(null);
+    useEffect(() => {
+        return boardController().onCreateTaskSessionStart.addListener((session) => {
+            setCreateTaskSession(session);
+            session.onEnd.addListener(() => setCreateTaskSession(null));
+        });
+    }, []);
 
-    const handleTaskCardMouseDown = (ev: MouseEvent, task: Task) => {
-        createLinkSession.start(task.id);
-        handleDraftStart(ev);
-    };
+    useEffect(() => {
+        const handlePointerMove = (ev: MouseEvent) => {
+            boardController().handlePointerMove(Point.create({ x: ev.clientX, y: ev.clientY }));
+        };
+        const handlePointerUp = (ev: MouseEvent) => {
+            boardController().handlePointerUp(Point.create({ x: ev.clientX, y: ev.clientY }));
+        };
 
-    const [taskDraft, setTaskDraft] = useState<TaskDraft>({
-        title: '',
-        description: '',
-        left: -1,
-        top: -1,
-    });
+        window.addEventListener('mousemove', handlePointerMove);
+        window.addEventListener('mouseup', handlePointerUp);
+        return () => {
+            window.removeEventListener('mousemove', handlePointerMove);
+            window.removeEventListener('mouseup', handlePointerUp);
+        };
+    }, []);
 
     return (
         <div
@@ -47,20 +54,19 @@ export function BoardView() {
                 userSelect: 'none',
                 background: '#f8faff',
             }}
-            onMouseDown={() => window.getSelection()?.removeAllRanges?.()}
+            onMouseDown={(ev) => {
+                boardController().handlePointerDown(Point.create({ x: ev.clientX, y: ev.clientY }));
+                window.getSelection()?.removeAllRanges?.();
+            }}
         >
             <div
                 css={{
                     position: 'absolute',
                     inset: 0,
                 }}
-                onDoubleClick={(ev) =>
-                    setTaskDraft((oldState) => ({
-                        ...oldState,
-                        left: ev.clientX,
-                        top: ev.clientY,
-                    }))
-                }
+                onDoubleClick={(ev) => {
+                    boardController().handleDoubleClick(Point.create({ x: ev.clientX, y: ev.clientY }));
+                }}
             >
                 {[...links.values()].map((link) => (
                     <LinkView link={link} key={link.id} />
@@ -69,43 +75,32 @@ export function BoardView() {
                     <TaskCard
                         task={task}
                         key={task.id}
-                        active={createLinkSessionState.isActiveTask(task.id)}
-                        onMouseDown={(ev) => handleTaskCardMouseDown(ev, task)}
-                        onMouseEnter={() => createLinkSession.setDestinationTaskId(task.id)}
-                        onMouseLeave={() => createLinkSession.setDestinationTaskId(null)}
+                        board={boardController()}
+                        active={createLinkSessions.some((session) => session.state.get().isActiveTask(task.id))}
+                        onMouseDown={(ev) =>
+                            boardController().handleCreateLinkStart(
+                                task.id,
+                                Point.create({ x: ev.clientX, y: ev.clientY }),
+                            )
+                        }
+                        onMouseEnter={(ev) =>
+                            boardController().handleTaskPointerEnter(
+                                task.id,
+                                Point.create({ x: ev.clientX, y: ev.clientY }),
+                            )
+                        }
+                        onMouseLeave={(ev) =>
+                            boardController().handleTaskPointerLeave(
+                                task.id,
+                                Point.create({ x: ev.clientX, y: ev.clientY }),
+                            )
+                        }
                     />
                 ))}
-                {taskDraft.left !== -1 && taskDraft.top !== -1 && (
-                    <CreateNewTaskFormCard
-                        taskDraft={taskDraft}
-                        onChange={(taskDraft) => setTaskDraft(taskDraft)}
-                        onSubmit={(taskDraft) => {
-                            try {
-                                if (taskDraft.title === '') return;
-
-                                createAndSaveNewTask(taskDraft);
-                            } finally {
-                                setTaskDraft({
-                                    title: '',
-                                    description: '',
-                                    left: -1,
-                                    top: -1,
-                                });
-                            }
-                        }}
-                    />
-                )}
-                {createLinkSessionState.isEditing && <CreateLinkSessionView createLinkSession={createLinkSession} />}
-            </div>
-
-            <div
-                css={{
-                    position: 'absolute',
-                    top: 0,
-                    userSelect: 'text',
-                }}
-            >
-                {/* Overlay UI layer */}
+                {createTaskSession !== null && <CreateTaskForm createTaskSession={createTaskSession} />}
+                {createLinkSessions.map((session) => (
+                    <CreateLinkView key={session.sourceTaskId} createLinkSession={session} />
+                ))}
             </div>
         </div>
     );

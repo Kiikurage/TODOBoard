@@ -1,7 +1,7 @@
 import { Task } from '../../model/Task';
 import { useDataChannel } from './useDataChannel';
-import { readTasks } from '../../usecase/readTasks';
+import { ReadTasksUseCase } from '../../usecase/ReadTasksUseCase';
 
-export function useTasks(): ReadonlyMap<string, Task> {
+export function useTasks(readTasks: ReadTasksUseCase): ReadonlyMap<string, Task> {
     return useDataChannel(readTasks());
 }

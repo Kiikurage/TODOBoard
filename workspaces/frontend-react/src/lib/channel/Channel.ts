@@ -1,4 +1,6 @@
-export class Channel<T = void> {
+import { Disposable, SymbolDispose } from '../Disposable';
+
+export class Channel<T = void> implements Disposable {
     private readonly callbacks = new Set<(value: T) => void>();
 
     addListener(callback: (value: T) => void): () => void {
@@ -13,5 +15,9 @@ export class Channel<T = void> {
 
     fire(value: T) {
         [...this.callbacks].forEach((callback) => callback(value));
+    }
+
+    [SymbolDispose](): void {
+        this.callbacks.clear();
     }
 }

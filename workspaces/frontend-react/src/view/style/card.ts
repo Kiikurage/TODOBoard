@@ -1,5 +1,5 @@
 import { CSSObject } from '@emotion/serialize/dist/declarations/types';
-import { COLOR_ACTIVE } from './Colors'; // https://codepen.io/sdthornton/pen/wBZdXq
+import { COLOR_ACTIVE } from './colors';
 
 // https://codepen.io/sdthornton/pen/wBZdXq
 

@@ -1,9 +1,10 @@
 import { useTasks } from './hook/useTasks';
 import { Link } from '../model/Link';
 import { throwError } from '../lib/throwError';
+import { readTasks } from '../deps';
 
 export function LinkView({ link }: { link: Link }) {
-    const tasks = useTasks();
+    const tasks = useTasks(readTasks());
 
     const sourceTask = tasks.get(link.sourceTaskId) ?? throwError('Source task is not found');
     const destinationTask = tasks.get(link.destinationTaskId) ?? throwError('Destination task is not found');

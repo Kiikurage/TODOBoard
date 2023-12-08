@@ -1,23 +1,18 @@
 import { STYLE_CARD__ACTIVE_BORDERED } from './style/card';
-import { TaskDraft } from '../usecase/createAndSaveNewTask';
 import { STYLE_INPUT_FOCUSED } from './style/input';
+import { CreateTaskSession } from '../controller/CreateTaskSession';
+import { useDataChannel } from './hook/useDataChannel';
 
-export function CreateNewTaskFormCard({
-    taskDraft,
-    onChange,
-    onSubmit,
-}: {
-    taskDraft: TaskDraft;
-    onChange?: (taskDraft: TaskDraft) => void;
-    onSubmit?: (taskDraft: TaskDraft) => void;
-}) {
+export function CreateTaskForm({ createTaskSession }: { createTaskSession: CreateTaskSession }) {
+    const { top, left, title } = useDataChannel(createTaskSession.state);
+
     return (
         <div
             css={{
                 ...STYLE_CARD__ACTIVE_BORDERED,
                 position: 'absolute',
-                top: taskDraft.top,
-                left: taskDraft.left,
+                top,
+                left,
                 display: 'flex',
                 flexDirection: 'row',
                 alignItems: 'flex-start',
@@ -68,11 +63,11 @@ export function CreateNewTaskFormCard({
                                     ...STYLE_INPUT_FOCUSED,
                                 }}
                                 type="text"
-                                value={taskDraft.title}
-                                onBlur={() => onSubmit?.(taskDraft)}
+                                value={title}
+                                onBlur={() => createTaskSession.submit()}
                                 autoFocus
                                 placeholder="タスクのタイトル"
-                                onChange={(ev) => onChange?.({ ...taskDraft, title: ev.target.value })}
+                                onChange={(ev) => createTaskSession.setTitle(ev.target.value)}
                             />
                         </div>
                     </div>

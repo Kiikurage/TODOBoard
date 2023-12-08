@@ -1,14 +1,11 @@
-import { COLOR_ACTIVE } from './style/Colors';
-import { useDataChannel } from './hook/useDataChannel';
-import { CreateLinkSession } from './model/CreateLinkSession';
 import { getIntersectionPointForLineSegmentAndRect } from '../lib/geometry/Line';
 import { Point } from '../lib/geometry/Point';
 import { LineSegment } from '../lib/geometry/LineSegment';
+import { CreateLinkSession } from '../controller/CreateLinkSession';
+import { COLOR_ACTIVE } from './style/colors';
 
-export function CreateLinkSessionView({ createLinkSession }: { createLinkSession: CreateLinkSession }) {
-    const { isLinkDraftReady, destinationTask, sourceTask, currentX, currentY } = useDataChannel(
-        createLinkSession.state,
-    );
+export function CreateLinkView({ createLinkSession }: { createLinkSession: CreateLinkSession }) {
+    const { readyToSubmit, destinationTask, sourceTask, currentX, currentY } = createLinkSession.state.get();
     if (sourceTask === null) return null;
 
     const linkDraftP1 = sourceTask.rect.center;
@@ -31,8 +28,8 @@ export function CreateLinkSessionView({ createLinkSession }: { createLinkSession
             width={window.innerWidth}
             height={window.innerHeight}
             strokeWidth={2}
-            strokeDasharray={isLinkDraftReady ? 'none' : '4 4'}
-            stroke={isLinkDraftReady ? COLOR_ACTIVE : '#aaa'}
+            strokeDasharray={readyToSubmit ? 'none' : '4 4'}
+            stroke={readyToSubmit ? COLOR_ACTIVE : '#aaa'}
             css={{
                 position: 'fixed',
                 inset: 0,

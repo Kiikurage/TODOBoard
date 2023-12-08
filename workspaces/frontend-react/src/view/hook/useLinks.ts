@@ -1,7 +1,7 @@
 import { Link } from '../../model/Link';
-import { readLinks } from '../../usecase/readLinks';
 import { useDataChannel } from './useDataChannel';
+import { ReadLinksUseCase } from '../../usecase/ReadLinksUseCase';
 
-export function useLinks(): ReadonlyMap<string, Link> {
+export function useLinks(readLinks: ReadLinksUseCase): ReadonlyMap<string, Link> {
     return useDataChannel(readLinks());
 }

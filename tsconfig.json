@@ -4,9 +4,10 @@
     "strict": true,
     "sourceMap": true,
     "moduleResolution": "node",
-    "forceConsistentCasingInFileNames": true
+    "forceConsistentCasingInFileNames": true,
+    "types": []
   },
   "exclude": [
-    "**/*.test.*"
+    "**/*.test.*",
   ]
 }
