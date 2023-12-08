@@ -1,4 +1,5 @@
 import { Point } from './Point';
+import { LineSegment } from './LineSegment';
 
 export class Rect {
     constructor(
@@ -11,6 +12,7 @@ export class Rect {
     get right() {
         return this.left + this.width;
     }
+
     get bottom() {
         return this.top + this.height;
     }
@@ -33,6 +35,15 @@ export class Rect {
 
     get center() {
         return Point.create({ y: this.top + this.height / 2, x: this.left + this.width / 2 });
+    }
+
+    get edges(): [l12: LineSegment, l14: LineSegment, l23: LineSegment, l43: LineSegment] {
+        return [
+            LineSegment.fromPoints(this.p1, this.p2),
+            LineSegment.fromPoints(this.p1, this.p4),
+            LineSegment.fromPoints(this.p2, this.p3),
+            LineSegment.fromPoints(this.p4, this.p3),
+        ];
     }
 
     copy(props: Partial<typeof ownProps>): Rect {

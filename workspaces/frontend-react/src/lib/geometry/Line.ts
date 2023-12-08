@@ -1,6 +1,7 @@
 import { Point } from './Point';
 import { Rect } from './Rect';
 import { LineSegment } from './LineSegment';
+import { isNotNullish } from '../isNotNullish';
 
 export class Line {
     constructor(
@@ -40,36 +41,33 @@ export function getIntersectionPointForLineAndLine(line1: Line, line2: Line): Po
     });
 }
 
-export function getIntersectionPointForLineSegmentAndRect(line: LineSegment, rect: Rect): Point | null {
-    const { p1: lineP1, p2: lineP2 } = line;
+export function getIntersectionPointForLineSegmentAndRect(lineSegment1: LineSegment, rect: Rect): Point[] {
+    return rect.edges
+        .map((lineSegment2) => getIntersectionPointForLineSegmentAndLineSegment(lineSegment1, lineSegment2))
+        .filter(isNotNullish);
+}
 
-    if (lineP1.x === lineP2.x && lineP1.y === lineP2.y) return null;
+export function getIntersectionPointForLineSegmentAndLineSegment(
+    lineSegment1: LineSegment,
+    lineSegment2: LineSegment,
+): Point | null {
+    if (lineSegment1.length === 0 || lineSegment2.length === 0) return null;
 
-    const line1 = Line.fromPoints(lineP1, lineP2);
+    const line1 = Line.fromPoints(lineSegment1.p1, lineSegment1.p2);
+    const line2 = Line.fromPoints(lineSegment2.p1, lineSegment2.p2);
 
-    for (const [rectP1, rectP2] of [
-        [rect.p1, rect.p2],
-        [rect.p1, rect.p4],
-        [rect.p2, rect.p3],
-        [rect.p4, rect.p3],
-    ]) {
-        const line2 = Line.fromPoints(rectP1, rectP2);
+    const point = getIntersectionPointForLineAndLine(line1, line2);
+    if (point === null) return null;
 
-        const point = getIntersectionPointForLineAndLine(line1, line2);
-        if (point === null) continue;
+    if (point.x < Math.min(lineSegment1.p1.x, lineSegment1.p2.x)) return null;
+    if (point.x > Math.max(lineSegment1.p1.x, lineSegment1.p2.x)) return null;
+    if (point.y < Math.min(lineSegment1.p1.y, lineSegment1.p2.y)) return null;
+    if (point.y > Math.max(lineSegment1.p1.y, lineSegment1.p2.y)) return null;
 
-        if (point.x < Math.min(rectP1.x, rectP2.x)) continue;
-        if (point.x > Math.max(rectP1.x, rectP2.x)) continue;
-        if (point.y < Math.min(rectP1.y, rectP2.y)) continue;
-        if (point.y > Math.max(rectP1.y, rectP2.y)) continue;
+    if (point.x < Math.min(lineSegment2.p1.x, lineSegment2.p2.x)) return null;
+    if (point.x > Math.max(lineSegment2.p1.x, lineSegment2.p2.x)) return null;
+    if (point.y < Math.min(lineSegment2.p1.y, lineSegment2.p2.y)) return null;
+    if (point.y > Math.max(lineSegment2.p1.y, lineSegment2.p2.y)) return null;
 
-        if (point.x < Math.min(lineP1.x, lineP2.x)) continue;
-        if (point.x > Math.max(lineP1.x, lineP2.x)) continue;
-        if (point.y < Math.min(lineP1.y, lineP2.y)) continue;
-        if (point.y > Math.max(lineP1.y, lineP2.y)) continue;
-
-        return point;
-    }
-
-    return null;
+    return point;
 }

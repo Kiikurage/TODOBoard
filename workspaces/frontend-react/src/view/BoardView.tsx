@@ -47,6 +47,7 @@ export function BoardView() {
                 userSelect: 'none',
                 background: '#f8faff',
             }}
+            onMouseDown={() => window.getSelection()?.removeAllRanges?.()}
         >
             <div
                 css={{

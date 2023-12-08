@@ -14,15 +14,16 @@ export function CreateLinkSessionView({ createLinkSession }: { createLinkSession
     const linkDraftP1 = sourceTask.rect.center;
     const linkDraftP2 = destinationTask ? destinationTask.rect.center : Point.create({ x: currentX, y: currentY });
 
-    const point1 = getIntersectionPointForLineSegmentAndRect(
-        LineSegment.create({ p1: linkDraftP1, p2: linkDraftP2 }),
-        sourceTask.rect,
-    );
+    const point1 =
+        getIntersectionPointForLineSegmentAndRect(
+            LineSegment.create({ p1: linkDraftP1, p2: linkDraftP2 }),
+            sourceTask.rect,
+        )[0] ?? null;
     const point2 = destinationTask
         ? getIntersectionPointForLineSegmentAndRect(
               LineSegment.create({ p1: linkDraftP1, p2: linkDraftP2 }),
               destinationTask.rect,
-          )
+          )[0] ?? null
         : null;
 
     return (

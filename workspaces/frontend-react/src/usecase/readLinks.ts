@@ -1,6 +1,6 @@
 import { linkStorage, taskStorage } from '../deps';
 import { Link } from '../model/Link';
-import { ch } from '../lib/Channel/ch';
+import { ch } from '../lib/channel/ch';
 import { singleton } from '../lib/singleton';
 
 export const readLinks = singleton(() => {

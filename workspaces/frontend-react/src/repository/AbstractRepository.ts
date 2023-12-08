@@ -1,5 +1,5 @@
-import { DataChannel } from '../lib/Channel/DataChannel';
-import { ch } from '../lib/Channel/ch';
+import { DataChannel } from '../lib/channel/DataChannel';
+import { ch } from '../lib/channel/ch';
 
 export abstract class AbstractRepository<T, SerializedT> {
     public readonly onChange: DataChannel<ReadonlyMap<string, T>>;

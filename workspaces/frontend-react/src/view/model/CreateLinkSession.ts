@@ -1,5 +1,5 @@
 import { Task } from '../../model/Task';
-import { ch } from '../../lib/Channel/ch';
+import { ch } from '../../lib/channel/ch';
 import { taskStorage } from '../../deps';
 import { createAndSaveNewLink } from '../../usecase/createAndSaveNewLink';
 
