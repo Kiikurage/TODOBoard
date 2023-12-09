@@ -1,8 +1,8 @@
 import { ch } from '../lib/channel/ch';
-import { Disposable, dispose, SymbolDispose } from '../lib/Disposable';
-import { CreateAndSaveNewTaskUseCase } from '../usecase/CreateAndSaveNewTaskUseCase';
+import { dispose, SymbolDispose } from '../lib/Disposable';
 import { Point } from '../lib/geometry/Point';
 import { AbstractSession } from './AbstractSession';
+import { TaskRepository } from '../repository/TaskRepository';
 
 export class CreateTaskSessionState {
     constructor(
@@ -41,7 +41,7 @@ export class CreateTaskSession extends AbstractSession {
 
     constructor(
         position: Point,
-        private readonly createAndSaveNewTask: CreateAndSaveNewTaskUseCase,
+        private readonly taskRepository: TaskRepository,
     ) {
         super();
         this.state.set((state) => state.copy({ left: position.x, top: position.y }));
@@ -61,7 +61,7 @@ export class CreateTaskSession extends AbstractSession {
             const { readyToSubmit, title, description, left, top } = this.state.get();
             if (!readyToSubmit) return;
 
-            this.createAndSaveNewTask({
+            this.taskRepository.createAndSave({
                 title,
                 description,
                 left,

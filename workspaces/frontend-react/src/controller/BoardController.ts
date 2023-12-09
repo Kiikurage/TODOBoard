@@ -2,7 +2,7 @@ import { Channel } from '../lib/channel/Channel';
 import { Point } from '../lib/geometry/Point';
 import { DragSession } from './DragSession';
 import { CreateLinkSession } from './CreateLinkSession';
-import { createAndSaveNewTask, linkRepository, taskRepository, updateTask } from '../deps';
+import { linkRepository, taskRepository, updateTask } from '../deps';
 import { MoveTaskSession } from './MoveTaskSession';
 import { CreateTaskSession } from './CreateTaskSession';
 
@@ -41,7 +41,7 @@ export class BoardController implements BoardControllerEvents {
     }
 
     handleDoubleClick(point: Point) {
-        this.onCreateTaskSessionStart.fire(new CreateTaskSession(point, createAndSaveNewTask()));
+        this.onCreateTaskSessionStart.fire(new CreateTaskSession(point, taskRepository()));
     }
 
     handlePointerDown(point: Point) {

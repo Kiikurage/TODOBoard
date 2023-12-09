@@ -7,12 +7,27 @@ export class TaskRepository extends AbstractRepository<Task, SerializedTask> {
         super('TaskStorage');
     }
 
-    getNextId(): string {
-        return '' + (this.models.size + 1);
+    createAndSave(draft: TaskDraft): Task {
+        const id = this.getNextId();
+        const task = Task.create({
+            id,
+            title: draft.title,
+            description: draft.description,
+            completed: false,
+            rect: Rect.create({
+                left: draft.left,
+                top: draft.top,
+                width: 100,
+                height: 100,
+            }),
+        });
+        this.save(task);
+
+        return task;
     }
 
-    readAll(): ReadonlyMap<string, Task> {
-        return this.models;
+    private getNextId(): string {
+        return '' + (this.models.size + 1);
     }
 
     protected serialize(model: Task): SerializedTask {
@@ -56,4 +71,11 @@ interface SerializedTask {
         width: number;
         height: number;
     };
+}
+
+export interface TaskDraft {
+    title: string;
+    description: string;
+    left: number;
+    top: number;
 }
