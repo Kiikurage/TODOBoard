@@ -5,28 +5,13 @@ import { CreateTaskForm } from './CreateTaskForm';
 import { Point } from '../lib/geometry/Point';
 import { boardController } from '../deps';
 import { CreateLinkView } from './CreateLinkView';
-import { useReactive, useReactiveAll } from './hook/useReactive';
+import { useReactive } from './hook/useReactive';
 
 export function BoardView() {
     const tasks = useReactive(boardController().taskRepository, (repository) => repository.readOpenTasksAll());
     const links = useReactive(boardController().linkRepository, (repository) => repository.readAll());
 
     const { createLinkSessions, createTaskSession } = useReactive(boardController(), (controller) => controller.state);
-
-    const activeTaskIds = useReactiveAll(createLinkSessions, (sessions) => {
-        const activeTaskIds = new Set<string>();
-
-        for (const session of sessions) {
-            if (!session.state.readyToSubmit) continue;
-
-            activeTaskIds.add(session.sourceTaskId);
-            if (session.state.destinationTaskId !== null) {
-                activeTaskIds.add(session.state.destinationTaskId);
-            }
-        }
-
-        return activeTaskIds;
-    });
 
     useEffect(() => {
         const handlePointerMove = (ev: MouseEvent) => {
@@ -57,6 +42,8 @@ export function BoardView() {
                 window.getSelection()?.removeAllRanges?.();
             }}
         >
+            <span css={{ pointerEvents: 'none', fontFamily: 'monospace' }}>Updated at: {new Date().toISOString()}</span>
+
             <div
                 css={{
                     position: 'absolute',
@@ -74,7 +61,6 @@ export function BoardView() {
                         task={task}
                         key={task.id}
                         board={boardController()}
-                        active={activeTaskIds.has(task.id)}
                         onMouseDown={(ev) =>
                             boardController().handleCreateLinkStart(
                                 task.id,

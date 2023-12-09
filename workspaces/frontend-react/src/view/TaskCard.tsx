@@ -1,6 +1,6 @@
 import { MouseEventHandler, useRef, useState } from 'react';
 import { Task } from '../model/Task';
-import { STYLE_CARD, STYLE_CARD__ACTIVE_BORDERED } from './style/card';
+import { STYLE_CARD } from './style/card';
 import { useResizeObserver } from './hook/useResizeObserver';
 import { STYLE_INPUT, STYLE_INPUT_FOCUSED } from './style/input';
 import { BoardController } from '../controller/BoardController';
@@ -9,7 +9,6 @@ import { Point } from '../lib/geometry/Point';
 export function TaskCard({
     board,
     task,
-    active = false,
     onMouseEnter,
     onMouseLeave,
     onMouseDown,
@@ -46,9 +45,6 @@ export function TaskCard({
                 left: task.rect.left,
                 width: 400,
                 transition: 'transform 160ms ease-in',
-                ...(active && {
-                    ...STYLE_CARD__ACTIVE_BORDERED,
-                }),
             }}
             onMouseEnter={onMouseEnter}
             onMouseLeave={onMouseLeave}
