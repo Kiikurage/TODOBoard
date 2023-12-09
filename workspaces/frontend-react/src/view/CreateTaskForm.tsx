@@ -2,8 +2,15 @@ import { STYLE_CARD__ACTIVE_BORDERED } from './style/card';
 import { STYLE_INPUT_FOCUSED } from './style/input';
 import { CreateTaskSession } from '../controller/CreateTaskSession';
 import { useReactive } from './hook/useReactive';
+import { BoardViewState } from './controller/BoardViewController';
 
-export function CreateTaskForm({ createTaskSession }: { createTaskSession: CreateTaskSession }) {
+export function CreateTaskForm({
+    createTaskSession,
+    boardViewState,
+}: {
+    createTaskSession: CreateTaskSession;
+    boardViewState: BoardViewState;
+}) {
     const { top, left, title } = useReactive(createTaskSession, (session) => session.state);
 
     return (
@@ -11,8 +18,8 @@ export function CreateTaskForm({ createTaskSession }: { createTaskSession: Creat
             css={{
                 ...STYLE_CARD__ACTIVE_BORDERED,
                 position: 'absolute',
-                top,
-                left,
+                top: top - boardViewState.viewportRect.top,
+                left: left - boardViewState.viewportRect.left,
                 display: 'flex',
                 flexDirection: 'row',
                 alignItems: 'flex-start',

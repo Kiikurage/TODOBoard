@@ -1,8 +1,8 @@
-import { Channel } from '../lib/Channel';
-import { Point } from '../lib/geometry/Point';
-import { AbstractSession } from './AbstractSession';
-import { Disposable, dispose } from '../lib/Disposable';
-import { BoardController } from './BoardController';
+import { Channel } from '../../lib/Channel';
+import { Point } from '../../lib/geometry/Point';
+import { AbstractSession } from '../../controller/AbstractSession';
+import { Disposable, dispose } from '../../lib/Disposable';
+import { BoardViewController } from './BoardViewController';
 
 export class DragSessionState {
     constructor(
@@ -54,18 +54,18 @@ export class DragSession extends AbstractSession<DragSessionState> {
     public readonly onDragEnd: Channel<DragSessionState> = new Channel();
 
     constructor(
-        private readonly boardController: BoardController,
-        startPoint: Point,
+        private readonly boardViewController: BoardViewController,
+        pointerDownEvent: PointerEvent,
     ) {
-        super(DragSessionState.start(startPoint));
+        super(DragSessionState.start(Point.create({ x: pointerDownEvent.clientX, y: pointerDownEvent.clientY })));
 
-        boardController.onPointerMove.addListener(this.handlePointerMove);
-        boardController.onPointerUp.addListener(this.handlePointerUp);
+        boardViewController.onPointerMove.addListener(this.handlePointerMove);
+        boardViewController.onPointerUp.addListener(this.handlePointerUp);
     }
 
     [Disposable.dispose]() {
-        this.boardController.onPointerMove.removeListener(this.handlePointerMove);
-        this.boardController.onPointerUp.removeListener(this.handlePointerUp);
+        this.boardViewController.onPointerMove.removeListener(this.handlePointerMove);
+        this.boardViewController.onPointerUp.removeListener(this.handlePointerUp);
 
         dispose(this.onDragMove);
         dispose(this.onDragEnd);
@@ -73,8 +73,8 @@ export class DragSession extends AbstractSession<DragSessionState> {
         super[Disposable.dispose]();
     }
 
-    private readonly handlePointerMove = (point: Point) => {
-        this.state = this.state.move(point);
+    private readonly handlePointerMove = (ev: PointerEvent) => {
+        this.state = this.state.move(Point.create({ x: ev.clientX, y: ev.clientY }));
 
         this.onDragMove.fire(this.state);
     };

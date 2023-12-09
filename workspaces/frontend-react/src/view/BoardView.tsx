@@ -1,4 +1,4 @@
-import { useEffect } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { TaskCard } from './TaskCard';
 import { LinkView } from './LinkView';
 import { CreateTaskForm } from './CreateTaskForm';
@@ -6,93 +6,89 @@ import { Point } from '../lib/geometry/Point';
 import { boardController } from '../deps';
 import { CreateLinkView } from './CreateLinkView';
 import { useReactive } from './hook/useReactive';
+import { useResizeObserver } from './hook/useResizeObserver';
+import { BoardViewController } from './controller/BoardViewController';
 
 export function BoardView() {
-    const tasks = useReactive(boardController().taskRepository, (repository) => repository.readOpenTasksAll());
-    const links = useReactive(boardController().linkRepository, (repository) => repository.readAll());
+    const viewController = useState(() => new BoardViewController(boardController()))[0];
+    const controller = boardController();
 
-    const { createLinkSessions, createTaskSession } = useReactive(boardController(), (controller) => controller.state);
+    const tasks = useReactive(controller.taskRepository, (repository) => repository.readOpenTasksAll());
+    const links = useReactive(controller.linkRepository, (repository) => repository.readAll());
+
+    const { createLinkSession, createTaskSession } = useReactive(controller, (controller) => controller.state);
+    const boardViewState = useReactive(viewController, (controller) => controller.state);
 
     useEffect(() => {
-        const handlePointerMove = (ev: MouseEvent) => {
-            boardController().handlePointerMove(Point.create({ x: ev.clientX, y: ev.clientY }));
-        };
-        const handlePointerUp = (ev: MouseEvent) => {
-            boardController().handlePointerUp(Point.create({ x: ev.clientX, y: ev.clientY }));
-        };
-
-        window.addEventListener('mousemove', handlePointerMove);
-        window.addEventListener('mouseup', handlePointerUp);
+        window.addEventListener('pointermove', viewController.handlePointerMove);
+        window.addEventListener('pointerup', viewController.handlePointerUp);
         return () => {
-            window.removeEventListener('mousemove', handlePointerMove);
-            window.removeEventListener('mouseup', handlePointerUp);
+            window.removeEventListener('pointermove', viewController.handlePointerMove);
+            window.removeEventListener('pointerup', viewController.handlePointerUp);
         };
-    }, []);
+    }, [viewController.handlePointerMove, viewController.handlePointerUp]);
+
+    const ref = useRef<HTMLDivElement | null>(null);
+    useResizeObserver(ref, (entry) => {
+        viewController.setViewportSize(entry.contentRect.width, entry.contentRect.height);
+    });
 
     return (
         <div
+            ref={ref}
             css={{
                 position: 'fixed',
                 inset: 0,
                 userSelect: 'none',
                 background: '#f8faff',
             }}
-            onMouseDown={(ev) => {
-                boardController().handlePointerDown(Point.create({ x: ev.clientX, y: ev.clientY }));
+            onPointerDown={(ev) => {
+                viewController.handlePointerDown(ev.nativeEvent);
                 window.getSelection()?.removeAllRanges?.();
             }}
         >
-            <span css={{ pointerEvents: 'none', fontFamily: 'monospace' }}>Updated at: {new Date().toISOString()}</span>
+            <div css={{ pointerEvents: 'none', fontFamily: 'monospace' }}>
+                <div>Updated at: {new Date().toISOString()}</div>
+                <div>viewport: {'' + boardViewState.viewportRect}</div>
+            </div>
 
             <div
                 css={{
                     position: 'absolute',
                     inset: 0,
                 }}
-                onDoubleClick={(ev) => {
-                    boardController().handleDoubleClick(Point.create({ x: ev.clientX, y: ev.clientY }));
-                }}
+                onDoubleClick={(ev) => viewController.handleDoubleClick(ev.nativeEvent)}
             >
                 {[...links.values()].map((link) => (
-                    <LinkView link={link} key={link.id} />
+                    <LinkView link={link} key={link.id} boardViewState={boardViewState} />
                 ))}
                 {[...tasks.values()].map((task) => (
                     <TaskCard
                         task={task}
                         key={task.id}
-                        board={boardController()}
-                        onMouseDown={(ev) =>
-                            boardController().handleCreateLinkStart(
-                                task.id,
-                                Point.create({ x: ev.clientX, y: ev.clientY }),
-                            )
+                        boardViewState={boardViewState}
+                        board={controller}
+                        onPointerDown={(ev) =>
+                            controller.startCreateLinkSession(task.id, Point.create({ x: ev.clientX, y: ev.clientY }))
                         }
-                        onMouseEnter={(ev) =>
-                            boardController().handleTaskPointerEnter(
-                                task.id,
-                                Point.create({ x: ev.clientX, y: ev.clientY }),
-                            )
-                        }
-                        onMouseLeave={(ev) =>
-                            boardController().handleTaskPointerLeave(
-                                task.id,
-                                Point.create({ x: ev.clientX, y: ev.clientY }),
-                            )
-                        }
+                        onPointerEnter={() => controller.handleTaskPointerEnter(task.id)}
+                        onPointerLeave={() => controller.handleTaskPointerLeave(task.id)}
                         onResize={(width, height) =>
-                            boardController().handleTaskUpdate(task.id, { rect: task.rect.copy({ width, height }) })
+                            controller.taskRepository.update(task.id, { rect: task.rect.copy({ width, height }) })
                         }
-                        onTitleChange={(title) => boardController().handleTaskUpdate(task.id, { title })}
+                        onTitleChange={(title) => controller.taskRepository.update(task.id, { title })}
                         onDescriptionChange={(description) =>
-                            boardController().handleTaskUpdate(task.id, { description })
+                            controller.taskRepository.update(task.id, { description })
                         }
-                        onCompletedChange={(completed) => boardController().handleTaskUpdate(task.id, { completed })}
+                        onCompletedChange={(completed) => controller.taskRepository.update(task.id, { completed })}
                     />
                 ))}
-                {createTaskSession !== null && <CreateTaskForm createTaskSession={createTaskSession} />}
-                {createLinkSessions.map((session) => (
-                    <CreateLinkView key={session.sourceTaskId} createLinkSession={session} />
-                ))}
+                {createTaskSession !== null && (
+                    <CreateTaskForm createTaskSession={createTaskSession} boardViewState={boardViewState} />
+                )}
+                {createLinkSession !== null && (
+                    <CreateLinkView createLinkSession={createLinkSession} boardViewState={boardViewState} />
+                )}
             </div>
         </div>
     );

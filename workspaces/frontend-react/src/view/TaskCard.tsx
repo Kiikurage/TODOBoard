@@ -1,28 +1,31 @@
-import { MouseEventHandler, useRef, useState } from 'react';
+import { PointerEventHandler, useRef, useState } from 'react';
 import { Task } from '../model/Task';
 import { STYLE_CARD } from './style/card';
 import { useResizeObserver } from './hook/useResizeObserver';
 import { STYLE_INPUT, STYLE_INPUT_FOCUSED } from './style/input';
 import { BoardController } from '../controller/BoardController';
 import { Point } from '../lib/geometry/Point';
+import { BoardViewState } from './controller/BoardViewController';
 
 export function TaskCard({
+    boardViewState,
     board,
     task,
-    onMouseEnter,
-    onMouseLeave,
-    onMouseDown,
+    onPointerEnter,
+    onPointerLeave,
+    onPointerDown,
     onResize,
     onTitleChange,
     onDescriptionChange,
     onCompletedChange,
 }: {
+    boardViewState: BoardViewState;
     board: BoardController;
     task: Task;
     active?: boolean;
-    onMouseDown?: MouseEventHandler;
-    onMouseEnter?: MouseEventHandler;
-    onMouseLeave?: MouseEventHandler;
+    onPointerDown?: PointerEventHandler;
+    onPointerEnter?: PointerEventHandler;
+    onPointerLeave?: PointerEventHandler;
     onResize?: (width: number, height: number) => void;
     onTitleChange?: (title: string) => void;
     onDescriptionChange?: (description: string) => void;
@@ -41,17 +44,13 @@ export function TaskCard({
             css={{
                 ...STYLE_CARD,
                 position: 'absolute',
-                top: task.rect.top,
-                left: task.rect.left,
+                top: task.rect.top - boardViewState.viewportRect.top,
+                left: task.rect.left - boardViewState.viewportRect.left,
                 width: 400,
                 transition: 'transform 160ms ease-in',
             }}
-            onMouseEnter={onMouseEnter}
-            onMouseLeave={onMouseLeave}
-            onClick={(ev) => {
-                ev.preventDefault();
-                ev.stopPropagation();
-            }}
+            onPointerEnter={onPointerEnter}
+            onPointerLeave={onPointerLeave}
         >
             <div
                 css={{
@@ -132,10 +131,10 @@ export function TaskCard({
                                 background: 'rgba(194,208,218,0.74)',
                             },
                         }}
-                        onMouseDown={(ev) => {
+                        onPointerDown={(ev) => {
                             ev.preventDefault();
                             ev.stopPropagation();
-                            onMouseDown?.(ev);
+                            onPointerDown?.(ev);
                         }}
                     >
                         <span className="material-symbols-outlined">link</span>
@@ -182,7 +181,7 @@ function TitleForm({
             autoFocus
             onBlur={handleBlur}
             onChange={(ev) => setDraftValue(ev.target.value)}
-            onMouseDown={(ev) => ev.stopPropagation()}
+            onPointerDown={(ev) => ev.stopPropagation()}
             onDoubleClick={
                 isEditing
                     ? undefined
@@ -217,7 +216,7 @@ function DescriptionForm({ value, onChange }: { value: string; onChange?: (value
                     color: '#666',
                     userSelect: 'text',
                 }}
-                onMouseDown={(ev) => ev.stopPropagation()}
+                onPointerDown={(ev) => ev.stopPropagation()}
                 onDoubleClick={(ev) => {
                     ev.stopPropagation();
                     setEditing(true);
@@ -252,8 +251,8 @@ function DragHandle({ task, board }: { task: Task; board: BoardController }) {
                     background: 'rgba(194,208,218,0.74)',
                 },
             }}
-            onMouseDown={(ev) => {
-                board.handleTaskDragStart(task.id, Point.create({ x: ev.clientX, y: ev.clientY }));
+            onPointerDown={(ev) => {
+                board.startMoveTaskSession(task.id, Point.create({ x: ev.clientX, y: ev.clientY }));
                 ev.stopPropagation();
             }}
         >

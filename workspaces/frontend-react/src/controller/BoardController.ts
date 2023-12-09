@@ -4,84 +4,73 @@ import { DragSession } from './DragSession';
 import { CreateLinkSession } from './CreateLinkSession';
 import { MoveTaskSession } from './MoveTaskSession';
 import { CreateTaskSession } from './CreateTaskSession';
-import { TaskRepository, UpdateTaskProps } from '../model/repository/TaskRepository';
+import { TaskRepository } from '../model/repository/TaskRepository';
 import { LinkRepository } from '../model/repository/LinkRepository';
-import { BoardEvents } from './BoardEvents';
 import { ReactiveStateMachine } from '../lib/ReactiveStateMachine';
 import { Disposable, dispose } from '../lib/Disposable';
 
-export class BoardControllerState {
+export class BoardState {
     constructor(
-        public readonly dragSessions: DragSession[],
-        public readonly moveTaskSessions: MoveTaskSession[],
-        public readonly createLinkSessions: CreateLinkSession[],
+        public readonly dragSession: DragSession | null,
+        public readonly moveTaskSession: MoveTaskSession | null,
+        public readonly createLinkSession: CreateLinkSession | null,
         public readonly createTaskSession: CreateTaskSession | null,
     ) {}
 
-    copy(props: Partial<typeof ownProps>): BoardControllerState {
-        return Object.assign(Object.create(BoardControllerState.prototype), this, props);
+    copy(props: Partial<typeof BoardState.ownProps>): BoardState {
+        return Object.assign(Object.create(BoardState.prototype), this, props);
     }
 
     static empty() {
-        return BoardControllerState.create({
-            dragSessions: [],
-            moveTaskSessions: [],
-            createLinkSessions: [],
+        return this.create({
+            dragSession: null,
+            moveTaskSession: null,
+            createLinkSession: null,
             createTaskSession: null,
         });
     }
 
-    static create(props: typeof ownProps): BoardControllerState {
-        return BoardControllerState.prototype.copy(props);
+    static create(props: typeof this.ownProps) {
+        return this.prototype.copy(props);
     }
+
+    private static ownProps = { ...this.prototype };
 }
 
-const ownProps = { ...BoardControllerState.prototype };
-
-export class BoardController extends ReactiveStateMachine<BoardControllerState> implements BoardEvents {
+export class BoardController extends ReactiveStateMachine<BoardState> {
     public readonly onPointerDown = new Channel<Point>();
     public readonly onPointerMove = new Channel<Point>();
     public readonly onPointerUp = new Channel<Point>();
-    public readonly onDragStart = new Channel<DragSession>();
-    public readonly onTaskPointerEnter = new Channel<{ taskId: string; point: Point }>();
-    public readonly onTaskPointerLeave = new Channel<{ taskId: string; point: Point }>();
+    public readonly onTaskPointerEnter = new Channel<string>();
+    public readonly onTaskPointerLeave = new Channel<string>();
 
     constructor(
         public readonly taskRepository: TaskRepository,
         public readonly linkRepository: LinkRepository,
     ) {
-        super(BoardControllerState.empty());
+        super(BoardState.empty());
     }
 
     [Disposable.dispose]() {
-        dispose(this.onPointerDown);
         dispose(this.onPointerMove);
         dispose(this.onPointerUp);
-        dispose(this.onDragStart);
         dispose(this.onTaskPointerEnter);
         dispose(this.onTaskPointerLeave);
 
         super[Disposable.dispose]();
     }
 
-    handleTaskUpdate(taskId: string, props: UpdateTaskProps) {
-        this.taskRepository.update(taskId, props);
-    }
-
-    handleTaskDragStart(taskId: string, point: Point) {
+    startMoveTaskSession(taskId: string, point: Point) {
         const dragSession = new DragSession(this, point);
         const moveTaskSession = new MoveTaskSession(taskId, dragSession, this.taskRepository);
 
-        dragSession.onEnd.addListener(() => this.handleDragSessionEnd(dragSession));
-        moveTaskSession.onEnd.addListener(() => this.handleMoveTaskSessionEnd(moveTaskSession));
+        dragSession.onEnd.addListener(this.handleDragSessionEnd);
+        moveTaskSession.onEnd.addListener(this.handleMoveTaskSessionEnd);
 
-        this.state = this.state.copy({
-            dragSessions: [...this.state.dragSessions, dragSession],
-            moveTaskSessions: [...this.state.moveTaskSessions, moveTaskSession],
-        });
+        this.state = this.state.copy({ dragSession, moveTaskSession });
     }
 
-    handleCreateLinkStart(sourceTaskId: string, point: Point) {
+    startCreateLinkSession(sourceTaskId: string, point: Point) {
         const dragSession = new DragSession(this, point);
         const createLinkSession = new CreateLinkSession(
             sourceTaskId,
@@ -91,28 +80,22 @@ export class BoardController extends ReactiveStateMachine<BoardControllerState> 
             this.linkRepository,
         );
 
-        dragSession.onEnd.addListener(() => this.handleDragSessionEnd(dragSession));
-        createLinkSession.onEnd.addListener(() => this.handleCreateLinkSessionEnd(createLinkSession));
+        dragSession.onEnd.addListener(this.handleDragSessionEnd);
+        createLinkSession.onEnd.addListener(this.handleCreateLinkSessionEnd);
 
-        this.state = this.state.copy({
-            dragSessions: [...this.state.dragSessions, dragSession],
-            createLinkSessions: [...this.state.createLinkSessions, createLinkSession],
-        });
+        this.state = this.state.copy({ dragSession, createLinkSession });
     }
 
-    handleDoubleClick(point: Point) {
+    startCreateTaskSession(point: Point) {
         const createTaskSession = new CreateTaskSession(point, this.taskRepository);
 
-        createTaskSession.onEnd.addListener(() => this.handleCreateTaskSessionEnd(createTaskSession));
+        createTaskSession.onEnd.addListener(this.handleCreateTaskSessionEnd);
 
-        this.state = this.state.copy({
-            createTaskSession,
-        });
+        this.state = this.state.copy({ createTaskSession });
     }
 
     handlePointerDown(point: Point) {
         this.onPointerDown.fire(point);
-        this.onDragStart.fire(new DragSession(this, point));
     }
 
     handlePointerMove(point: Point) {
@@ -123,35 +106,27 @@ export class BoardController extends ReactiveStateMachine<BoardControllerState> 
         this.onPointerUp.fire(point);
     }
 
-    handleTaskPointerEnter(taskId: string, point: Point) {
-        this.onTaskPointerEnter.fire({ taskId, point });
+    handleTaskPointerEnter(taskId: string) {
+        this.onTaskPointerEnter.fire(taskId);
     }
 
-    handleTaskPointerLeave(taskId: string, point: Point) {
-        this.onTaskPointerLeave.fire({ taskId, point });
+    handleTaskPointerLeave(taskId: string) {
+        this.onTaskPointerLeave.fire(taskId);
     }
 
-    private handleDragSessionEnd(session: DragSession) {
-        this.state = this.state.copy({
-            dragSessions: this.state.dragSessions.filter((s) => s !== session),
-        });
-    }
+    private handleDragSessionEnd = () => {
+        this.state = this.state.copy({ dragSession: null });
+    };
 
-    private handleMoveTaskSessionEnd(session: MoveTaskSession) {
-        this.state = this.state.copy({
-            moveTaskSessions: this.state.moveTaskSessions.filter((s) => s !== session),
-        });
-    }
+    private handleMoveTaskSessionEnd = () => {
+        this.state = this.state.copy({ moveTaskSession: null });
+    };
 
-    private handleCreateLinkSessionEnd(session: CreateLinkSession) {
-        this.state = this.state.copy({
-            createLinkSessions: this.state.createLinkSessions.filter((s) => s !== session),
-        });
-    }
+    private handleCreateLinkSessionEnd = () => {
+        this.state = this.state.copy({ createLinkSession: null });
+    };
 
-    private handleCreateTaskSessionEnd(session: CreateTaskSession) {
-        this.state = this.state.copy({
-            createTaskSession: this.state.createTaskSession === session ? null : this.state.createTaskSession,
-        });
-    }
+    private handleCreateTaskSessionEnd = () => {
+        this.state = this.state.copy({ createTaskSession: null });
+    };
 }

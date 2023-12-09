@@ -5,7 +5,7 @@ import { TaskRepository } from '../model/repository/TaskRepository';
 import { AbstractSession } from './AbstractSession';
 import { Disposable, dispose } from '../lib/Disposable';
 import { LinkRepository } from '../model/repository/LinkRepository';
-import { BoardEvents } from './BoardEvents';
+import { BoardController } from './BoardController';
 
 export class CreateLinkSessionState {
     constructor(
@@ -44,7 +44,7 @@ const ownProps = { ...CreateLinkSessionState.prototype };
 export class CreateLinkSession extends AbstractSession<CreateLinkSessionState> {
     constructor(
         public readonly sourceTaskId: string,
-        private readonly boardEvents: BoardEvents,
+        private readonly boardController: BoardController,
         private readonly dragSession: DragSession,
         private readonly taskRepository: TaskRepository,
         private readonly linkRepository: LinkRepository,
@@ -61,16 +61,16 @@ export class CreateLinkSession extends AbstractSession<CreateLinkSessionState> {
         );
 
         this.taskRepository.onChange.addListener(this.handleTaskRepositoryChange);
-        this.boardEvents.onTaskPointerEnter.addListener(this.handleTaskPointerEnter);
-        this.boardEvents.onTaskPointerLeave.addListener(this.handleTaskPointerLeave);
+        this.boardController.onTaskPointerEnter.addListener(this.handleTaskPointerEnter);
+        this.boardController.onTaskPointerLeave.addListener(this.handleTaskPointerLeave);
         this.dragSession.onDragMove.addListener(this.handleDragMove);
         this.dragSession.onDragEnd.addListener(this.handleDragEnd);
     }
 
     [Disposable.dispose]() {
         this.taskRepository.onChange.removeListener(this.handleTaskRepositoryChange);
-        this.boardEvents.onTaskPointerEnter.removeListener(this.handleTaskPointerEnter);
-        this.boardEvents.onTaskPointerLeave.removeListener(this.handleTaskPointerLeave);
+        this.boardController.onTaskPointerEnter.removeListener(this.handleTaskPointerEnter);
+        this.boardController.onTaskPointerLeave.removeListener(this.handleTaskPointerLeave);
         this.dragSession.onDragMove.removeListener(this.handleDragMove);
         this.dragSession.onDragEnd.removeListener(this.handleDragEnd);
 
@@ -87,7 +87,7 @@ export class CreateLinkSession extends AbstractSession<CreateLinkSessionState> {
         });
     };
 
-    private readonly handleTaskPointerEnter = ({ taskId }: { taskId: string }) => {
+    private readonly handleTaskPointerEnter = (taskId: string) => {
         this.state = this.state.copy({
             destinationTaskId: taskId,
             destinationTask: this.taskRepository.findById(taskId),

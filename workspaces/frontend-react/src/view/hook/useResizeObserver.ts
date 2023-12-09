@@ -27,14 +27,14 @@ class ResizeObserverWrapper {
 const getInstance = singleton(() => new ResizeObserverWrapper());
 
 export function useResizeObserver(ref: RefObject<Element>, callback: (entry: ResizeObserverEntry) => void) {
-    const target = ref.current;
-
     useLayoutEffect(() => {
+        const target = ref.current;
+
         if (target === null) return;
 
         const resizeObserver = getInstance();
 
         resizeObserver.observe(target, callback);
         return () => resizeObserver.unobserve(target);
-    }, [callback, target]);
+    }, [callback, ref]);
 }

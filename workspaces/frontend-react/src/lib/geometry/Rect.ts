@@ -17,19 +17,19 @@ export class Rect {
         return this.top + this.height;
     }
 
-    get p1() {
+    get topLeft() {
         return Point.create({ y: this.top, x: this.left });
     }
 
-    get p2() {
+    get topRight() {
         return Point.create({ y: this.top, x: this.right });
     }
 
-    get p3() {
+    get bottomRight() {
         return Point.create({ y: this.bottom, x: this.right });
     }
 
-    get p4() {
+    get bottomLeft() {
         return Point.create({ y: this.bottom, x: this.left });
     }
 
@@ -39,10 +39,10 @@ export class Rect {
 
     get edges(): [l12: LineSegment, l14: LineSegment, l23: LineSegment, l43: LineSegment] {
         return [
-            LineSegment.fromPoints(this.p1, this.p2),
-            LineSegment.fromPoints(this.p1, this.p4),
-            LineSegment.fromPoints(this.p2, this.p3),
-            LineSegment.fromPoints(this.p4, this.p3),
+            LineSegment.fromPoints(this.topLeft, this.topRight),
+            LineSegment.fromPoints(this.topLeft, this.bottomLeft),
+            LineSegment.fromPoints(this.topRight, this.bottomRight),
+            LineSegment.fromPoints(this.bottomLeft, this.bottomRight),
         ];
     }
 
@@ -52,6 +52,10 @@ export class Rect {
 
     static create(props: typeof ownProps): Rect {
         return Rect.prototype.copy(props);
+    }
+
+    valueOf(): string {
+        return `Rect(${this.left}, ${this.top}, ${this.width}, ${this.height})`;
     }
 }
 
