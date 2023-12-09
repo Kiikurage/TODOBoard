@@ -1,8 +1,8 @@
 import { Channel } from '../lib/Channel';
-import { BoardControllerEvents } from './BoardController';
 import { Point } from '../lib/geometry/Point';
 import { AbstractSession } from './AbstractSession';
 import { Disposable, dispose } from '../lib/Disposable';
+import { BoardEvents } from './BoardEvents';
 
 export class DragSessionState {
     constructor(
@@ -54,18 +54,18 @@ export class DragSession extends AbstractSession<DragSessionState> {
     public readonly onDragEnd: Channel<DragSessionState> = new Channel();
 
     constructor(
-        private readonly boardControllerEvents: BoardControllerEvents,
+        private readonly boardEvents: BoardEvents,
         startPoint: Point,
     ) {
         super(DragSessionState.start(startPoint));
 
-        boardControllerEvents.onPointerMove.addListener(this.handlePointerMove);
-        boardControllerEvents.onPointerUp.addListener(this.handlePointerUp);
+        boardEvents.onPointerMove.addListener(this.handlePointerMove);
+        boardEvents.onPointerUp.addListener(this.handlePointerUp);
     }
 
     [Disposable.dispose]() {
-        this.boardControllerEvents.onPointerMove.removeListener(this.handlePointerMove);
-        this.boardControllerEvents.onPointerUp.removeListener(this.handlePointerUp);
+        this.boardEvents.onPointerMove.removeListener(this.handlePointerMove);
+        this.boardEvents.onPointerUp.removeListener(this.handlePointerUp);
 
         dispose(this.onDragMove);
         dispose(this.onDragEnd);

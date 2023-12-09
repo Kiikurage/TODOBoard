@@ -1,10 +1,10 @@
 import { STYLE_CARD__ACTIVE_BORDERED } from './style/card';
 import { STYLE_INPUT_FOCUSED } from './style/input';
 import { CreateTaskSession } from '../controller/CreateTaskSession';
-import { useSessionState } from './hook/useSessionState';
+import { useReactive } from './hook/useReactive';
 
 export function CreateTaskForm({ createTaskSession }: { createTaskSession: CreateTaskSession }) {
-    const { top, left, title } = useSessionState(createTaskSession);
+    const { top, left, title } = useReactive(createTaskSession, (session) => session.state);
 
     return (
         <div

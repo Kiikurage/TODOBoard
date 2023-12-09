@@ -3,10 +3,13 @@ import { Point } from '../lib/geometry/Point';
 import { LineSegment } from '../lib/geometry/LineSegment';
 import { CreateLinkSession } from '../controller/CreateLinkSession';
 import { COLOR_ACTIVE } from './style/colors';
-import { useSessionState } from './hook/useSessionState';
+import { useReactive } from './hook/useReactive';
 
 export function CreateLinkView({ createLinkSession }: { createLinkSession: CreateLinkSession }) {
-    const { readyToSubmit, destinationTask, sourceTask, currentX, currentY } = useSessionState(createLinkSession);
+    const { readyToSubmit, destinationTask, sourceTask, currentX, currentY } = useReactive(
+        createLinkSession,
+        (session) => session.state,
+    );
     if (sourceTask === null) return null;
 
     const linkDraftP1 = sourceTask.rect.center;

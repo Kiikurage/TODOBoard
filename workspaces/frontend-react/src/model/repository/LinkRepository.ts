@@ -1,10 +1,11 @@
 import { Link } from '../Link';
-import { TaskRepository } from '../repository/TaskRepository';
-import { RawLinkRepository } from '../repository/RawLinkRepository';
+import { TaskRepository } from './TaskRepository';
+import { RawLinkRepository } from './RawLinkRepository';
 import { throwError } from '../../lib/throwError';
 import { Channel } from '../../lib/Channel';
+import { Repository } from './Repository';
 
-export class LinkStorage {
+export class LinkRepository implements Repository<Link> {
     public readonly onChange = new Channel();
 
     constructor(
@@ -13,6 +14,35 @@ export class LinkStorage {
     ) {
         this.taskRepository.onChange.addListener(() => this.onChange.fire());
         this.rawLinkRepository.onChange.addListener(() => this.onChange.fire());
+    }
+
+    findById(id: string): Link | null {
+        const rawLink = this.rawLinkRepository.findById(id);
+        if (rawLink === null) return null;
+
+        const sourceTask = this.taskRepository.findById(rawLink.sourceTaskId);
+        const destinationTask = this.taskRepository.findById(rawLink.destinationTaskId);
+        if (sourceTask === null || destinationTask === null) {
+            console.error(`rawLink is corrupted. rawLink: ${JSON.stringify(rawLink)}`);
+            return null;
+        }
+
+        if (sourceTask.completed || destinationTask.completed) return null;
+
+        return Link.create({ sourceTask, destinationTask });
+    }
+
+    findByTaskIds(sourceTaskId: string, destinationTaskId: string): Link | null {
+        return this.findById(Link.getId(sourceTaskId, destinationTaskId));
+    }
+
+    save(model: Link): void {
+        const { sourceTask, destinationTask } = model;
+        this.createAndSave({ sourceTaskId: sourceTask.id, destinationTaskId: destinationTask.id });
+    }
+
+    deleteById(id: string): void {
+        this.rawLinkRepository.deleteById(id);
     }
 
     readAll(): ReadonlyMap<string, Link> {
@@ -38,7 +68,7 @@ export class LinkStorage {
         return map;
     }
 
-    createAndSave(props: CreateLinkProps): Link {
+    createAndSave(props: CreateLinkProps) {
         const { sourceTaskId, destinationTaskId } = props;
         if (sourceTaskId === destinationTaskId) throwError(`Source task and destination task are the same`);
         this.taskRepository.findById(sourceTaskId) ?? throwError(`Task #${sourceTaskId} is not found`);
@@ -49,22 +79,6 @@ export class LinkStorage {
         if (link === null) throwError('Failed to create link');
 
         return link;
-    }
-
-    findByTaskIds(sourceTaskId: string, destinationTaskId: string): Link | null {
-        const rawLink = this.rawLinkRepository.findByTaskIds(sourceTaskId, destinationTaskId);
-        if (rawLink === null) return null;
-
-        const sourceTask = this.taskRepository.findById(sourceTaskId);
-        const destinationTask = this.taskRepository.findById(destinationTaskId);
-        if (sourceTask === null || destinationTask === null) {
-            console.error(`rawLink is corrupted. rawLink: ${JSON.stringify(rawLink)}`);
-            return null;
-        }
-
-        if (sourceTask.completed || destinationTask.completed) return null;
-
-        return Link.create({ sourceTask, destinationTask });
     }
 }
 

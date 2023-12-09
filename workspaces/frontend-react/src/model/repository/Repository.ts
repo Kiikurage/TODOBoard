@@ -1,13 +1,11 @@
-import { Channel } from '../../lib/Channel';
+import { Reactive } from '../../lib/Reactive';
 
-export interface Repository<T> {
-    readonly onChange: Channel<ReadonlyMap<string, T>>;
-
+export interface Repository<T> extends Reactive {
     readAll(): ReadonlyMap<string, T>;
 
     findById(id: string): T | null;
 
     save(model: T): void;
 
-    deleteById(modelId: string): void;
+    deleteById(id: string): void;
 }

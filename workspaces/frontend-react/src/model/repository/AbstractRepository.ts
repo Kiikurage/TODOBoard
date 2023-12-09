@@ -1,7 +1,6 @@
-import { Reactive } from '../../lib/Reactive';
 import { Channel } from '../../lib/Channel';
 
-export abstract class AbstractRepository<T, SerializedT> implements Reactive {
+export abstract class AbstractRepository<T, SerializedT> {
     public readonly onChange = new Channel();
 
     protected models = new Map<string, T>();

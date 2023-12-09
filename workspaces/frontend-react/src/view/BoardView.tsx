@@ -1,34 +1,32 @@
-import { useEffect, useState } from 'react';
+import { useEffect } from 'react';
 import { TaskCard } from './TaskCard';
 import { LinkView } from './LinkView';
 import { CreateTaskForm } from './CreateTaskForm';
 import { Point } from '../lib/geometry/Point';
 import { boardController } from '../deps';
-import { CreateLinkSession } from '../controller/CreateLinkSession';
 import { CreateLinkView } from './CreateLinkView';
-import { CreateTaskSession } from '../controller/CreateTaskSession';
-import { useTasks } from './hook/useTasks';
-import { useReactive } from './hook/useReactive';
+import { useReactive, useReactiveAll } from './hook/useReactive';
 
 export function BoardView() {
-    const tasks = useTasks(boardController().taskRepository);
-    const links = useReactive(boardController().linkStorage, (storage) => storage.readAll());
+    const tasks = useReactive(boardController().taskRepository, (repository) => repository.readOpenTasksAll());
+    const links = useReactive(boardController().linkRepository, (repository) => repository.readAll());
 
-    const [createLinkSessions, setCreateLinkSessions] = useState<CreateLinkSession[]>([]);
-    useEffect(() => {
-        return boardController().onCreateLinkSessionStart.addListener((session) => {
-            setCreateLinkSessions((oldState) => [...oldState, session]);
-            session.onEnd.addListener(() => setCreateLinkSessions((oldState) => oldState.filter((s) => s !== session)));
-        });
-    }, []);
+    const { createLinkSessions, createTaskSession } = useReactive(boardController(), (controller) => controller.state);
 
-    const [createTaskSession, setCreateTaskSession] = useState<CreateTaskSession | null>(null);
-    useEffect(() => {
-        return boardController().onCreateTaskSessionStart.addListener((session) => {
-            setCreateTaskSession(session);
-            session.onEnd.addListener(() => setCreateTaskSession(null));
-        });
-    }, []);
+    const activeTaskIds = useReactiveAll(createLinkSessions, (sessions) => {
+        const activeTaskIds = new Set<string>();
+
+        for (const session of sessions) {
+            if (!session.state.readyToSubmit) continue;
+
+            activeTaskIds.add(session.sourceTaskId);
+            if (session.state.destinationTaskId !== null) {
+                activeTaskIds.add(session.state.destinationTaskId);
+            }
+        }
+
+        return activeTaskIds;
+    });
 
     useEffect(() => {
         const handlePointerMove = (ev: MouseEvent) => {
@@ -76,7 +74,7 @@ export function BoardView() {
                         task={task}
                         key={task.id}
                         board={boardController()}
-                        active={createLinkSessions.some((session) => session.state.isActiveTask(task.id))}
+                        active={activeTaskIds.has(task.id)}
                         onMouseDown={(ev) =>
                             boardController().handleCreateLinkStart(
                                 task.id,
