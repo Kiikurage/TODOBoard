@@ -1,12 +1,15 @@
+import { Task } from './Task';
+import { RawLink } from '../repository/LinkRepository';
+
 export class Link {
     protected constructor(
-        public readonly sourceTaskId: string,
-        public readonly destinationTaskId: string,
+        public readonly sourceTask: Task,
+        public readonly destinationTask: Task,
         // public readonly type: RelationType, // TODO
     ) {}
 
     get id(): string {
-        return Link.getId(this.sourceTaskId, this.destinationTaskId);
+        return Link.getId(this.sourceTask.id, this.destinationTask.id);
     }
 
     copy(props: Partial<typeof ownProps>): Link {
@@ -18,7 +21,7 @@ export class Link {
     }
 
     static getId(sourceTaskId: string, destinationTaskId: string): string {
-        return `${sourceTaskId}_${destinationTaskId}`;
+        return RawLink.getId(sourceTaskId, destinationTaskId);
     }
 }
 

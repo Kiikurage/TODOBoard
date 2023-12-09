@@ -2,7 +2,7 @@ import { Channel } from '../lib/channel/Channel';
 import { Point } from '../lib/geometry/Point';
 import { DragSession } from './DragSession';
 import { CreateLinkSession } from './CreateLinkSession';
-import { createAndSaveNewLink, createAndSaveNewTask, taskRepository, updateTask } from '../deps';
+import { createAndSaveNewTask, linkRepository, taskRepository, updateTask } from '../deps';
 import { MoveTaskSession } from './MoveTaskSession';
 import { CreateTaskSession } from './CreateTaskSession';
 
@@ -36,13 +36,7 @@ export class BoardController implements BoardControllerEvents {
 
     handleCreateLinkStart(sourceTaskId: string, point: Point) {
         this.onCreateLinkSessionStart.fire(
-            new CreateLinkSession(
-                sourceTaskId,
-                this,
-                new DragSession(this, point),
-                taskRepository(),
-                createAndSaveNewLink(),
-            ),
+            new CreateLinkSession(sourceTaskId, this, new DragSession(this, point), taskRepository(), linkRepository()),
         );
     }
 

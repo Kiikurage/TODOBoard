@@ -8,16 +8,17 @@ export function ReadLinksUseCase(taskRepository: TaskRepository, linkRepository:
     return singleton(() => {
         return ch.reactive((get) => {
             const tasks = get(taskRepository.onChange);
-            const links = get(linkRepository.onChange);
+            const rawLinks = get(linkRepository.onChange);
 
             const map = new Map<string, Link>();
 
-            for (const link of links.values()) {
-                const sourceTask = tasks.get(link.sourceTaskId);
-                const destinationTask = tasks.get(link.destinationTaskId);
+            for (const rawLink of rawLinks.values()) {
+                const sourceTask = tasks.get(rawLink.sourceTaskId);
+                const destinationTask = tasks.get(rawLink.destinationTaskId);
                 if (sourceTask === undefined || destinationTask === undefined) continue;
                 if (sourceTask.completed || destinationTask.completed) continue;
 
+                const link = Link.create({ sourceTask, destinationTask });
                 map.set(link.id, link);
             }
 

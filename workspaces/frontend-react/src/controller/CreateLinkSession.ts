@@ -4,9 +4,9 @@ import { Task } from '../model/Task';
 import { assert } from '../lib/assert';
 import { ch } from '../lib/channel/ch';
 import { TaskRepository } from '../repository/TaskRepository';
-import { CreateAndSaveNewLinkUseCase } from '../usecase/CreateAndSaveNewLinkUseCase';
 import { AbstractSession } from './AbstractSession';
 import { dispose, SymbolDispose } from '../lib/Disposable';
+import { LinkRepository } from '../repository/LinkRepository';
 
 export class CreateLinkSessionState {
     constructor(
@@ -59,7 +59,7 @@ export class CreateLinkSession extends AbstractSession {
         private readonly boardViewEvents: BoardControllerEvents,
         private readonly dragSession: DragSession,
         private readonly taskRepository: TaskRepository,
-        private readonly createAndSaveNewLink: CreateAndSaveNewLinkUseCase,
+        private readonly linkRepository: LinkRepository,
     ) {
         super();
 
@@ -134,7 +134,7 @@ export class CreateLinkSession extends AbstractSession {
             if (!readyToSubmit) return;
             assert(destinationTaskId !== null, 'destinationTaskId !== null');
 
-            this.createAndSaveNewLink(this.sourceTaskId, destinationTaskId);
+            this.linkRepository.createAndSave(this.sourceTaskId, destinationTaskId);
         } finally {
             dispose(this);
         }
