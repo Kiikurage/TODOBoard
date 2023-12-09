@@ -16,8 +16,8 @@ export abstract class AbstractRepository<T, SerializedT> {
         return this.models;
     }
 
-    findById(id: string): T | undefined {
-        return this.models.get(id);
+    findById(id: string): T | null {
+        return this.models.get(id) ?? null;
     }
 
     save(model: T) {

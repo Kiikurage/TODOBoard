@@ -7,14 +7,14 @@ export class LinkRepository extends AbstractRepository<RawLink, SerializedRawLin
 
     createAndSave(sourceTaskId: string, destinationTaskId: string): RawLink {
         const existingLink = this.findByTaskIds(sourceTaskId, destinationTaskId);
-        if (existingLink !== undefined) return existingLink;
+        if (existingLink !== null) return existingLink;
 
         const newLink = RawLink.create({ sourceTaskId, destinationTaskId });
         this.save(newLink);
         return newLink;
     }
 
-    findByTaskIds(sourceTaskId: string, destinationTaskId: string): RawLink | undefined {
+    findByTaskIds(sourceTaskId: string, destinationTaskId: string): RawLink | null {
         return this.findById(RawLink.getId(sourceTaskId, destinationTaskId));
     }
 

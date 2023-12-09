@@ -1,5 +1,4 @@
-import { ch } from '../lib/channel/ch';
-import { Disposable, dispose } from '../lib/Disposable';
+import { dispose } from '../lib/Disposable';
 import { Point } from '../lib/geometry/Point';
 import { AbstractSession } from './AbstractSession';
 import { TaskRepository } from '../repository/TaskRepository';
@@ -11,13 +10,6 @@ export class CreateTaskSessionState {
         public readonly left: number,
         public readonly top: number,
     ) {}
-
-    static readonly EMPTY = CreateTaskSessionState.create({
-        title: '',
-        description: '',
-        left: 0,
-        top: 0,
-    });
 
     get readyToSubmit() {
         if (this.title.trim() === '') return false;
@@ -36,29 +28,28 @@ export class CreateTaskSessionState {
 
 const ownProps = { ...CreateTaskSessionState.prototype };
 
-export class CreateTaskSession extends AbstractSession {
-    public readonly state = ch.data(CreateTaskSessionState.EMPTY);
-
+export class CreateTaskSession extends AbstractSession<CreateTaskSessionState> {
     constructor(
         position: Point,
         private readonly taskRepository: TaskRepository,
     ) {
-        super();
-        this.state.set((state) => state.copy({ left: position.x, top: position.y }));
-    }
-
-    [Disposable.dispose]() {
-        super[Disposable.dispose]();
-        dispose(this.state);
+        super(
+            CreateTaskSessionState.create({
+                left: position.x,
+                top: position.y,
+                title: '',
+                description: '',
+            }),
+        );
     }
 
     setTitle(title: string) {
-        this.state.set((state) => state.copy({ title }));
+        this.state = this.state.copy({ title });
     }
 
     readonly submit = () => {
         try {
-            const { readyToSubmit, title, description, left, top } = this.state.get();
+            const { readyToSubmit, title, description, left, top } = this.state;
             if (!readyToSubmit) return;
 
             this.taskRepository.createAndSave({

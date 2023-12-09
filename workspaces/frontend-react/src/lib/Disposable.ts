@@ -8,10 +8,18 @@ export interface Disposable {
 }
 
 /**
- * Disposableなオブジェクトを破棄する。
+ * オブジェクトを破棄する。
  */
-export function dispose(disposable: Disposable) {
-    disposable[Disposable.dispose]();
+export function dispose(disposable: unknown) {
+    // call disposable[Disposable.dispose]() only if disposable has Disposable.dispose method.
+    if (
+        disposable !== null &&
+        typeof disposable === 'object' &&
+        Disposable.dispose in disposable &&
+        typeof disposable[Disposable.dispose] === 'function'
+    ) {
+        disposable[Disposable.dispose]();
+    }
 }
 
 export module Disposable {

@@ -76,7 +76,7 @@ export function BoardView() {
                         task={task}
                         key={task.id}
                         board={boardController()}
-                        active={createLinkSessions.some((session) => session.state.get().isActiveTask(task.id))}
+                        active={createLinkSessions.some((session) => session.state.isActiveTask(task.id))}
                         onMouseDown={(ev) =>
                             boardController().handleCreateLinkStart(
                                 task.id,

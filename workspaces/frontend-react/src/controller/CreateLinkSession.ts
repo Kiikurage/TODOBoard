@@ -2,7 +2,6 @@ import { BoardControllerEvents } from './BoardController';
 import { DragSession, DragSessionState } from './DragSession';
 import { Task } from '../model/Task';
 import { assert } from '../lib/assert';
-import { ch } from '../lib/channel/ch';
 import { TaskRepository } from '../repository/TaskRepository';
 import { AbstractSession } from './AbstractSession';
 import { Disposable, dispose } from '../lib/Disposable';
@@ -17,15 +16,6 @@ export class CreateLinkSessionState {
         public readonly destinationTaskId: string | null,
         public readonly destinationTask: Task | null,
     ) {}
-
-    static readonly EMPTY = CreateLinkSessionState.create({
-        currentX: 0,
-        currentY: 0,
-        sourceTaskId: null,
-        sourceTask: null,
-        destinationTaskId: null,
-        destinationTask: null,
-    });
 
     get readyToSubmit() {
         if (this.sourceTask?.id === this.destinationTask?.id) return false;
@@ -51,9 +41,7 @@ export class CreateLinkSessionState {
 
 const ownProps = { ...CreateLinkSessionState.prototype };
 
-export class CreateLinkSession extends AbstractSession {
-    public readonly state = ch.data(CreateLinkSessionState.EMPTY);
-
+export class CreateLinkSession extends AbstractSession<CreateLinkSessionState> {
     constructor(
         public readonly sourceTaskId: string,
         private readonly boardControllerEvents: BoardControllerEvents,
@@ -61,12 +49,14 @@ export class CreateLinkSession extends AbstractSession {
         private readonly taskRepository: TaskRepository,
         private readonly createLinkAndSave: CreateLinkAndSaveUseCase,
     ) {
-        super();
-
-        this.state.set((oldState) =>
-            oldState.copy({
-                sourceTaskId: this.sourceTaskId,
-                sourceTask: this.taskRepository.findById(this.sourceTaskId),
+        super(
+            CreateLinkSessionState.create({
+                currentX: dragSession.state.currentPosition.x,
+                currentY: dragSession.state.currentPosition.y,
+                sourceTaskId: sourceTaskId,
+                sourceTask: taskRepository.findById(sourceTaskId),
+                destinationTaskId: null,
+                destinationTask: null,
             }),
         );
 
@@ -78,59 +68,49 @@ export class CreateLinkSession extends AbstractSession {
     }
 
     [Disposable.dispose]() {
-        super[Disposable.dispose]();
-
         this.taskRepository.onChange.removeListener(this.handleTaskRepositoryChange);
         this.boardControllerEvents.onTaskPointerEnter.removeListener(this.handleTaskPointerEnter);
         this.boardControllerEvents.onTaskPointerLeave.removeListener(this.handleTaskPointerLeave);
         this.dragSession.onDragMove.removeListener(this.handleDragMove);
         this.dragSession.onDragEnd.removeListener(this.handleDragEnd);
 
-        dispose(this.state);
+        super[Disposable.dispose]();
     }
 
     private readonly handleTaskRepositoryChange = () => {
-        this.state.set((oldState) =>
-            oldState.copy({
-                sourceTask: oldState.sourceTaskId === null ? null : this.taskRepository.findById(oldState.sourceTaskId),
-                destinationTask:
-                    oldState.destinationTaskId === null
-                        ? null
-                        : this.taskRepository.findById(oldState.destinationTaskId),
-            }),
-        );
+        this.state = this.state.copy({
+            sourceTask: this.state.sourceTaskId === null ? null : this.taskRepository.findById(this.state.sourceTaskId),
+            destinationTask:
+                this.state.destinationTaskId === null
+                    ? null
+                    : this.taskRepository.findById(this.state.destinationTaskId),
+        });
     };
 
     private readonly handleTaskPointerEnter = ({ taskId }: { taskId: string }) => {
-        this.state.set((oldState) =>
-            oldState.copy({
-                destinationTaskId: taskId,
-                destinationTask: this.taskRepository.findById(taskId),
-            }),
-        );
+        this.state = this.state.copy({
+            destinationTaskId: taskId,
+            destinationTask: this.taskRepository.findById(taskId),
+        });
     };
 
     private readonly handleTaskPointerLeave = () => {
-        this.state.set((oldState) =>
-            oldState.copy({
-                destinationTaskId: null,
-                destinationTask: null,
-            }),
-        );
+        this.state = this.state.copy({
+            destinationTaskId: null,
+            destinationTask: null,
+        });
     };
 
     private readonly handleDragMove = (state: DragSessionState) => {
-        this.state.set((oldState) =>
-            oldState.copy({
-                currentX: state.currentPosition.x,
-                currentY: state.currentPosition.y,
-            }),
-        );
+        this.state = this.state.copy({
+            currentX: state.currentPosition.x,
+            currentY: state.currentPosition.y,
+        });
     };
 
     private readonly handleDragEnd = () => {
         try {
-            const { destinationTaskId, readyToSubmit } = this.state.get();
+            const { destinationTaskId, readyToSubmit } = this.state;
             if (!readyToSubmit) return;
             assert(destinationTaskId !== null, 'destinationTaskId !== null');
 

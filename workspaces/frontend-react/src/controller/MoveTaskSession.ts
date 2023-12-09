@@ -5,7 +5,7 @@ import { Point } from '../lib/geometry/Point';
 import { throwError } from '../lib/throwError';
 import { AbstractSession } from './AbstractSession';
 
-export class MoveTaskSession extends AbstractSession {
+export class MoveTaskSession extends AbstractSession<DragSessionState> {
     private readonly originalPosition: Point;
 
     constructor(
@@ -13,13 +13,12 @@ export class MoveTaskSession extends AbstractSession {
         private readonly dragSession: DragSession,
         private readonly taskRepository: TaskRepository,
     ) {
-        super();
+        super(dragSession.state);
 
         this.dragSession.onDragMove.addListener(this.handleDragMove);
         this.dragSession.onDragEnd.addListener(this.handleDragEnd);
 
         const task = this.taskRepository.findById(this.taskId) ?? throwError('Task not found');
-
         this.originalPosition = task.rect.p1;
     }
 
@@ -29,8 +28,10 @@ export class MoveTaskSession extends AbstractSession {
     }
 
     private handleDragMove = (state: DragSessionState) => {
+        this.state = state;
+
         const task = this.taskRepository.findById(this.taskId);
-        if (task === undefined) return;
+        if (task === null) return;
 
         this.taskRepository.update(task.id, {
             rect: task.rect.copy({

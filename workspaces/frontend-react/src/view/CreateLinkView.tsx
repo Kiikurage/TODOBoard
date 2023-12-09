@@ -3,9 +3,10 @@ import { Point } from '../lib/geometry/Point';
 import { LineSegment } from '../lib/geometry/LineSegment';
 import { CreateLinkSession } from '../controller/CreateLinkSession';
 import { COLOR_ACTIVE } from './style/colors';
+import { useSessionState } from './hook/useSessionState';
 
 export function CreateLinkView({ createLinkSession }: { createLinkSession: CreateLinkSession }) {
-    const { readyToSubmit, destinationTask, sourceTask, currentX, currentY } = createLinkSession.state.get();
+    const { readyToSubmit, destinationTask, sourceTask, currentX, currentY } = useSessionState(createLinkSession);
     if (sourceTask === null) return null;
 
     const linkDraftP1 = sourceTask.rect.center;
@@ -23,6 +24,8 @@ export function CreateLinkView({ createLinkSession }: { createLinkSession: Creat
           )[0] ?? null
         : null;
 
+    if (point1 === null) return null;
+
     return (
         <svg
             width={window.innerWidth}
@@ -36,12 +39,7 @@ export function CreateLinkView({ createLinkSession }: { createLinkSession: Creat
                 pointerEvents: 'none',
             }}
         >
-            <line
-                x1={point1?.x ?? linkDraftP1.x}
-                y1={point1?.y ?? linkDraftP1.y}
-                x2={point2?.x ?? linkDraftP2.x}
-                y2={point2?.y ?? linkDraftP2.y}
-            />
+            <line x1={point1.x} y1={point1.y} x2={point2?.x ?? linkDraftP2.x} y2={point2?.y ?? linkDraftP2.y} />
         </svg>
     );
 }

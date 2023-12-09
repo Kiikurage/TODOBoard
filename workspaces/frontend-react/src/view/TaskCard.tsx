@@ -31,6 +31,8 @@ export function TaskCard({
 }) {
     const cardRef = useRef<HTMLDivElement | null>(null);
     useResizeObserver(cardRef, (entry) => {
+        if (entry.contentRect.width === task.rect.width && entry.contentRect.height === task.rect.height) return;
+
         onResize?.(entry.contentRect.width, entry.contentRect.height);
     });
 

@@ -1,7 +1,6 @@
 import { Channel } from '../lib/channel/Channel';
 import { BoardControllerEvents } from './BoardController';
 import { Point } from '../lib/geometry/Point';
-import { ch } from '../lib/channel/ch';
 import { AbstractSession } from './AbstractSession';
 import { Disposable, dispose } from '../lib/Disposable';
 
@@ -50,8 +49,7 @@ export class DragSessionState {
 
 const ownProps = { ...DragSessionState.prototype };
 
-export class DragSession extends AbstractSession {
-    public readonly state = ch.data(DragSessionState.EMPTY);
+export class DragSession extends AbstractSession<DragSessionState> {
     public readonly onDragMove: Channel<DragSessionState> = new Channel();
     public readonly onDragEnd: Channel<DragSessionState> = new Channel();
 
@@ -59,34 +57,32 @@ export class DragSession extends AbstractSession {
         private readonly boardControllerEvents: BoardControllerEvents,
         startPoint: Point,
     ) {
-        super();
+        super(DragSessionState.start(startPoint));
 
-        this.state.set(DragSessionState.start(startPoint));
         boardControllerEvents.onPointerMove.addListener(this.handlePointerMove);
         boardControllerEvents.onPointerUp.addListener(this.handlePointerUp);
     }
 
     [Disposable.dispose]() {
-        super[Disposable.dispose]();
-
         this.boardControllerEvents.onPointerMove.removeListener(this.handlePointerMove);
         this.boardControllerEvents.onPointerUp.removeListener(this.handlePointerUp);
 
-        dispose(this.state);
         dispose(this.onDragMove);
         dispose(this.onDragEnd);
+
+        super[Disposable.dispose]();
     }
 
     private readonly handlePointerMove = (point: Point) => {
-        this.state.set((oldState) => oldState.move(point));
+        this.state = this.state.move(point);
 
-        this.onDragMove.fire(this.state.get());
+        this.onDragMove.fire(this.state);
     };
 
     private readonly handlePointerUp = () => {
-        this.state.set((oldState) => oldState.complete());
+        this.state = this.state.complete();
 
-        this.onDragEnd.fire(this.state.get());
+        this.onDragEnd.fire(this.state);
         dispose(this);
     };
 }

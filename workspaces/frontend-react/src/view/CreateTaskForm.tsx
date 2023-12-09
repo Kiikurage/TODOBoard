@@ -1,10 +1,10 @@
 import { STYLE_CARD__ACTIVE_BORDERED } from './style/card';
 import { STYLE_INPUT_FOCUSED } from './style/input';
 import { CreateTaskSession } from '../controller/CreateTaskSession';
-import { useDataChannel } from './hook/useDataChannel';
+import { useSessionState } from './hook/useSessionState';
 
 export function CreateTaskForm({ createTaskSession }: { createTaskSession: CreateTaskSession }) {
-    const { top, left, title } = useDataChannel(createTaskSession.state);
+    const { top, left, title } = useSessionState(createTaskSession);
 
     return (
         <div
