@@ -5,7 +5,8 @@ export function LinkView({ link }: { link: Link }) {
         <svg
             width={window.innerWidth}
             height={window.innerHeight}
-            stroke="#000"
+            stroke="#bbb"
+            strokeWidth={2}
             css={{
                 position: 'fixed',
                 inset: 0,

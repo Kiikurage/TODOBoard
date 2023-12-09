@@ -48,19 +48,19 @@ export function TaskCard({
                     ...STYLE_CARD__ACTIVE_BORDERED,
                 }),
             }}
-            onMouseDown={(ev) => {
-                ev.preventDefault();
-                onMouseDown?.(ev);
-            }}
             onMouseEnter={onMouseEnter}
             onMouseLeave={onMouseLeave}
+            onClick={(ev) => {
+                ev.preventDefault();
+                ev.stopPropagation();
+            }}
         >
             <div
                 css={{
                     display: 'flex',
                     flexDirection: 'row',
-                    alignItems: 'flex-start',
-                    padding: '10px 16px 10px 0',
+                    alignItems: 'stretch',
+                    gap: 4,
                 }}
             >
                 <DragHandle task={task} board={board} />
@@ -68,6 +68,7 @@ export function TaskCard({
                     css={{
                         flex: '1 1 0',
                         minWidth: 0,
+                        padding: '10px 0',
                     }}
                 >
                     <span
@@ -85,13 +86,62 @@ export function TaskCard({
                 <div
                     css={{
                         flex: '0 0 auto',
+                        display: 'flex',
+                        flexDirection: 'column',
+                        justifyContent: 'space-between',
+                        padding: '4px 4px',
                     }}
                 >
-                    <input
-                        type="checkbox"
-                        checked={task.completed}
-                        onChange={(ev) => onCompletedChange?.(ev.target.checked)}
-                    />
+                    <button
+                        css={{
+                            border: 'none',
+                            // border: '1px solid #e0e0e0',
+                            background: '#fff',
+                            color: '#666',
+                            borderRadius: 100,
+                            padding: '0 8px',
+                            cursor: 'pointer',
+                            transition: 'background 80ms ease-out',
+                            '&:hover': {
+                                background: 'rgba(226,238,228,0.74)',
+                            },
+                            '&:active': {
+                                background: 'rgba(193,217,197,0.74)',
+                            },
+                        }}
+                        onClick={(ev) => {
+                            ev.preventDefault();
+                            ev.stopPropagation();
+                            onCompletedChange?.(true);
+                        }}
+                    >
+                        <span className="material-symbols-outlined">check</span>
+                    </button>
+                    <button
+                        css={{
+                            border: 'none',
+                            // border: '1px solid #e0e0e0',
+                            background: '#fff',
+                            color: '#666',
+                            borderRadius: 100,
+                            padding: '0 8px',
+                            cursor: 'pointer',
+                            transition: 'background 80ms ease-out',
+                            '&:hover': {
+                                background: 'rgba(226,233,238,0.74)',
+                            },
+                            '&:active': {
+                                background: 'rgba(194,208,218,0.74)',
+                            },
+                        }}
+                        onMouseDown={(ev) => {
+                            ev.preventDefault();
+                            ev.stopPropagation();
+                            onMouseDown?.(ev);
+                        }}
+                    >
+                        <span className="material-symbols-outlined">link</span>
+                    </button>
                 </div>
             </div>
         </div>
@@ -195,7 +245,14 @@ function DragHandle({ task, board }: { task: Task; board: BoardController }) {
                 justifyContent: 'center',
                 alignSelf: 'stretch',
                 cursor: 'move',
-                paddingRight: 4,
+                transition: 'background 80ms ease-out',
+
+                '&:hover': {
+                    background: 'rgba(226,233,238,0.74)',
+                },
+                '&:active': {
+                    background: 'rgba(194,208,218,0.74)',
+                },
             }}
             onMouseDown={(ev) => {
                 board.handleTaskDragStart(task.id, Point.create({ x: ev.clientX, y: ev.clientY }));
@@ -206,7 +263,7 @@ function DragHandle({ task, board }: { task: Task; board: BoardController }) {
                 className="material-symbols-outlined"
                 css={{
                     fontSize: 20,
-                    color: '#888',
+                    color: '#666',
                 }}
             >
                 drag_indicator

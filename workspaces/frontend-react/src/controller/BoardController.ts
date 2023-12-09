@@ -8,6 +8,7 @@ import { TaskRepository, UpdateTaskProps } from '../repository/TaskRepository';
 import { CreateLinkAndSaveUseCase } from '../usecase/CreateLinkAndSaveUseCase';
 import { ReadLinksUseCase } from '../usecase/ReadLinksUseCase';
 
+export interface BoardViewEvents {}
 export interface BoardControllerEvents {
     readonly onPointerDown: Channel<Point>;
     readonly onPointerMove: Channel<Point>;

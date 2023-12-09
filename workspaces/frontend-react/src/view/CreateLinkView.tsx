@@ -29,7 +29,7 @@ export function CreateLinkView({ createLinkSession }: { createLinkSession: Creat
             height={window.innerHeight}
             strokeWidth={2}
             strokeDasharray={readyToSubmit ? 'none' : '4 4'}
-            stroke={readyToSubmit ? COLOR_ACTIVE : '#aaa'}
+            stroke={readyToSubmit ? COLOR_ACTIVE : '#bbb'}
             css={{
                 position: 'fixed',
                 inset: 0,
