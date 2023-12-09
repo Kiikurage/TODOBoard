@@ -7,12 +7,12 @@ import { boardController } from '../deps';
 import { CreateLinkSession } from '../controller/CreateLinkSession';
 import { CreateLinkView } from './CreateLinkView';
 import { CreateTaskSession } from '../controller/CreateTaskSession';
-import { useDataChannel } from './hook/useDataChannel';
 import { useTasks } from './hook/useTasks';
+import { useReactive } from './hook/useReactive';
 
 export function BoardView() {
     const tasks = useTasks(boardController().taskRepository);
-    const links = useDataChannel(boardController().readLinks());
+    const links = useReactive(boardController().linkStorage, (storage) => storage.readAll());
 
     const [createLinkSessions, setCreateLinkSessions] = useState<CreateLinkSession[]>([]);
     useEffect(() => {

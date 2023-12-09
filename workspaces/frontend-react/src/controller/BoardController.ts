@@ -1,14 +1,14 @@
-import { Channel } from '../lib/channel/Channel';
+import { Channel } from '../lib/Channel';
 import { Point } from '../lib/geometry/Point';
 import { DragSession } from './DragSession';
 import { CreateLinkSession } from './CreateLinkSession';
 import { MoveTaskSession } from './MoveTaskSession';
 import { CreateTaskSession } from './CreateTaskSession';
-import { TaskRepository, UpdateTaskProps } from '../repository/TaskRepository';
-import { CreateLinkAndSaveUseCase } from '../usecase/CreateLinkAndSaveUseCase';
-import { ReadLinksUseCase } from '../usecase/ReadLinksUseCase';
+import { TaskRepository, UpdateTaskProps } from '../model/repository/TaskRepository';
+import { LinkStorage } from '../model/storage/LinkStorage';
 
 export interface BoardViewEvents {}
+
 export interface BoardControllerEvents {
     readonly onPointerDown: Channel<Point>;
     readonly onPointerMove: Channel<Point>;
@@ -33,8 +33,7 @@ export class BoardController implements BoardControllerEvents {
 
     constructor(
         public readonly taskRepository: TaskRepository,
-        public readonly createLinkAndSave: CreateLinkAndSaveUseCase,
-        public readonly readLinks: ReadLinksUseCase,
+        public readonly linkStorage: LinkStorage,
     ) {}
 
     handleTaskUpdate(taskId: string, props: UpdateTaskProps) {
@@ -54,7 +53,7 @@ export class BoardController implements BoardControllerEvents {
                 this,
                 new DragSession(this, point),
                 this.taskRepository,
-                this.createLinkAndSave,
+                this.linkStorage,
             ),
         );
     }

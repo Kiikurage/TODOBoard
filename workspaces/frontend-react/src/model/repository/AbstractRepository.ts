@@ -1,14 +1,13 @@
-import { DataChannel } from '../lib/channel/DataChannel';
-import { ch } from '../lib/channel/ch';
+import { Reactive } from '../../lib/Reactive';
+import { Channel } from '../../lib/Channel';
 
-export abstract class AbstractRepository<T, SerializedT> {
-    public readonly onChange: DataChannel<ReadonlyMap<string, T>>;
+export abstract class AbstractRepository<T, SerializedT> implements Reactive {
+    public readonly onChange = new Channel();
 
     protected models = new Map<string, T>();
 
     protected constructor(protected readonly localStorageKey: string) {
         this.models = this.loadFromLocalStorage();
-        this.onChange = ch.data<ReadonlyMap<string, T>>(this.models);
         this.onChange.addListener(() => this.saveToLocalStorage());
     }
 
@@ -24,14 +23,14 @@ export abstract class AbstractRepository<T, SerializedT> {
         this.models = new Map(this.models);
         this.models.set(this.getId(model), model);
 
-        this.onChange.fire(this.models);
+        this.onChange.fire();
     }
 
     deleteById(modelId: string) {
         this.models = new Map(this.models);
         this.models.delete(modelId);
 
-        this.onChange.fire(this.models);
+        this.onChange.fire();
     }
 
     protected abstract getId(model: T): string;

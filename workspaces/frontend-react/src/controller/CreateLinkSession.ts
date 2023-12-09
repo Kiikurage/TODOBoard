@@ -2,10 +2,10 @@ import { BoardControllerEvents } from './BoardController';
 import { DragSession, DragSessionState } from './DragSession';
 import { Task } from '../model/Task';
 import { assert } from '../lib/assert';
-import { TaskRepository } from '../repository/TaskRepository';
+import { TaskRepository } from '../model/repository/TaskRepository';
 import { AbstractSession } from './AbstractSession';
 import { Disposable, dispose } from '../lib/Disposable';
-import { CreateLinkAndSaveUseCase } from '../usecase/CreateLinkAndSaveUseCase';
+import { LinkStorage } from '../model/storage/LinkStorage';
 
 export class CreateLinkSessionState {
     constructor(
@@ -47,7 +47,7 @@ export class CreateLinkSession extends AbstractSession<CreateLinkSessionState> {
         private readonly boardControllerEvents: BoardControllerEvents,
         private readonly dragSession: DragSession,
         private readonly taskRepository: TaskRepository,
-        private readonly createLinkAndSave: CreateLinkAndSaveUseCase,
+        private readonly linkStorage: LinkStorage,
     ) {
         super(
             CreateLinkSessionState.create({
@@ -114,7 +114,7 @@ export class CreateLinkSession extends AbstractSession<CreateLinkSessionState> {
             if (!readyToSubmit) return;
             assert(destinationTaskId !== null, 'destinationTaskId !== null');
 
-            this.createLinkAndSave(this.sourceTaskId, destinationTaskId);
+            this.linkStorage.createAndSave({ sourceTaskId: this.sourceTaskId, destinationTaskId });
         } finally {
             dispose(this);
         }

@@ -1,6 +1,6 @@
 import { DragSession, DragSessionState } from './DragSession';
 import { Disposable, dispose } from '../lib/Disposable';
-import { TaskRepository } from '../repository/TaskRepository';
+import { TaskRepository } from '../model/repository/TaskRepository';
 import { Point } from '../lib/geometry/Point';
 import { throwError } from '../lib/throwError';
 import { AbstractSession } from './AbstractSession';

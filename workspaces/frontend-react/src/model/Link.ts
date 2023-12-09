@@ -1,5 +1,5 @@
 import { Task } from './Task';
-import { RawLink } from '../repository/LinkRepository';
+import { RawLink } from './repository/RawLinkRepository';
 
 export class Link {
     protected constructor(

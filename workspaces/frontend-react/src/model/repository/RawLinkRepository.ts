@@ -1,6 +1,6 @@
 import { AbstractRepository } from './AbstractRepository';
 
-export class LinkRepository extends AbstractRepository<RawLink, SerializedRawLink> {
+export class RawLinkRepository extends AbstractRepository<RawLink, SerializedRawLink> {
     constructor() {
         super('LinkRepository');
     }

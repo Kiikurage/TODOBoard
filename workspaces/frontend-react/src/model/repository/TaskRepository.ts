@@ -1,8 +1,8 @@
-import { Task } from '../model/Task';
+import { Task } from '../Task';
 import { AbstractRepository } from './AbstractRepository';
-import { Rect } from '../lib/geometry/Rect';
-import { filterMapByValue } from '../lib/filterMap';
-import { throwError } from '../lib/throwError';
+import { Rect } from '../../lib/geometry/Rect';
+import { filterMapByValue } from '../../lib/filterMap';
+import { throwError } from '../../lib/throwError';
 
 export class TaskRepository extends AbstractRepository<Task, SerializedTask> {
     constructor() {

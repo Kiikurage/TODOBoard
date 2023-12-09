@@ -1,18 +1,12 @@
-import { TaskRepository } from './repository/TaskRepository';
-import { LinkRepository } from './repository/LinkRepository';
-import { ReadLinksUseCase } from './usecase/ReadLinksUseCase';
+import { TaskRepository } from './model/repository/TaskRepository';
+import { RawLinkRepository } from './model/repository/RawLinkRepository';
 import { BoardController } from './controller/BoardController';
 import { singleton } from './lib/singleton';
-import { ReadLinkByIdUseCase } from './usecase/ReadLinkByIdUseCase';
-import { CreateLinkAndSaveUseCase } from './usecase/CreateLinkAndSaveUseCase';
+import { LinkStorage } from './model/storage/LinkStorage';
 
 export const taskRepository = singleton(() => new TaskRepository());
-export const linkRepository = singleton(() => new LinkRepository());
+export const rawLinkRepository = singleton(() => new RawLinkRepository());
 
-export const createLinkAndSave = singleton(() =>
-    CreateLinkAndSaveUseCase(taskRepository(), linkRepository(), readLinkById()),
-);
-export const readLinks = singleton(() => ReadLinksUseCase(taskRepository(), linkRepository()));
-export const readLinkById = singleton(() => ReadLinkByIdUseCase(taskRepository(), linkRepository()));
+export const linkStorage = singleton(() => new LinkStorage(taskRepository(), rawLinkRepository()));
 
-export const boardController = singleton(() => new BoardController(taskRepository(), createLinkAndSave(), readLinks()));
+export const boardController = singleton(() => new BoardController(taskRepository(), linkStorage()));

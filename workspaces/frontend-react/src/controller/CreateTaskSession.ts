@@ -1,7 +1,7 @@
 import { dispose } from '../lib/Disposable';
 import { Point } from '../lib/geometry/Point';
 import { AbstractSession } from './AbstractSession';
-import { TaskRepository } from '../repository/TaskRepository';
+import { TaskRepository } from '../model/repository/TaskRepository';
 
 export class CreateTaskSessionState {
     constructor(

@@ -1,4 +1,4 @@
-import { Channel } from '../lib/channel/Channel';
+import { Channel } from '../lib/Channel';
 import { BoardControllerEvents } from './BoardController';
 import { Point } from '../lib/geometry/Point';
 import { AbstractSession } from './AbstractSession';
