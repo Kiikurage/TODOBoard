@@ -1,18 +1,18 @@
 import { useEffect, useState } from 'react';
-import { useTasks } from './hook/useTasks';
 import { TaskCard } from './TaskCard';
-import { useLinks } from './hook/useLinks';
 import { LinkView } from './LinkView';
 import { CreateTaskForm } from './CreateTaskForm';
 import { Point } from '../lib/geometry/Point';
-import { boardController, readLinks, readTasks } from '../deps';
+import { boardController } from '../deps';
 import { CreateLinkSession } from '../controller/CreateLinkSession';
 import { CreateLinkView } from './CreateLinkView';
 import { CreateTaskSession } from '../controller/CreateTaskSession';
+import { useDataChannel } from './hook/useDataChannel';
+import { useTasks } from './hook/useTasks';
 
 export function BoardView() {
-    const tasks = useTasks(readTasks());
-    const links = useLinks(readLinks());
+    const tasks = useTasks(boardController().taskRepository);
+    const links = useDataChannel(boardController().readLinks());
 
     const [createLinkSessions, setCreateLinkSessions] = useState<CreateLinkSession[]>([]);
     useEffect(() => {

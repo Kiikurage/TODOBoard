@@ -1,7 +1,5 @@
 import { TaskRepository } from './repository/TaskRepository';
 import { LinkRepository } from './repository/LinkRepository';
-import { UpdateTaskUseCase } from './usecase/UpdateTaskUseCase';
-import { ReadTasksUseCase } from './usecase/ReadTasksUseCase';
 import { ReadLinksUseCase } from './usecase/ReadLinksUseCase';
 import { BoardController } from './controller/BoardController';
 import { singleton } from './lib/singleton';
@@ -16,9 +14,5 @@ export const createLinkAndSave = singleton(() =>
 );
 export const readLinks = singleton(() => ReadLinksUseCase(taskRepository(), linkRepository()));
 export const readLinkById = singleton(() => ReadLinkByIdUseCase(taskRepository(), linkRepository()));
-export const readTasks = singleton(() => ReadTasksUseCase(taskRepository()));
-export const updateTask = singleton(() => UpdateTaskUseCase(taskRepository()));
 
-export const boardController = singleton(
-    () => new BoardController(taskRepository(), createLinkAndSave(), updateTask()),
-);
+export const boardController = singleton(() => new BoardController(taskRepository(), createLinkAndSave(), readLinks()));

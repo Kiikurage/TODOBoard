@@ -4,9 +4,9 @@ import { DragSession } from './DragSession';
 import { CreateLinkSession } from './CreateLinkSession';
 import { MoveTaskSession } from './MoveTaskSession';
 import { CreateTaskSession } from './CreateTaskSession';
-import { TaskDraft, TaskRepository } from '../repository/TaskRepository';
-import { UpdateTaskProps, UpdateTaskUseCase } from '../usecase/UpdateTaskUseCase';
+import { TaskRepository, UpdateTaskProps } from '../repository/TaskRepository';
 import { CreateLinkAndSaveUseCase } from '../usecase/CreateLinkAndSaveUseCase';
+import { ReadLinksUseCase } from '../usecase/ReadLinksUseCase';
 
 export interface BoardControllerEvents {
     readonly onPointerDown: Channel<Point>;
@@ -31,18 +31,18 @@ export class BoardController implements BoardControllerEvents {
     public readonly onCreateLinkSessionStart = new Channel<CreateLinkSession>();
 
     constructor(
-        private readonly taskRepository: TaskRepository,
-        private readonly createLinkAndSave: CreateLinkAndSaveUseCase,
-        private readonly updateTask: UpdateTaskUseCase,
+        public readonly taskRepository: TaskRepository,
+        public readonly createLinkAndSave: CreateLinkAndSaveUseCase,
+        public readonly readLinks: ReadLinksUseCase,
     ) {}
 
     handleTaskUpdate(taskId: string, props: UpdateTaskProps) {
-        this.updateTask(taskId, props);
+        this.taskRepository.update(taskId, props);
     }
 
     handleTaskDragStart(taskId: string, point: Point) {
         this.onMoveTaskSessionStart.fire(
-            new MoveTaskSession(taskId, new DragSession(this, point), this.taskRepository, this.updateTask),
+            new MoveTaskSession(taskId, new DragSession(this, point), this.taskRepository),
         );
     }
 
