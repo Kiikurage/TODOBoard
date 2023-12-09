@@ -4,15 +4,7 @@ import { Rect } from '../lib/geometry/Rect';
 import { TaskRepository } from '../repository/TaskRepository';
 
 export function UpdateTaskUseCase(taskRepository: TaskRepository) {
-    return function updateTask(
-        taskId: string,
-        props: Partial<{
-            rect: Rect;
-            title: string;
-            description: string;
-            completed: boolean;
-        }>,
-    ): Task {
+    return function updateTask(taskId: string, props: UpdateTaskProps): Task {
         const oldTask = taskRepository.readAll().get(taskId) ?? throwError(`Task #${taskId} is not found`);
         const newTask = oldTask.copy(props);
 
@@ -25,3 +17,10 @@ export function UpdateTaskUseCase(taskRepository: TaskRepository) {
 }
 
 export type UpdateTaskUseCase = ReturnType<typeof UpdateTaskUseCase>;
+
+export interface UpdateTaskProps {
+    readonly rect?: Rect;
+    readonly title?: string;
+    readonly description?: string;
+    readonly completed?: boolean;
+}

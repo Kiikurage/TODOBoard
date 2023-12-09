@@ -1,5 +1,8 @@
-import { Disposable, SymbolDispose } from '../Disposable';
+import { Disposable } from '../Disposable';
 
+/**
+ * 登録されたリスナーへイベントを配信するチャネル
+ */
 export class Channel<T = void> implements Disposable {
     private readonly callbacks = new Set<(value: T) => void>();
 
@@ -17,7 +20,7 @@ export class Channel<T = void> implements Disposable {
         [...this.callbacks].forEach((callback) => callback(value));
     }
 
-    [SymbolDispose](): void {
+    [Disposable.dispose](): void {
         this.callbacks.clear();
     }
 }

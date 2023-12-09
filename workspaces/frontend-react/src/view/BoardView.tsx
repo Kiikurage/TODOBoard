@@ -95,6 +95,14 @@ export function BoardView() {
                                 Point.create({ x: ev.clientX, y: ev.clientY }),
                             )
                         }
+                        onResize={(width, height) =>
+                            boardController().handleTaskUpdate(task.id, { rect: task.rect.copy({ width, height }) })
+                        }
+                        onTitleChange={(title) => boardController().handleTaskUpdate(task.id, { title })}
+                        onDescriptionChange={(description) =>
+                            boardController().handleTaskUpdate(task.id, { description })
+                        }
+                        onCompletedChange={(completed) => boardController().handleTaskUpdate(task.id, { completed })}
                     />
                 ))}
                 {createTaskSession !== null && <CreateTaskForm createTaskSession={createTaskSession} />}

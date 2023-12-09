@@ -1,5 +1,5 @@
 import { ch } from '../lib/channel/ch';
-import { dispose, SymbolDispose } from '../lib/Disposable';
+import { Disposable, dispose } from '../lib/Disposable';
 import { Point } from '../lib/geometry/Point';
 import { AbstractSession } from './AbstractSession';
 import { TaskRepository } from '../repository/TaskRepository';
@@ -47,8 +47,8 @@ export class CreateTaskSession extends AbstractSession {
         this.state.set((state) => state.copy({ left: position.x, top: position.y }));
     }
 
-    [SymbolDispose]() {
-        super[SymbolDispose]();
+    [Disposable.dispose]() {
+        super[Disposable.dispose]();
         dispose(this.state);
     }
 

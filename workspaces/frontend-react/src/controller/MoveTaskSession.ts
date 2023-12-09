@@ -1,5 +1,5 @@
 import { DragSession, DragSessionState } from './DragSession';
-import { dispose, SymbolDispose } from '../lib/Disposable';
+import { Disposable, dispose } from '../lib/Disposable';
 import { TaskRepository } from '../repository/TaskRepository';
 import { Point } from '../lib/geometry/Point';
 import { throwError } from '../lib/throwError';
@@ -25,7 +25,7 @@ export class MoveTaskSession extends AbstractSession {
         this.originalPosition = task.rect.p1;
     }
 
-    [SymbolDispose]() {
+    [Disposable.dispose]() {
         this.dragSession.onDragMove.removeListener(this.handleDragMove);
         this.dragSession.onDragEnd.removeListener(this.handleDragEnd);
     }

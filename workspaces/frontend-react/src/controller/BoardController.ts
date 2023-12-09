@@ -2,9 +2,11 @@ import { Channel } from '../lib/channel/Channel';
 import { Point } from '../lib/geometry/Point';
 import { DragSession } from './DragSession';
 import { CreateLinkSession } from './CreateLinkSession';
-import { linkRepository, taskRepository, updateTask } from '../deps';
 import { MoveTaskSession } from './MoveTaskSession';
 import { CreateTaskSession } from './CreateTaskSession';
+import { TaskDraft, TaskRepository } from '../repository/TaskRepository';
+import { UpdateTaskProps, UpdateTaskUseCase } from '../usecase/UpdateTaskUseCase';
+import { CreateLinkAndSaveUseCase } from '../usecase/CreateLinkAndSaveUseCase';
 
 export interface BoardControllerEvents {
     readonly onPointerDown: Channel<Point>;
@@ -28,20 +30,36 @@ export class BoardController implements BoardControllerEvents {
     public readonly onMoveTaskSessionStart = new Channel<MoveTaskSession>();
     public readonly onCreateLinkSessionStart = new Channel<CreateLinkSession>();
 
+    constructor(
+        private readonly taskRepository: TaskRepository,
+        private readonly createLinkAndSave: CreateLinkAndSaveUseCase,
+        private readonly updateTask: UpdateTaskUseCase,
+    ) {}
+
+    handleTaskUpdate(taskId: string, props: UpdateTaskProps) {
+        this.updateTask(taskId, props);
+    }
+
     handleTaskDragStart(taskId: string, point: Point) {
         this.onMoveTaskSessionStart.fire(
-            new MoveTaskSession(taskId, new DragSession(this, point), taskRepository(), updateTask()),
+            new MoveTaskSession(taskId, new DragSession(this, point), this.taskRepository, this.updateTask),
         );
     }
 
     handleCreateLinkStart(sourceTaskId: string, point: Point) {
         this.onCreateLinkSessionStart.fire(
-            new CreateLinkSession(sourceTaskId, this, new DragSession(this, point), taskRepository(), linkRepository()),
+            new CreateLinkSession(
+                sourceTaskId,
+                this,
+                new DragSession(this, point),
+                this.taskRepository,
+                this.createLinkAndSave,
+            ),
         );
     }
 
     handleDoubleClick(point: Point) {
-        this.onCreateTaskSessionStart.fire(new CreateTaskSession(point, taskRepository()));
+        this.onCreateTaskSessionStart.fire(new CreateTaskSession(point, this.taskRepository));
     }
 
     handlePointerDown(point: Point) {

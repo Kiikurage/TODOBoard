@@ -1,5 +1,8 @@
 import { Channel } from './Channel';
 
+/**
+ * 最後に通知した値を保持するチャネル。リアクティブな値のソースとして利用可能。
+ */
 export class DataChannel<T> extends Channel<T> {
     constructor(private value: T) {
         super();

@@ -1,12 +1,10 @@
 import { MouseEventHandler, useRef, useState } from 'react';
 import { Task } from '../model/Task';
-import { UpdateTaskUseCase } from '../usecase/UpdateTaskUseCase';
 import { STYLE_CARD, STYLE_CARD__ACTIVE_BORDERED } from './style/card';
 import { useResizeObserver } from './hook/useResizeObserver';
 import { STYLE_INPUT, STYLE_INPUT_FOCUSED } from './style/input';
 import { BoardController } from '../controller/BoardController';
 import { Point } from '../lib/geometry/Point';
-import { taskRepository } from '../deps';
 
 export function TaskCard({
     board,
@@ -15,6 +13,10 @@ export function TaskCard({
     onMouseEnter,
     onMouseLeave,
     onMouseDown,
+    onResize,
+    onTitleChange,
+    onDescriptionChange,
+    onCompletedChange,
 }: {
     board: BoardController;
     task: Task;
@@ -22,17 +24,14 @@ export function TaskCard({
     onMouseDown?: MouseEventHandler;
     onMouseEnter?: MouseEventHandler;
     onMouseLeave?: MouseEventHandler;
+    onResize?: (width: number, height: number) => void;
+    onTitleChange?: (title: string) => void;
+    onDescriptionChange?: (description: string) => void;
+    onCompletedChange?: (completed: boolean) => void;
 }) {
-    const [updateTask] = useState(() => UpdateTaskUseCase(taskRepository()));
-
     const cardRef = useRef<HTMLDivElement | null>(null);
     useResizeObserver(cardRef, (entry) => {
-        updateTask(task.id, {
-            rect: task.rect.copy({
-                width: entry.contentRect.width,
-                height: entry.contentRect.height,
-            }),
-        });
+        onResize?.(entry.contentRect.width, entry.contentRect.height);
     });
 
     return (
@@ -80,15 +79,8 @@ export function TaskCard({
                     >
                         #{task.id}
                     </span>
-                    <TitleForm
-                        value={task.title}
-                        completed={task.completed}
-                        onChange={(title) => updateTask(task.id, { title })}
-                    />
-                    <DescriptionForm
-                        value={task.description}
-                        onChange={(description) => updateTask(task.id, { description })}
-                    />
+                    <TitleForm value={task.title} completed={task.completed} onChange={onTitleChange} />
+                    <DescriptionForm value={task.description} onChange={onDescriptionChange} />
                 </div>
                 <div
                     css={{
@@ -98,7 +90,7 @@ export function TaskCard({
                     <input
                         type="checkbox"
                         checked={task.completed}
-                        onChange={(ev) => updateTask(task.id, { completed: ev.target.checked })}
+                        onChange={(ev) => onCompletedChange?.(ev.target.checked)}
                     />
                 </div>
             </div>
@@ -113,14 +105,14 @@ function TitleForm({
 }: {
     value: string;
     completed: boolean;
-    onChange: (value: string) => void;
+    onChange?: (value: string) => void;
 }) {
     const [isEditing, setEditing] = useState(false);
     const [draftValue, setDraftValue] = useState(value);
 
     const handleBlur = () => {
         setEditing(false);
-        onChange(draftValue);
+        onChange?.(draftValue);
     };
 
     return (
@@ -155,13 +147,13 @@ function TitleForm({
     );
 }
 
-function DescriptionForm({ value, onChange }: { value: string; onChange: (value: string) => void }) {
+function DescriptionForm({ value, onChange }: { value: string; onChange?: (value: string) => void }) {
     const [isEditing, setEditing] = useState(false);
     const [draftValue, setDraftValue] = useState(value);
 
     const handleBlur = () => {
         setEditing(false);
-        onChange(draftValue);
+        onChange?.(draftValue);
     };
 
     if (!isEditing) {

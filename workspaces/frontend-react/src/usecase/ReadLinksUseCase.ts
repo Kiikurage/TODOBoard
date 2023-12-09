@@ -15,7 +15,11 @@ export function ReadLinksUseCase(taskRepository: TaskRepository, linkRepository:
             for (const rawLink of rawLinks.values()) {
                 const sourceTask = tasks.get(rawLink.sourceTaskId);
                 const destinationTask = tasks.get(rawLink.destinationTaskId);
-                if (sourceTask === undefined || destinationTask === undefined) continue;
+                if (sourceTask === undefined || destinationTask === undefined) {
+                    console.error(`rawLink is corrupted. rawLink: ${JSON.stringify(rawLink)}`);
+                    continue;
+                }
+
                 if (sourceTask.completed || destinationTask.completed) continue;
 
                 const link = Link.create({ sourceTask, destinationTask });
