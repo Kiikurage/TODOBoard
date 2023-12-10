@@ -30,14 +30,14 @@ export class MoveViewportSession extends AbstractSession<void> {
         // origin1 = origin0 - (display1/scale1 - display0/scale0)
         //         = origin0 - (size1 - size0)
 
-        this.boardViewController.setViewportCameraOrigin(
+        this.boardViewController.setCameraOrigin(
             Point.create({
                 x:
-                    state.startCamera.viewportOrigin.x -
+                    state.startCamera.origin.x -
                     (state.currentCamera.toViewportSize(state.currentDisplayPosition).x -
                         state.startCamera.toViewportSize(state.startDisplayPosition).x),
                 y:
-                    state.startCamera.viewportOrigin.y -
+                    state.startCamera.origin.y -
                     (state.currentCamera.toViewportSize(state.currentDisplayPosition).y -
                         state.startCamera.toViewportSize(state.startDisplayPosition).y),
             }),

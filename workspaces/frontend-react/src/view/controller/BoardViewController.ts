@@ -1,47 +1,49 @@
 import { Point } from '../../lib/geometry/Point';
-import { BoardController } from '../../controller/BoardController';
+import { BoardController, BoardState } from '../../controller/BoardController';
 import { ReactiveStateMachine } from '../../lib/ReactiveStateMachine';
 import { Rect } from '../../lib/geometry/Rect';
 import { MoveViewportSession } from './MoveViewportSession';
 import { Channel } from '../../lib/Channel';
 import { DragSession } from '../../controller/DragSession';
 import { Camera } from '../model/Camera';
+import { Disposable } from '../../lib/Disposable';
 
 export class BoardViewState {
     constructor(
         public readonly camera: Camera,
-        public readonly viewportSize: Point,
+        public readonly size: Point,
+        public readonly boardState: BoardState,
     ) {}
 
-    get viewportRect(): Rect {
+    get rect(): Rect {
         return Rect.create({
-            left: this.camera.viewportOrigin.x,
-            top: this.camera.viewportOrigin.y,
-            width: this.viewportSize.x,
-            height: this.viewportSize.y,
+            left: this.camera.origin.x,
+            top: this.camera.origin.y,
+            width: this.size.x,
+            height: this.size.y,
         });
     }
 
-    setViewportCameraOrigin(viewportOrigin: Point) {
-        if (viewportOrigin.equals(this.camera.viewportOrigin)) return this;
+    setCameraOrigin(origin: Point) {
+        if (origin.equals(this.camera.origin)) return this;
 
         return this.copy({
-            camera: this.camera.copy({ viewportOrigin }),
+            camera: this.camera.copy({ origin }),
         });
     }
 
     setDisplayCameraOrigin(displayOrigin: Point) {
-        return this.setViewportCameraOrigin(this.camera.toViewportPoint(displayOrigin));
+        return this.setCameraOrigin(this.camera.toViewportPoint(displayOrigin));
     }
 
-    setViewportSize(viewportSize: Point) {
-        if (viewportSize.equals(this.viewportSize)) return this;
+    setSize(size: Point) {
+        if (size.equals(this.size)) return this;
 
-        return this.copy({ viewportSize });
+        return this.copy({ size });
     }
 
     setDisplaySize(displayOrigin: Point) {
-        return this.setViewportSize(this.camera.toViewportSize(displayOrigin));
+        return this.setSize(this.camera.toViewportSize(displayOrigin));
     }
 
     copy(props: Partial<typeof BoardViewState.ownProps>): this {
@@ -56,7 +58,8 @@ export class BoardViewState {
 
     static readonly EMPTY = this.create({
         camera: Camera.EMPTY,
-        viewportSize: Point.EMPTY,
+        size: Point.EMPTY,
+        boardState: BoardState.EMPTY,
     });
 }
 
@@ -67,20 +70,26 @@ export class BoardViewController extends ReactiveStateMachine<BoardViewState> {
 
     constructor(private readonly controller: BoardController) {
         super(BoardViewState.EMPTY);
+
+        this.controller.onChange.addListener(this.handleControllerChange);
     }
 
-    setViewportCameraOrigin(viewportOrigin: Point) {
-        this.state = this.state.setViewportCameraOrigin(viewportOrigin);
-        this.onCameraChange.fire(this.state.camera);
+    [Disposable.dispose]() {
+        super[Disposable.dispose]();
+
+        this.controller.onChange.removeListener(this.handleControllerChange);
     }
 
-    setDisplayCameraOrigin(displayOrigin: Point) {
-        this.state = this.state.setDisplayCameraOrigin(displayOrigin);
-        this.onCameraChange.fire(this.state.camera);
+    get taskRepository() {
+        return this.controller.taskRepository;
     }
 
-    setViewportSize(viewportSize: Point) {
-        this.state = this.state.setViewportSize(viewportSize);
+    get linkRepository() {
+        return this.controller.linkRepository;
+    }
+
+    setCameraOrigin(origin: Point) {
+        this.state = this.state.setCameraOrigin(origin);
         this.onCameraChange.fire(this.state.camera);
     }
 
@@ -92,6 +101,7 @@ export class BoardViewController extends ReactiveStateMachine<BoardViewState> {
     readonly handleDoubleClick = (ev: MouseEvent) => {
         ev.stopPropagation();
         ev.preventDefault();
+
         this.controller.startCreateTaskSession(this.getViewportPointFromMouseEvent(ev));
     };
 
@@ -106,22 +116,18 @@ export class BoardViewController extends ReactiveStateMachine<BoardViewState> {
                 this,
             );
         }
-
-        this.controller.handlePointerDown(this.getViewportPointFromMouseEvent(ev));
     };
 
     readonly handlePointerMove = (ev: PointerEvent) => {
         ev.stopPropagation();
         ev.preventDefault();
         this.onPointerMove.fire(ev);
-        this.controller.handlePointerMove(this.getViewportPointFromMouseEvent(ev));
     };
 
     readonly handlePointerUp = (ev: PointerEvent) => {
         ev.stopPropagation();
         ev.preventDefault();
         this.onPointerUp.fire(ev);
-        this.controller.handlePointerUp(this.getViewportPointFromMouseEvent(ev));
     };
 
     readonly handleTaskDragHandlePointerDown = (ev: PointerEvent, taskId: string) => {
@@ -130,6 +136,18 @@ export class BoardViewController extends ReactiveStateMachine<BoardViewState> {
 
     readonly handleCreateLinkButtonPointerDown = (ev: PointerEvent, taskId: string) => {
         this.controller.startCreateLinkSession(taskId, new DragSession(this, this.getDisplayPointFromMouseEvent(ev)));
+    };
+
+    readonly handleTaskPointerEnter = (taskId: string) => {
+        this.controller.handleTaskPointerEnter(taskId);
+    };
+
+    readonly handleTaskPointerLeave = (taskId: string) => {
+        this.controller.handleTaskPointerLeave(taskId);
+    };
+
+    private readonly handleControllerChange = () => {
+        this.state = this.state.copy({ boardState: this.controller.state });
     };
 
     private getDisplayPointFromMouseEvent(ev: MouseEvent): Point {

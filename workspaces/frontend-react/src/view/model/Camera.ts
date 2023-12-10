@@ -2,21 +2,21 @@ import { Point } from '../../lib/geometry/Point';
 
 export class Camera {
     constructor(
-        public readonly viewportOrigin: Point,
+        public readonly origin: Point,
         public readonly scale: number,
     ) {}
 
     toViewportPoint(displayPoint: Point): Point {
         return Point.create({
-            x: displayPoint.x / this.scale + this.viewportOrigin.x,
-            y: displayPoint.y / this.scale + this.viewportOrigin.y,
+            x: displayPoint.x / this.scale + this.origin.x,
+            y: displayPoint.y / this.scale + this.origin.y,
         });
     }
 
-    toDisplayPoint(viewportPoint: Point): Point {
+    toDisplayPoint(point: Point): Point {
         return Point.create({
-            x: (viewportPoint.x - this.viewportOrigin.x) * this.scale,
-            y: (viewportPoint.y - this.viewportOrigin.y) * this.scale,
+            x: (point.x - this.origin.x) * this.scale,
+            y: (point.y - this.origin.y) * this.scale,
         });
     }
 
@@ -24,8 +24,8 @@ export class Camera {
         return Point.create({ x: displaySize.x / this.scale, y: displaySize.y / this.scale });
     }
 
-    toDisplaySize(viewportSize: Point): Point {
-        return Point.create({ x: viewportSize.x * this.scale, y: viewportSize.y * this.scale });
+    toDisplaySize(size: Point): Point {
+        return Point.create({ x: size.x * this.scale, y: size.y * this.scale });
     }
 
     copy(props: Partial<typeof Camera.ownProps>): Camera {
@@ -38,5 +38,5 @@ export class Camera {
 
     private static readonly ownProps = { ...this.prototype };
 
-    static readonly EMPTY = this.create({ viewportOrigin: Point.EMPTY, scale: 1 });
+    static readonly EMPTY = this.create({ origin: Point.EMPTY, scale: 1 });
 }

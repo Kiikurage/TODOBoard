@@ -3,7 +3,6 @@ import { Task } from '../model/Task';
 import { STYLE_CARD } from './style/card';
 import { useResizeObserver } from './hook/useResizeObserver';
 import { STYLE_INPUT, STYLE_INPUT_FOCUSED } from './style/input';
-import { BoardController } from '../controller/BoardController';
 import { BoardViewState } from './controller/BoardViewController';
 
 export function TaskCard({
@@ -19,7 +18,6 @@ export function TaskCard({
     onCompletedChange,
 }: {
     boardViewState: BoardViewState;
-    board: BoardController;
     task: Task;
     active?: boolean;
     onPointerDown?: PointerEventHandler;
@@ -44,8 +42,8 @@ export function TaskCard({
             css={{
                 ...STYLE_CARD,
                 position: 'absolute',
-                top: task.rect.top - boardViewState.viewportRect.top,
-                left: task.rect.left - boardViewState.viewportRect.left,
+                top: task.rect.top - boardViewState.rect.top,
+                left: task.rect.left - boardViewState.rect.left,
                 width: 400,
                 transition: 'transform 160ms ease-in',
             }}

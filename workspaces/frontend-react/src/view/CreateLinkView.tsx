@@ -47,8 +47,8 @@ export function CreateLinkView({
                         pointerEvents: 'none',
                         position: 'absolute',
                         background: 'none',
-                        top: sourceTask.rect.top - boardViewState.viewportRect.top,
-                        left: sourceTask.rect.left - boardViewState.viewportRect.left,
+                        top: sourceTask.rect.top - boardViewState.rect.top,
+                        left: sourceTask.rect.left - boardViewState.rect.left,
                         width: sourceTask.rect.width,
                         height: sourceTask.rect.height,
                     }}
@@ -61,17 +61,17 @@ export function CreateLinkView({
                         pointerEvents: 'none',
                         position: 'absolute',
                         background: 'none',
-                        top: destinationTask.rect.top - boardViewState.viewportRect.top,
-                        left: destinationTask.rect.left - boardViewState.viewportRect.left,
+                        top: destinationTask.rect.top - boardViewState.rect.top,
+                        left: destinationTask.rect.left - boardViewState.rect.left,
                         width: destinationTask.rect.width,
                         height: destinationTask.rect.height,
                     }}
                 />
             )}
             <svg
-                viewBox={`0 0 ${boardViewState.viewportRect.width} ${boardViewState.viewportRect.height}`}
-                width={boardViewState.viewportRect.width}
-                height={boardViewState.viewportRect.height}
+                viewBox={`0 0 ${boardViewState.rect.width} ${boardViewState.rect.height}`}
+                width={boardViewState.rect.width}
+                height={boardViewState.rect.height}
                 css={{
                     position: 'fixed',
                     inset: 0,
@@ -83,8 +83,8 @@ export function CreateLinkView({
                         <rect x={0} y={0} width="100%" height="100%" fill="white" strokeWidth={0} />
                         {isNotNullish(sourceTask) && (
                             <rect
-                                x={sourceTask.rect.left - boardViewState.viewportRect.left}
-                                y={sourceTask.rect.top - boardViewState.viewportRect.top}
+                                x={sourceTask.rect.left - boardViewState.rect.left}
+                                y={sourceTask.rect.top - boardViewState.rect.top}
                                 width={sourceTask.rect.width}
                                 height={sourceTask.rect.height}
                                 fill="black"
@@ -93,8 +93,8 @@ export function CreateLinkView({
                         )}
                         {isNotNullish(destinationTask) && (
                             <rect
-                                x={destinationTask.rect.left - boardViewState.viewportRect.left}
-                                y={destinationTask.rect.top - boardViewState.viewportRect.top}
+                                x={destinationTask.rect.left - boardViewState.rect.left}
+                                y={destinationTask.rect.top - boardViewState.rect.top}
                                 width={destinationTask.rect.width}
                                 height={destinationTask.rect.height}
                                 fill="black"
@@ -104,10 +104,10 @@ export function CreateLinkView({
                     </mask>
                 </defs>
                 <line
-                    x1={point1.x - boardViewState.viewportRect.left}
-                    y1={point1.y - boardViewState.viewportRect.top}
-                    x2={(point2?.x ?? linkDraftP2.x) - boardViewState.viewportRect.left}
-                    y2={(point2?.y ?? linkDraftP2.y) - boardViewState.viewportRect.top}
+                    x1={point1.x - boardViewState.rect.left}
+                    y1={point1.y - boardViewState.rect.top}
+                    x2={(point2?.x ?? linkDraftP2.x) - boardViewState.rect.left}
+                    y2={(point2?.y ?? linkDraftP2.y) - boardViewState.rect.top}
                     strokeWidth={2}
                     strokeDasharray={readyToSubmit ? 'none' : '4 4'}
                     stroke={readyToSubmit ? COLOR_ACTIVE : '#bbb'}

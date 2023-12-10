@@ -33,8 +33,8 @@ export class MoveTaskSession extends AbstractSession<void> {
 
         this.taskRepository.update(task.id, {
             rect: task.rect.copy({
-                left: this.originalPosition.x + state.viewportDiff.x,
-                top: this.originalPosition.y + state.viewportDiff.y,
+                left: this.originalPosition.x + state.diff.x,
+                top: this.originalPosition.y + state.diff.y,
             }),
         });
     };

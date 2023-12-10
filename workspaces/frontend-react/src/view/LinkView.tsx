@@ -4,9 +4,9 @@ import { BoardViewState } from './controller/BoardViewController';
 export function LinkView({ link, boardViewState }: { link: Link; boardViewState: BoardViewState }) {
     return (
         <svg
-            width={boardViewState.viewportRect.width}
-            height={boardViewState.viewportRect.height}
-            viewBox={`${boardViewState.viewportRect.left} ${boardViewState.viewportRect.top} ${boardViewState.viewportRect.width} ${boardViewState.viewportRect.height}`}
+            width={boardViewState.rect.width}
+            height={boardViewState.rect.height}
+            viewBox={`${boardViewState.rect.left} ${boardViewState.rect.top} ${boardViewState.rect.width} ${boardViewState.rect.height}`}
             stroke="#bbb"
             strokeWidth={2}
             css={{

@@ -11,20 +11,20 @@ import { DragSession } from './DragSession';
 
 export class BoardState {
     constructor(
-        public readonly createLinkSession: CreateLinkSession | null,
         public readonly createTaskSession: CreateTaskSession | null,
+        public readonly createLinkSession: CreateLinkSession | null,
+        public readonly moveTaskSession: MoveTaskSession | null,
     ) {}
 
     copy(props: Partial<typeof BoardState.ownProps>): BoardState {
         return Object.assign(Object.create(BoardState.prototype), this, props);
     }
 
-    static empty() {
-        return this.create({
-            createLinkSession: null,
-            createTaskSession: null,
-        });
-    }
+    static readonly EMPTY = this.create({
+        createLinkSession: null,
+        moveTaskSession: null,
+        createTaskSession: null,
+    });
 
     static create(props: typeof this.ownProps) {
         return this.prototype.copy(props);
@@ -34,9 +34,6 @@ export class BoardState {
 }
 
 export class BoardController extends ReactiveStateMachine<BoardState> {
-    public readonly onPointerDown = new Channel<Point>();
-    public readonly onPointerMove = new Channel<Point>();
-    public readonly onPointerUp = new Channel<Point>();
     public readonly onTaskPointerEnter = new Channel<string>();
     public readonly onTaskPointerLeave = new Channel<string>();
 
@@ -44,24 +41,30 @@ export class BoardController extends ReactiveStateMachine<BoardState> {
         public readonly taskRepository: TaskRepository,
         public readonly linkRepository: LinkRepository,
     ) {
-        super(BoardState.empty());
+        super(BoardState.EMPTY);
     }
 
     [Disposable.dispose]() {
-        dispose(this.onPointerMove);
-        dispose(this.onPointerUp);
         dispose(this.onTaskPointerEnter);
         dispose(this.onTaskPointerLeave);
 
         super[Disposable.dispose]();
     }
 
-    startMoveTaskSession(taskId: string, dragSession: DragSession): MoveTaskSession {
-        return new MoveTaskSession(taskId, dragSession, this.taskRepository);
+    startMoveTaskSession(taskId: string, dragSession: DragSession) {
+        const session = new MoveTaskSession(taskId, dragSession, this.taskRepository);
+
+        this.state = this.state.copy({ moveTaskSession: session });
+
+        session.onEnd.addListener(() => {
+            this.state = this.state.copy({ moveTaskSession: null });
+        });
+
+        return session;
     }
 
     startCreateLinkSession(sourceTaskId: string, dragSession: DragSession) {
-        const createLinkSession = new CreateLinkSession(
+        const session = new CreateLinkSession(
             sourceTaskId,
             this,
             dragSession,
@@ -69,44 +72,32 @@ export class BoardController extends ReactiveStateMachine<BoardState> {
             this.linkRepository,
         );
 
-        createLinkSession.onEnd.addListener(this.handleCreateLinkSessionEnd);
+        this.state = this.state.copy({ createLinkSession: session });
 
-        this.state = this.state.copy({ createLinkSession });
+        session.onEnd.addListener(() => {
+            this.state = this.state.copy({ createLinkSession: null });
+        });
+
+        return session;
     }
 
     startCreateTaskSession(point: Point) {
-        const createTaskSession = new CreateTaskSession(point, this.taskRepository);
+        const session = new CreateTaskSession(point, this.taskRepository);
 
-        createTaskSession.onEnd.addListener(this.handleCreateTaskSessionEnd);
+        this.state = this.state.copy({ createTaskSession: session });
 
-        this.state = this.state.copy({ createTaskSession });
+        session.onEnd.addListener(() => {
+            this.state = this.state.copy({ createTaskSession: null });
+        });
+
+        return session;
     }
 
-    handlePointerDown(point: Point) {
-        this.onPointerDown.fire(point);
-    }
-
-    handlePointerMove(point: Point) {
-        this.onPointerMove.fire(point);
-    }
-
-    handlePointerUp(point: Point) {
-        this.onPointerUp.fire(point);
-    }
-
-    handleTaskPointerEnter(taskId: string) {
+    readonly handleTaskPointerEnter = (taskId: string) => {
         this.onTaskPointerEnter.fire(taskId);
-    }
-
-    handleTaskPointerLeave(taskId: string) {
-        this.onTaskPointerLeave.fire(taskId);
-    }
-
-    private handleCreateLinkSessionEnd = () => {
-        this.state = this.state.copy({ createLinkSession: null });
     };
 
-    private handleCreateTaskSessionEnd = () => {
-        this.state = this.state.copy({ createTaskSession: null });
+    readonly handleTaskPointerLeave = (taskId: string) => {
+        this.onTaskPointerLeave.fire(taskId);
     };
 }

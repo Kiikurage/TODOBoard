@@ -14,11 +14,11 @@ export class DragSessionState {
         public readonly currentCamera: Camera,
     ) {}
 
-    get startViewportPosition(): Point {
+    get startPosition(): Point {
         return this.startCamera.toViewportPoint(this.startDisplayPosition);
     }
 
-    get currentViewportPosition(): Point {
+    get currentPosition(): Point {
         return this.currentCamera.toViewportPoint(this.currentDisplayPosition);
     }
 
@@ -29,10 +29,10 @@ export class DragSessionState {
         });
     }
 
-    get viewportDiff(): Point {
+    get diff(): Point {
         return Point.create({
-            x: this.currentViewportPosition.x - this.startViewportPosition.x,
-            y: this.currentViewportPosition.y - this.startViewportPosition.y,
+            x: this.currentPosition.x - this.startPosition.x,
+            y: this.currentPosition.y - this.startPosition.y,
         });
     }
 

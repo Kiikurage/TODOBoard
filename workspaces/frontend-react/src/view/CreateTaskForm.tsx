@@ -18,8 +18,8 @@ export function CreateTaskForm({
             css={{
                 ...STYLE_CARD__ACTIVE_BORDERED,
                 position: 'absolute',
-                top: top - boardViewState.viewportRect.top,
-                left: left - boardViewState.viewportRect.left,
+                top: top - boardViewState.rect.top,
+                left: left - boardViewState.rect.left,
                 display: 'flex',
                 flexDirection: 'row',
                 alignItems: 'flex-start',

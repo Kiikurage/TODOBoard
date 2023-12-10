@@ -1,36 +1,31 @@
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useRef } from 'react';
 import { TaskCard } from './TaskCard';
 import { LinkView } from './LinkView';
 import { CreateTaskForm } from './CreateTaskForm';
 import { Point } from '../lib/geometry/Point';
-import { boardController } from '../deps';
 import { CreateLinkView } from './CreateLinkView';
 import { useReactive } from './hook/useReactive';
 import { useResizeObserver } from './hook/useResizeObserver';
 import { BoardViewController } from './controller/BoardViewController';
 
-export function BoardView() {
-    const viewController = useState(() => new BoardViewController(boardController()))[0];
-    const controller = boardController();
-
+export function BoardView({ controller }: { controller: BoardViewController }) {
     const tasks = useReactive(controller.taskRepository, (repository) => repository.readOpenTasksAll());
     const links = useReactive(controller.linkRepository, (repository) => repository.readAll());
 
-    const { createLinkSession, createTaskSession } = useReactive(controller, (controller) => controller.state);
-    const boardViewState = useReactive(viewController, (controller) => controller.state);
+    const boardViewState = useReactive(controller, (controller) => controller.state);
 
     useEffect(() => {
-        window.addEventListener('pointermove', viewController.handlePointerMove);
-        window.addEventListener('pointerup', viewController.handlePointerUp);
+        window.addEventListener('pointermove', controller.handlePointerMove);
+        window.addEventListener('pointerup', controller.handlePointerUp);
         return () => {
-            window.removeEventListener('pointermove', viewController.handlePointerMove);
-            window.removeEventListener('pointerup', viewController.handlePointerUp);
+            window.removeEventListener('pointermove', controller.handlePointerMove);
+            window.removeEventListener('pointerup', controller.handlePointerUp);
         };
-    }, [viewController.handlePointerMove, viewController.handlePointerUp]);
+    }, [controller.handlePointerMove, controller.handlePointerUp]);
 
     const ref = useRef<HTMLDivElement | null>(null);
     useResizeObserver(ref, (entry) => {
-        viewController.setDisplaySize(
+        controller.setDisplaySize(
             Point.create({
                 x: entry.contentRect.width,
                 y: entry.contentRect.height,
@@ -48,13 +43,13 @@ export function BoardView() {
                 background: '#f8faff',
             }}
             onPointerDown={(ev) => {
-                viewController.handlePointerDown(ev.nativeEvent);
+                controller.handlePointerDown(ev.nativeEvent);
                 window.getSelection()?.removeAllRanges?.();
             }}
         >
             <div css={{ pointerEvents: 'none', fontFamily: 'monospace' }}>
                 <div>Updated at: {new Date().toISOString()}</div>
-                <div>viewport: {'' + boardViewState.viewportRect}</div>
+                <div>viewport: {'' + boardViewState.rect}</div>
             </div>
 
             <div
@@ -62,7 +57,7 @@ export function BoardView() {
                     position: 'absolute',
                     inset: 0,
                 }}
-                onDoubleClick={(ev) => viewController.handleDoubleClick(ev.nativeEvent)}
+                onDoubleClick={(ev) => controller.handleDoubleClick(ev.nativeEvent)}
             >
                 {[...links.values()].map((link) => (
                     <LinkView link={link} key={link.id} boardViewState={boardViewState} />
@@ -72,14 +67,11 @@ export function BoardView() {
                         task={task}
                         key={task.id}
                         boardViewState={boardViewState}
-                        board={controller}
-                        onPointerDown={(ev) =>
-                            viewController.handleCreateLinkButtonPointerDown(ev.nativeEvent, task.id)
-                        }
+                        onPointerDown={(ev) => controller.handleCreateLinkButtonPointerDown(ev.nativeEvent, task.id)}
                         onPointerEnter={() => controller.handleTaskPointerEnter(task.id)}
                         onPointerLeave={() => controller.handleTaskPointerLeave(task.id)}
                         onTaskDragHandlePointerDown={(ev) =>
-                            viewController.handleTaskDragHandlePointerDown(ev.nativeEvent, task.id)
+                            controller.handleTaskDragHandlePointerDown(ev.nativeEvent, task.id)
                         }
                         onResize={(width, height) =>
                             controller.taskRepository.update(task.id, { rect: task.rect.copy({ width, height }) })
@@ -91,11 +83,17 @@ export function BoardView() {
                         onCompletedChange={(completed) => controller.taskRepository.update(task.id, { completed })}
                     />
                 ))}
-                {createTaskSession !== null && (
-                    <CreateTaskForm createTaskSession={createTaskSession} boardViewState={boardViewState} />
+                {boardViewState.boardState.createTaskSession !== null && (
+                    <CreateTaskForm
+                        createTaskSession={boardViewState.boardState.createTaskSession}
+                        boardViewState={boardViewState}
+                    />
                 )}
-                {createLinkSession !== null && (
-                    <CreateLinkView createLinkSession={createLinkSession} boardViewState={boardViewState} />
+                {boardViewState.boardState.createLinkSession !== null && (
+                    <CreateLinkView
+                        createLinkSession={boardViewState.boardState.createLinkSession}
+                        boardViewState={boardViewState}
+                    />
                 )}
             </div>
         </div>

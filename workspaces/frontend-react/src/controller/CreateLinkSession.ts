@@ -51,8 +51,8 @@ export class CreateLinkSession extends AbstractSession<CreateLinkSessionState> {
     ) {
         super(
             CreateLinkSessionState.create({
-                currentX: dragSession.state.currentViewportPosition.x,
-                currentY: dragSession.state.currentViewportPosition.y,
+                currentX: dragSession.state.currentPosition.x,
+                currentY: dragSession.state.currentPosition.y,
                 sourceTaskId: sourceTaskId,
                 sourceTask: taskRepository.findById(sourceTaskId),
                 destinationTaskId: null,
@@ -103,8 +103,8 @@ export class CreateLinkSession extends AbstractSession<CreateLinkSessionState> {
 
     private readonly handleDragMove = (state: DragSessionState) => {
         this.state = this.state.copy({
-            currentX: state.currentViewportPosition.x,
-            currentY: state.currentViewportPosition.y,
+            currentX: state.currentPosition.x,
+            currentY: state.currentPosition.y,
         });
     };
 
