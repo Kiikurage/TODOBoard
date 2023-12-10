@@ -4,16 +4,15 @@ import { STYLE_CARD } from './style/card';
 import { useResizeObserver } from './hook/useResizeObserver';
 import { STYLE_INPUT, STYLE_INPUT_FOCUSED } from './style/input';
 import { BoardController } from '../controller/BoardController';
-import { Point } from '../lib/geometry/Point';
 import { BoardViewState } from './controller/BoardViewController';
 
 export function TaskCard({
     boardViewState,
-    board,
     task,
     onPointerEnter,
     onPointerLeave,
     onPointerDown,
+    onTaskDragHandlePointerDown,
     onResize,
     onTitleChange,
     onDescriptionChange,
@@ -26,6 +25,7 @@ export function TaskCard({
     onPointerDown?: PointerEventHandler;
     onPointerEnter?: PointerEventHandler;
     onPointerLeave?: PointerEventHandler;
+    onTaskDragHandlePointerDown?: PointerEventHandler;
     onResize?: (width: number, height: number) => void;
     onTitleChange?: (title: string) => void;
     onDescriptionChange?: (description: string) => void;
@@ -60,7 +60,7 @@ export function TaskCard({
                     gap: 4,
                 }}
             >
-                <DragHandle task={task} board={board} />
+                <DragHandle onTaskDragHandlePointerDown={onTaskDragHandlePointerDown} />
                 <div
                     css={{
                         flex: '1 1 0',
@@ -232,7 +232,7 @@ function DescriptionForm({ value, onChange }: { value: string; onChange?: (value
     );
 }
 
-function DragHandle({ task, board }: { task: Task; board: BoardController }) {
+function DragHandle({ onTaskDragHandlePointerDown }: { onTaskDragHandlePointerDown?: PointerEventHandler }) {
     return (
         <div
             css={{
@@ -251,10 +251,7 @@ function DragHandle({ task, board }: { task: Task; board: BoardController }) {
                     background: 'rgba(194,208,218,0.74)',
                 },
             }}
-            onPointerDown={(ev) => {
-                board.startMoveTaskSession(task.id, Point.create({ x: ev.clientX, y: ev.clientY }));
-                ev.stopPropagation();
-            }}
+            onPointerDown={onTaskDragHandlePointerDown}
         >
             <span
                 className="material-symbols-outlined"

@@ -30,16 +30,16 @@ export class CreateLinkSessionState {
         return this.sourceTask?.id === taskId || this.destinationTask?.id === taskId;
     }
 
-    copy(props: Partial<typeof ownProps>): CreateLinkSessionState {
+    copy(props: Partial<typeof CreateLinkSessionState.ownProps>): CreateLinkSessionState {
         return Object.assign(Object.create(CreateLinkSessionState.prototype), this, props);
     }
 
-    static create(props: typeof ownProps): CreateLinkSessionState {
-        return CreateLinkSessionState.prototype.copy(props);
+    static create(props: typeof this.ownProps) {
+        return this.prototype.copy(props);
     }
-}
 
-const ownProps = { ...CreateLinkSessionState.prototype };
+    private static readonly ownProps = { ...this.prototype };
+}
 
 export class CreateLinkSession extends AbstractSession<CreateLinkSessionState> {
     constructor(
@@ -51,8 +51,8 @@ export class CreateLinkSession extends AbstractSession<CreateLinkSessionState> {
     ) {
         super(
             CreateLinkSessionState.create({
-                currentX: dragSession.state.currentPosition.x,
-                currentY: dragSession.state.currentPosition.y,
+                currentX: dragSession.state.currentViewportPosition.x,
+                currentY: dragSession.state.currentViewportPosition.y,
                 sourceTaskId: sourceTaskId,
                 sourceTask: taskRepository.findById(sourceTaskId),
                 destinationTaskId: null,
@@ -103,8 +103,8 @@ export class CreateLinkSession extends AbstractSession<CreateLinkSessionState> {
 
     private readonly handleDragMove = (state: DragSessionState) => {
         this.state = this.state.copy({
-            currentX: state.currentPosition.x,
-            currentY: state.currentPosition.y,
+            currentX: state.currentViewportPosition.x,
+            currentY: state.currentViewportPosition.y,
         });
     };
 

@@ -2,19 +2,37 @@ import { Channel } from '../lib/Channel';
 import { Point } from '../lib/geometry/Point';
 import { AbstractSession } from './AbstractSession';
 import { Disposable, dispose } from '../lib/Disposable';
-import { BoardController } from './BoardController';
+import { BoardViewController } from '../view/controller/BoardViewController';
+import { Camera } from '../view/model/Camera';
 
 export class DragSessionState {
     constructor(
         public readonly completed: boolean,
-        public readonly startPosition: Point,
-        public readonly currentPosition: Point,
+        public readonly startDisplayPosition: Point,
+        public readonly startCamera: Camera,
+        public readonly currentDisplayPosition: Point,
+        public readonly currentCamera: Camera,
     ) {}
 
-    get diff(): Point {
+    get startViewportPosition(): Point {
+        return this.startCamera.toViewportPoint(this.startDisplayPosition);
+    }
+
+    get currentViewportPosition(): Point {
+        return this.currentCamera.toViewportPoint(this.currentDisplayPosition);
+    }
+
+    get displayDiff(): Point {
         return Point.create({
-            x: this.currentPosition.x - this.startPosition.x,
-            y: this.currentPosition.y - this.startPosition.y,
+            x: this.currentDisplayPosition.x - this.startDisplayPosition.x,
+            y: this.currentDisplayPosition.y - this.startDisplayPosition.y,
+        });
+    }
+
+    get viewportDiff(): Point {
+        return Point.create({
+            x: this.currentViewportPosition.x - this.startViewportPosition.x,
+            y: this.currentViewportPosition.y - this.startViewportPosition.y,
         });
     }
 
@@ -22,50 +40,66 @@ export class DragSessionState {
         return this.copy({ completed: true });
     }
 
-    static start(point: Point): DragSessionState {
-        return DragSessionState.prototype.copy({ completed: false, startPosition: point, currentPosition: point });
+    static start(displayPosition: Point, camera: Camera): DragSessionState {
+        return DragSessionState.prototype.copy({
+            completed: false,
+            startDisplayPosition: displayPosition,
+            startCamera: camera,
+            currentDisplayPosition: displayPosition,
+            currentCamera: camera,
+        });
     }
 
-    move(point: Point): DragSessionState {
+    setDisplayPosition(displayPosition: Point): DragSessionState {
         if (this.completed) return this;
 
-        return this.copy({ currentPosition: point });
+        return this.copy({ currentDisplayPosition: displayPosition });
     }
 
-    copy(props: Partial<typeof ownProps>): DragSessionState {
+    setCamera(camera: Camera): DragSessionState {
+        if (this.completed) return this;
+
+        return this.copy({ currentCamera: camera });
+    }
+
+    copy(props: Partial<typeof DragSessionState.ownProps>): DragSessionState {
         return Object.assign(Object.create(DragSessionState.prototype), this, props);
     }
 
-    static create(props: typeof ownProps): DragSessionState {
-        return DragSessionState.prototype.copy(props);
+    static create(props: typeof this.ownProps) {
+        return this.prototype.copy(props);
     }
 
-    static readonly EMPTY = DragSessionState.create({
+    private static readonly ownProps = { ...this.prototype };
+
+    static readonly EMPTY = this.create({
         completed: true,
-        startPosition: Point.create({ x: 0, y: 0 }),
-        currentPosition: Point.create({ x: 0, y: 0 }),
+        startDisplayPosition: Point.EMPTY,
+        startCamera: Camera.EMPTY,
+        currentDisplayPosition: Point.EMPTY,
+        currentCamera: Camera.EMPTY,
     });
 }
-
-const ownProps = { ...DragSessionState.prototype };
 
 export class DragSession extends AbstractSession<DragSessionState> {
     public readonly onDragMove: Channel<DragSessionState> = new Channel();
     public readonly onDragEnd: Channel<DragSessionState> = new Channel();
 
     constructor(
-        private readonly boardController: BoardController,
-        startPoint: Point,
+        private readonly boardViewController: BoardViewController,
+        startDisplayPosition: Point,
     ) {
-        super(DragSessionState.start(startPoint));
+        super(DragSessionState.start(startDisplayPosition, boardViewController.state.camera));
 
-        boardController.onPointerMove.addListener(this.handlePointerMove);
-        boardController.onPointerUp.addListener(this.handlePointerUp);
+        boardViewController.onCameraChange.addListener(this.handleCameraChange);
+        boardViewController.onPointerMove.addListener(this.handlePointerMove);
+        boardViewController.onPointerUp.addListener(this.handlePointerUp);
     }
 
     [Disposable.dispose]() {
-        this.boardController.onPointerMove.removeListener(this.handlePointerMove);
-        this.boardController.onPointerUp.removeListener(this.handlePointerUp);
+        this.boardViewController.onCameraChange.removeListener(this.handleCameraChange);
+        this.boardViewController.onPointerMove.removeListener(this.handlePointerMove);
+        this.boardViewController.onPointerUp.removeListener(this.handlePointerUp);
 
         dispose(this.onDragMove);
         dispose(this.onDragEnd);
@@ -73,9 +107,12 @@ export class DragSession extends AbstractSession<DragSessionState> {
         super[Disposable.dispose]();
     }
 
-    private readonly handlePointerMove = (point: Point) => {
-        this.state = this.state.move(point);
+    private readonly handleCameraChange = (camera: Camera) => {
+        this.state = this.state.setCamera(camera);
+    };
 
+    private readonly handlePointerMove = (ev: PointerEvent) => {
+        this.state = this.state.setDisplayPosition(Point.create({ x: ev.clientX, y: ev.clientY }));
         this.onDragMove.fire(this.state);
     };
 

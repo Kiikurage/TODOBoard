@@ -30,7 +30,12 @@ export function BoardView() {
 
     const ref = useRef<HTMLDivElement | null>(null);
     useResizeObserver(ref, (entry) => {
-        viewController.setViewportSize(entry.contentRect.width, entry.contentRect.height);
+        viewController.setDisplaySize(
+            Point.create({
+                x: entry.contentRect.width,
+                y: entry.contentRect.height,
+            }),
+        );
     });
 
     return (
@@ -69,10 +74,13 @@ export function BoardView() {
                         boardViewState={boardViewState}
                         board={controller}
                         onPointerDown={(ev) =>
-                            controller.startCreateLinkSession(task.id, Point.create({ x: ev.clientX, y: ev.clientY }))
+                            viewController.handleCreateLinkButtonPointerDown(ev.nativeEvent, task.id)
                         }
                         onPointerEnter={() => controller.handleTaskPointerEnter(task.id)}
                         onPointerLeave={() => controller.handleTaskPointerLeave(task.id)}
+                        onTaskDragHandlePointerDown={(ev) =>
+                            viewController.handleTaskDragHandlePointerDown(ev.nativeEvent, task.id)
+                        }
                         onResize={(width, height) =>
                             controller.taskRepository.update(task.id, { rect: task.rect.copy({ width, height }) })
                         }

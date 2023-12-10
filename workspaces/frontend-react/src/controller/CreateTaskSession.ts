@@ -17,16 +17,16 @@ export class CreateTaskSessionState {
         return true;
     }
 
-    copy(props: Partial<typeof ownProps>): CreateTaskSessionState {
+    copy(props: Partial<typeof CreateTaskSessionState.ownProps>): CreateTaskSessionState {
         return Object.assign(Object.create(CreateTaskSessionState.prototype), this, props);
     }
 
-    static create(props: typeof ownProps): CreateTaskSessionState {
-        return CreateTaskSessionState.prototype.copy(props);
+    static create(props: typeof this.ownProps) {
+        return this.prototype.copy(props);
     }
-}
 
-const ownProps = { ...CreateTaskSessionState.prototype };
+    private static readonly ownProps = { ...this.prototype };
+}
 
 export class CreateTaskSession extends AbstractSession<CreateTaskSessionState> {
     constructor(

@@ -46,17 +46,17 @@ export class Rect {
         ];
     }
 
-    copy(props: Partial<typeof ownProps>): Rect {
+    copy(props: Partial<typeof Rect.ownProps>): Rect {
         return Object.assign(Object.create(Rect.prototype), this, props);
     }
 
-    static create(props: typeof ownProps): Rect {
-        return Rect.prototype.copy(props);
+    static create(props: typeof this.ownProps) {
+        return this.prototype.copy(props);
     }
 
-    valueOf(): string {
+    private static readonly ownProps = { ...this.prototype };
+
+    toString(): string {
         return `Rect(${this.left}, ${this.top}, ${this.width}, ${this.height})`;
     }
 }
-
-const ownProps = { ...Rect.prototype };

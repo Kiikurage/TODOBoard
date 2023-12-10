@@ -10,23 +10,23 @@ export class Line {
         public readonly c: number,
     ) {}
 
-    copy(props: Partial<typeof ownProps>): Line {
+    copy(props: Partial<typeof Line.ownProps>): Line {
         return Object.assign(Object.create(Line.prototype), this, props);
     }
 
-    static create(props: typeof ownProps): Line {
-        return Line.prototype.copy(props);
+    static create(props: typeof this.ownProps) {
+        return this.prototype.copy(props);
     }
 
-    static fromPoints(p1: Point, p2: Point): Line {
+    private static readonly ownProps = { ...this.prototype };
+
+    static fromPoints(p1: Point, p2: Point) {
         const { x: x1, y: y1 } = p1;
         const { x: x2, y: y2 } = p2;
 
-        return Line.create({ a: x2 - x1, b: y1 - y2, c: x1 * y2 - x2 * y1 });
+        return this.create({ a: x2 - x1, b: y1 - y2, c: x1 * y2 - x2 * y1 });
     }
 }
-
-const ownProps = { ...Line.prototype };
 
 export function getIntersectionPointForLineAndLine(line1: Line, line2: Line): Point | null {
     const { a: a1, b: b1, c: c1 } = line1;

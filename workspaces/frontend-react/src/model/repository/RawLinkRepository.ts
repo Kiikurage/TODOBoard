@@ -53,17 +53,17 @@ export class RawLink {
         return RawLink.getId(this.sourceTaskId, this.destinationTaskId);
     }
 
-    copy(props: Partial<typeof ownProps>): RawLink {
+    copy(props: Partial<typeof RawLink.ownProps>): RawLink {
         return Object.assign(Object.create(RawLink.prototype), { ...this, ...props });
     }
 
-    static create(props: typeof ownProps): RawLink {
-        return Object.assign(Object.create(RawLink.prototype), props);
+    static create(props: typeof this.ownProps) {
+        return this.prototype.copy(props);
     }
+
+    private static readonly ownProps = { ...this.prototype };
 
     static getId(sourceTaskId: string, destinationTaskId: string): string {
         return `${sourceTaskId}_${destinationTaskId}`;
     }
 }
-
-const ownProps = { ...RawLink.prototype };

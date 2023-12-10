@@ -10,17 +10,17 @@ export class LineSegment {
         return ((this.p1.x - this.p2.x) ** 2 + (this.p1.y - this.p2.y) ** 2) ** (1 / 2);
     }
 
-    copy(props: Partial<typeof ownProps>): LineSegment {
+    copy(props: Partial<typeof LineSegment.ownProps>): LineSegment {
         return Object.assign(Object.create(LineSegment.prototype), this, props);
     }
 
-    static create(props: typeof ownProps): LineSegment {
-        return LineSegment.prototype.copy(props);
+    static create(props: typeof this.ownProps) {
+        return this.prototype.copy(props);
     }
 
-    static fromPoints(p1: Point, p2: Point): LineSegment {
-        return LineSegment.create({ p1, p2 });
+    private static readonly ownProps = { ...this.prototype };
+
+    static fromPoints(p1: Point, p2: Point) {
+        return this.create({ p1, p2 });
     }
 }
-
-const ownProps = { ...LineSegment.prototype };

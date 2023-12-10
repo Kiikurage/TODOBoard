@@ -12,17 +12,17 @@ export class Link {
         return Link.getId(this.sourceTask.id, this.destinationTask.id);
     }
 
-    copy(props: Partial<typeof ownProps>): Link {
+    copy(props: Partial<typeof Link.ownProps>): Link {
         return Object.assign(Object.create(Link.prototype), { ...this, ...props });
     }
 
-    static create(props: typeof ownProps): Link {
-        return Object.assign(Object.create(Link.prototype), props);
+    static create(props: typeof this.ownProps) {
+        return this.prototype.copy(props);
     }
+
+    private static readonly ownProps = { ...this.prototype };
 
     static getId(sourceTaskId: string, destinationTaskId: string): string {
         return RawLink.getId(sourceTaskId, destinationTaskId);
     }
 }
-
-const ownProps = { ...Link.prototype };

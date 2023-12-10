@@ -1,9 +1,9 @@
-import { DragSession, DragSessionState } from './DragSession';
 import { Disposable, dispose } from '../lib/Disposable';
 import { TaskRepository } from '../model/repository/TaskRepository';
 import { Point } from '../lib/geometry/Point';
 import { throwError } from '../lib/throwError';
 import { AbstractSession } from './AbstractSession';
+import { DragSession, DragSessionState } from './DragSession';
 
 export class MoveTaskSession extends AbstractSession<void> {
     private readonly originalPosition: Point;
@@ -33,8 +33,8 @@ export class MoveTaskSession extends AbstractSession<void> {
 
         this.taskRepository.update(task.id, {
             rect: task.rect.copy({
-                left: this.originalPosition.x + state.diff.x,
-                top: this.originalPosition.y + state.diff.y,
+                left: this.originalPosition.x + state.viewportDiff.x,
+                top: this.originalPosition.y + state.viewportDiff.y,
             }),
         });
     };

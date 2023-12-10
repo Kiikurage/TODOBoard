@@ -9,7 +9,7 @@ export class Task {
         public rect: Rect,
     ) {}
 
-    copy(props: Partial<typeof ownProps>): Task {
+    copy(props: Partial<typeof Task.ownProps>): Task {
         return Object.assign(Object.create(Task.prototype), { ...this, ...props });
     }
 
@@ -17,9 +17,9 @@ export class Task {
         return (Object.keys({ ...this }) as (keyof Task)[]).every((key) => this[key] === other[key]);
     }
 
-    static create(props: typeof ownProps): Task {
-        return Object.assign(Object.create(Task.prototype), props);
+    static create(props: typeof this.ownProps) {
+        return this.prototype.copy(props);
     }
-}
 
-const ownProps = { ...Task.prototype };
+    private static readonly ownProps = { ...this.prototype };
+}

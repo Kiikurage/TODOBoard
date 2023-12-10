@@ -1,6 +1,5 @@
 import { Channel } from '../lib/Channel';
 import { Point } from '../lib/geometry/Point';
-import { DragSession } from './DragSession';
 import { CreateLinkSession } from './CreateLinkSession';
 import { MoveTaskSession } from './MoveTaskSession';
 import { CreateTaskSession } from './CreateTaskSession';
@@ -8,11 +7,10 @@ import { TaskRepository } from '../model/repository/TaskRepository';
 import { LinkRepository } from '../model/repository/LinkRepository';
 import { ReactiveStateMachine } from '../lib/ReactiveStateMachine';
 import { Disposable, dispose } from '../lib/Disposable';
+import { DragSession } from './DragSession';
 
 export class BoardState {
     constructor(
-        public readonly dragSession: DragSession | null,
-        public readonly moveTaskSession: MoveTaskSession | null,
         public readonly createLinkSession: CreateLinkSession | null,
         public readonly createTaskSession: CreateTaskSession | null,
     ) {}
@@ -23,8 +21,6 @@ export class BoardState {
 
     static empty() {
         return this.create({
-            dragSession: null,
-            moveTaskSession: null,
             createLinkSession: null,
             createTaskSession: null,
         });
@@ -60,18 +56,11 @@ export class BoardController extends ReactiveStateMachine<BoardState> {
         super[Disposable.dispose]();
     }
 
-    startMoveTaskSession(taskId: string, point: Point) {
-        const dragSession = new DragSession(this, point);
-        const moveTaskSession = new MoveTaskSession(taskId, dragSession, this.taskRepository);
-
-        dragSession.onEnd.addListener(this.handleDragSessionEnd);
-        moveTaskSession.onEnd.addListener(this.handleMoveTaskSessionEnd);
-
-        this.state = this.state.copy({ dragSession, moveTaskSession });
+    startMoveTaskSession(taskId: string, dragSession: DragSession): MoveTaskSession {
+        return new MoveTaskSession(taskId, dragSession, this.taskRepository);
     }
 
-    startCreateLinkSession(sourceTaskId: string, point: Point) {
-        const dragSession = new DragSession(this, point);
+    startCreateLinkSession(sourceTaskId: string, dragSession: DragSession) {
         const createLinkSession = new CreateLinkSession(
             sourceTaskId,
             this,
@@ -80,10 +69,9 @@ export class BoardController extends ReactiveStateMachine<BoardState> {
             this.linkRepository,
         );
 
-        dragSession.onEnd.addListener(this.handleDragSessionEnd);
         createLinkSession.onEnd.addListener(this.handleCreateLinkSessionEnd);
 
-        this.state = this.state.copy({ dragSession, createLinkSession });
+        this.state = this.state.copy({ createLinkSession });
     }
 
     startCreateTaskSession(point: Point) {
@@ -113,14 +101,6 @@ export class BoardController extends ReactiveStateMachine<BoardState> {
     handleTaskPointerLeave(taskId: string) {
         this.onTaskPointerLeave.fire(taskId);
     }
-
-    private handleDragSessionEnd = () => {
-        this.state = this.state.copy({ dragSession: null });
-    };
-
-    private handleMoveTaskSessionEnd = () => {
-        this.state = this.state.copy({ moveTaskSession: null });
-    };
 
     private handleCreateLinkSessionEnd = () => {
         this.state = this.state.copy({ createLinkSession: null });

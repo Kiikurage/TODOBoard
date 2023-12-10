@@ -1,12 +1,13 @@
-import { DragSession, DragSessionState } from './DragSession';
+import { DragSession, DragSessionState } from '../../controller/DragSession';
 import { Disposable, dispose } from '../../lib/Disposable';
 import { Point } from '../../lib/geometry/Point';
 import { AbstractSession } from '../../controller/AbstractSession';
 import { BoardViewController } from './BoardViewController';
+import { Camera } from '../model/Camera';
 
 export class MoveViewportSession extends AbstractSession<void> {
     constructor(
-        public readonly originalPosition: Point,
+        public readonly originalCamera: Camera,
         private readonly dragSession: DragSession,
         private readonly boardViewController: BoardViewController,
     ) {
@@ -22,11 +23,24 @@ export class MoveViewportSession extends AbstractSession<void> {
     }
 
     private handleDragMove = (state: DragSessionState) => {
-        const { diff } = state;
+        // position in viewport space is constant during drag.
+        //
+        // viewport = display0/scale0+origin0 = display1/scale1+origin1
+        //
+        // origin1 = origin0 - (display1/scale1 - display0/scale0)
+        //         = origin0 - (size1 - size0)
 
-        this.boardViewController.setViewportPosition(
-            this.originalPosition.x - diff.x,
-            this.originalPosition.y - diff.y,
+        this.boardViewController.setViewportCameraOrigin(
+            Point.create({
+                x:
+                    state.startCamera.viewportOrigin.x -
+                    (state.currentCamera.toViewportSize(state.currentDisplayPosition).x -
+                        state.startCamera.toViewportSize(state.startDisplayPosition).x),
+                y:
+                    state.startCamera.viewportOrigin.y -
+                    (state.currentCamera.toViewportSize(state.currentDisplayPosition).y -
+                        state.startCamera.toViewportSize(state.startDisplayPosition).y),
+            }),
         );
     };
 
