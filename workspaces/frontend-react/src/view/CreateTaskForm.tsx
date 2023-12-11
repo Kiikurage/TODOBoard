@@ -71,7 +71,10 @@ export function CreateTaskForm({
                                 }}
                                 type="text"
                                 value={title}
-                                onBlur={() => createTaskSession.submit()}
+                                onBlur={() => {
+                                    console.log('submit');
+                                    createTaskSession.submit();
+                                }}
                                 autoFocus
                                 placeholder="タスクのタイトル"
                                 onChange={(ev) => createTaskSession.setTitle(ev.target.value)}

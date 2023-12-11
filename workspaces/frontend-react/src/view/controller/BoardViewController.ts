@@ -7,6 +7,7 @@ import { Channel } from '../../lib/Channel';
 import { DragSession } from '../../controller/DragSession';
 import { Camera } from '../model/Camera';
 import { Disposable } from '../../lib/Disposable';
+import { Task } from '../../model/Task';
 
 export class BoardViewState {
     constructor(
@@ -23,7 +24,6 @@ export class BoardViewState {
             height: this.size.y,
         });
     }
-
     setCameraOrigin(origin: Point) {
         if (origin.equals(this.camera.origin)) return this;
 
@@ -107,7 +107,6 @@ export class BoardViewController extends ReactiveStateMachine<BoardViewState> {
 
     readonly handlePointerDown = (ev: PointerEvent) => {
         ev.stopPropagation();
-        ev.preventDefault();
 
         if (ev.button === MouseButton.MIDDLE) {
             new MoveViewportSession(

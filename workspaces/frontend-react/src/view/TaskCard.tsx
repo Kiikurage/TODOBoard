@@ -4,6 +4,7 @@ import { STYLE_CARD } from './style/card';
 import { useResizeObserver } from './hook/useResizeObserver';
 import { STYLE_INPUT, STYLE_INPUT_FOCUSED } from './style/input';
 import { BoardViewState } from './controller/BoardViewController';
+import { STYLE_TEXT__DESCRIPTION, STYLE_TEXT__HELPER } from './style/text';
 
 export function TaskCard({
     boardViewState,
@@ -68,8 +69,7 @@ export function TaskCard({
                 >
                     <span
                         css={{
-                            fontSize: '0.75em',
-                            color: '#666',
+                            ...STYLE_TEXT__HELPER,
                             userSelect: 'text',
                         }}
                     >
@@ -205,13 +205,12 @@ function DescriptionForm({ value, onChange }: { value: string; onChange?: (value
         return (
             <div
                 css={{
+                    ...STYLE_TEXT__DESCRIPTION,
                     display: '-webkit-box',
                     overflow: 'hidden',
                     '-webkit-line-clamp': '3',
                     '-webkit-box-orient': 'vertical',
                     textOverflow: 'ellipsis',
-                    fontSize: '0.875em',
-                    color: '#666',
                     userSelect: 'text',
                 }}
                 onPointerDown={(ev) => ev.stopPropagation()}

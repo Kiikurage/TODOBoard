@@ -7,6 +7,8 @@ import { CreateLinkView } from './CreateLinkView';
 import { useReactive } from './hook/useReactive';
 import { useResizeObserver } from './hook/useResizeObserver';
 import { BoardViewController } from './controller/BoardViewController';
+import { DebugView } from './DebugView';
+import { SidePanel } from './SidePanel';
 
 export function BoardView({ controller }: { controller: BoardViewController }) {
     const tasks = useReactive(controller.taskRepository, (repository) => repository.readOpenTasksAll());
@@ -47,11 +49,6 @@ export function BoardView({ controller }: { controller: BoardViewController }) {
                 window.getSelection()?.removeAllRanges?.();
             }}
         >
-            <div css={{ pointerEvents: 'none', fontFamily: 'monospace' }}>
-                <div>Updated at: {new Date().toISOString()}</div>
-                <div>viewport: {'' + boardViewState.rect}</div>
-            </div>
-
             <div
                 css={{
                     position: 'absolute',
@@ -96,6 +93,9 @@ export function BoardView({ controller }: { controller: BoardViewController }) {
                     />
                 )}
             </div>
+            <SidePanel controller={controller} />
+
+            <DebugView controller={controller} />
         </div>
     );
 }

@@ -14,6 +14,7 @@ export class BoardState {
         public readonly createTaskSession: CreateTaskSession | null,
         public readonly createLinkSession: CreateLinkSession | null,
         public readonly moveTaskSession: MoveTaskSession | null,
+        public readonly selectedTaskId: string | null = null,
     ) {}
 
     copy(props: Partial<typeof BoardState.ownProps>): BoardState {
@@ -24,6 +25,7 @@ export class BoardState {
         createLinkSession: null,
         moveTaskSession: null,
         createTaskSession: null,
+        selectedTaskId: null,
     });
 
     static create(props: typeof this.ownProps) {
@@ -49,6 +51,12 @@ export class BoardController extends ReactiveStateMachine<BoardState> {
         dispose(this.onTaskPointerLeave);
 
         super[Disposable.dispose]();
+    }
+
+    get selectedTask() {
+        if (this.state.selectedTaskId === null) return null;
+
+        return this.taskRepository.findById(this.state.selectedTaskId);
     }
 
     startMoveTaskSession(taskId: string, dragSession: DragSession) {
