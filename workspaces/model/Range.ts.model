@@ -1,0 +1,43 @@
+model Range {
+    from: number
+    to: number
+
+    // GetOnlyな場合
+    // size: number = this.to - this.from
+
+    // size: number {
+    //     set(value) {
+    //         this.to = this.from + this.value;
+    //     }
+    // }
+
+    size: number {
+        get = to - from;+
+        set(value) {
+            this.to = this.from + this.value;
+        }
+    }
+}
+
+//
+
+<Model> := 'model' <ModelName> '{' <ModelField>* '}'
+<ModelName> := (TypeScriptのシンボル名として有効な文字列)
+
+<ModelField> :=
+    <FieldName> ':' <FieldType>                    // Property
+    <FieldName> ':' <FieldType> '=' <Expression>     // ReadOnly
+    <FieldName> ':' <FieldType> <PropertyAccessor> // ReadWrite
+
+<FieldName> := (TypeScriptのシンボル名として有効な文字列)
+
+<FieldType> := string | number | boolean
+
+<Expression> := (TypeScriptの式)
+
+<PropertyAccessor> := '{' <PropertyAccessorBody> '}'
+<PropertyAccessorBody> :=
+    'get' '=' <Expression> // GetOnly
+    'set' '(' <ArgumentName> ')' '{' <Statement>* '}' // ReadWrite
+
+<Statement> := (TypeScriptの文)
