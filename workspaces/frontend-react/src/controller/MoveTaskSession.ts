@@ -1,12 +1,12 @@
 import { Disposable, dispose } from '../lib/Disposable';
 import { TaskRepository } from '../model/repository/TaskRepository';
-import { Point } from '../lib/geometry/Point';
+import { Vector2 } from '../lib/geometry/Vector2';
 import { throwError } from '../lib/throwError';
 import { AbstractSession } from './AbstractSession';
 import { DragSession, DragSessionState } from './DragSession';
 
 export class MoveTaskSession extends AbstractSession<void> {
-    private readonly originalPosition: Point;
+    private readonly originalPosition: Vector2;
 
     constructor(
         private readonly taskId: string,

@@ -20,7 +20,7 @@ export class TaskRepository extends AbstractRepository<Task, SerializedTask> {
             title: props.title,
             description: props.description,
             completed: false,
-            rect: Rect.create({
+            rect: new Rect({
                 left: props.left,
                 top: props.top,
                 width: 100,
@@ -68,7 +68,7 @@ export class TaskRepository extends AbstractRepository<Task, SerializedTask> {
             title: serializedModel.title,
             completed: serializedModel.completed,
             description: serializedModel.description,
-            rect: Rect.create(serializedModel.rect),
+            rect: new Rect(serializedModel.rect),
         });
     }
 

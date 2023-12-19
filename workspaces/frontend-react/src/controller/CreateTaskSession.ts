@@ -1,5 +1,5 @@
 import { dispose } from '../lib/Disposable';
-import { Point } from '../lib/geometry/Point';
+import { Vector2 } from '../lib/geometry/Vector2';
 import { AbstractSession } from './AbstractSession';
 import { TaskRepository } from '../model/repository/TaskRepository';
 
@@ -30,7 +30,7 @@ export class CreateTaskSessionState {
 
 export class CreateTaskSession extends AbstractSession<CreateTaskSessionState> {
     constructor(
-        position: Point,
+        position: Vector2,
         private readonly taskRepository: TaskRepository,
     ) {
         super(

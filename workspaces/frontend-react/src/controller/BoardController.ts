@@ -1,5 +1,5 @@
 import { Channel } from '../lib/Channel';
-import { Point } from '../lib/geometry/Point';
+import { Vector2 } from '../lib/geometry/Vector2';
 import { CreateLinkSession } from './CreateLinkSession';
 import { MoveTaskSession } from './MoveTaskSession';
 import { CreateTaskSession } from './CreateTaskSession';
@@ -89,7 +89,7 @@ export class BoardController extends ReactiveStateMachine<BoardState> {
         return session;
     }
 
-    startCreateTaskSession(point: Point) {
+    startCreateTaskSession(point: Vector2) {
         const session = new CreateTaskSession(point, this.taskRepository);
 
         this.state = this.state.copy({ createTaskSession: session });

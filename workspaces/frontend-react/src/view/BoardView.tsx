@@ -2,13 +2,12 @@ import { useEffect, useRef } from 'react';
 import { TaskCard } from './TaskCard';
 import { LinkView } from './LinkView';
 import { CreateTaskForm } from './CreateTaskForm';
-import { Point } from '../lib/geometry/Point';
+import { Vector2 } from '../lib/geometry/Vector2';
 import { CreateLinkView } from './CreateLinkView';
 import { useReactive } from './hook/useReactive';
 import { useResizeObserver } from './hook/useResizeObserver';
 import { BoardViewController } from './controller/BoardViewController';
 import { DebugView } from './DebugView';
-import { SidePanel } from './SidePanel';
 
 export function BoardView({ controller }: { controller: BoardViewController }) {
     const tasks = useReactive(controller.taskRepository, (repository) => repository.readOpenTasksAll());
@@ -28,7 +27,7 @@ export function BoardView({ controller }: { controller: BoardViewController }) {
     const ref = useRef<HTMLDivElement | null>(null);
     useResizeObserver(ref, (entry) => {
         controller.setDisplaySize(
-            Point.create({
+            new Vector2({
                 x: entry.contentRect.width,
                 y: entry.contentRect.height,
             }),
@@ -93,7 +92,6 @@ export function BoardView({ controller }: { controller: BoardViewController }) {
                     />
                 )}
             </div>
-            <SidePanel controller={controller} />
 
             <DebugView controller={controller} />
         </div>

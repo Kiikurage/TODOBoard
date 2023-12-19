@@ -1,5 +1,5 @@
 import { Channel } from '../lib/Channel';
-import { Point } from '../lib/geometry/Point';
+import { Vector2 } from '../lib/geometry/Vector2';
 import { AbstractSession } from './AbstractSession';
 import { Disposable, dispose } from '../lib/Disposable';
 import { BoardViewController } from '../view/controller/BoardViewController';
@@ -8,29 +8,29 @@ import { Camera } from '../view/model/Camera';
 export class DragSessionState {
     constructor(
         public readonly completed: boolean,
-        public readonly startDisplayPosition: Point,
+        public readonly startDisplayPosition: Vector2,
         public readonly startCamera: Camera,
-        public readonly currentDisplayPosition: Point,
+        public readonly currentDisplayPosition: Vector2,
         public readonly currentCamera: Camera,
     ) {}
 
-    get startPosition(): Point {
+    get startPosition(): Vector2 {
         return this.startCamera.toViewportPoint(this.startDisplayPosition);
     }
 
-    get currentPosition(): Point {
+    get currentPosition(): Vector2 {
         return this.currentCamera.toViewportPoint(this.currentDisplayPosition);
     }
 
-    get displayDiff(): Point {
-        return Point.create({
+    get displayDiff(): Vector2 {
+        return new Vector2({
             x: this.currentDisplayPosition.x - this.startDisplayPosition.x,
             y: this.currentDisplayPosition.y - this.startDisplayPosition.y,
         });
     }
 
-    get diff(): Point {
-        return Point.create({
+    get diff(): Vector2 {
+        return new Vector2({
             x: this.currentPosition.x - this.startPosition.x,
             y: this.currentPosition.y - this.startPosition.y,
         });
@@ -40,7 +40,7 @@ export class DragSessionState {
         return this.copy({ completed: true });
     }
 
-    static start(displayPosition: Point, camera: Camera): DragSessionState {
+    static start(displayPosition: Vector2, camera: Camera): DragSessionState {
         return DragSessionState.prototype.copy({
             completed: false,
             startDisplayPosition: displayPosition,
@@ -50,7 +50,7 @@ export class DragSessionState {
         });
     }
 
-    setDisplayPosition(displayPosition: Point): DragSessionState {
+    setDisplayPosition(displayPosition: Vector2): DragSessionState {
         if (this.completed) return this;
 
         return this.copy({ currentDisplayPosition: displayPosition });
@@ -74,9 +74,9 @@ export class DragSessionState {
 
     static readonly EMPTY = this.create({
         completed: true,
-        startDisplayPosition: Point.EMPTY,
+        startDisplayPosition: Vector2.EMPTY,
         startCamera: Camera.EMPTY,
-        currentDisplayPosition: Point.EMPTY,
+        currentDisplayPosition: Vector2.EMPTY,
         currentCamera: Camera.EMPTY,
     });
 }
@@ -87,7 +87,7 @@ export class DragSession extends AbstractSession<DragSessionState> {
 
     constructor(
         private readonly boardViewController: BoardViewController,
-        startDisplayPosition: Point,
+        startDisplayPosition: Vector2,
     ) {
         super(DragSessionState.start(startDisplayPosition, boardViewController.state.camera));
 
@@ -112,7 +112,7 @@ export class DragSession extends AbstractSession<DragSessionState> {
     };
 
     private readonly handlePointerMove = (ev: PointerEvent) => {
-        this.state = this.state.setDisplayPosition(Point.create({ x: ev.clientX, y: ev.clientY }));
+        this.state = this.state.setDisplayPosition(new Vector2({ x: ev.clientX, y: ev.clientY }));
         this.onDragMove.fire(this.state);
     };
 

@@ -208,8 +208,8 @@ function DescriptionForm({ value, onChange }: { value: string; onChange?: (value
                     ...STYLE_TEXT__DESCRIPTION,
                     display: '-webkit-box',
                     overflow: 'hidden',
-                    '-webkit-line-clamp': '3',
-                    '-webkit-box-orient': 'vertical',
+                    webkitLineClamp: '3',
+                    webkitBoxOrient: 'vertical',
                     textOverflow: 'ellipsis',
                     userSelect: 'text',
                 }}

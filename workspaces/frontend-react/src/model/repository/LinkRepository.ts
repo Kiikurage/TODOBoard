@@ -3,9 +3,8 @@ import { TaskRepository } from './TaskRepository';
 import { RawLinkRepository } from './RawLinkRepository';
 import { throwError } from '../../lib/throwError';
 import { Channel } from '../../lib/Channel';
-import { Repository } from './Repository';
 
-export class LinkRepository implements Repository<Link> {
+export class LinkRepository {
     public readonly onChange = new Channel();
 
     constructor(

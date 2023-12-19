@@ -1,4 +1,4 @@
-import { Point } from '../../lib/geometry/Point';
+import { Vector2 } from '../../lib/geometry/Vector2';
 import { BoardController, BoardState } from '../../controller/BoardController';
 import { ReactiveStateMachine } from '../../lib/ReactiveStateMachine';
 import { Rect } from '../../lib/geometry/Rect';
@@ -12,19 +12,19 @@ import { Task } from '../../model/Task';
 export class BoardViewState {
     constructor(
         public readonly camera: Camera,
-        public readonly size: Point,
+        public readonly size: Vector2,
         public readonly boardState: BoardState,
     ) {}
 
     get rect(): Rect {
-        return Rect.create({
+        return new Rect({
             left: this.camera.origin.x,
             top: this.camera.origin.y,
             width: this.size.x,
             height: this.size.y,
         });
     }
-    setCameraOrigin(origin: Point) {
+    setCameraOrigin(origin: Vector2) {
         if (origin.equals(this.camera.origin)) return this;
 
         return this.copy({
@@ -32,17 +32,17 @@ export class BoardViewState {
         });
     }
 
-    setDisplayCameraOrigin(displayOrigin: Point) {
+    setDisplayCameraOrigin(displayOrigin: Vector2) {
         return this.setCameraOrigin(this.camera.toViewportPoint(displayOrigin));
     }
 
-    setSize(size: Point) {
+    setSize(size: Vector2) {
         if (size.equals(this.size)) return this;
 
         return this.copy({ size });
     }
 
-    setDisplaySize(displayOrigin: Point) {
+    setDisplaySize(displayOrigin: Vector2) {
         return this.setSize(this.camera.toViewportSize(displayOrigin));
     }
 
@@ -58,7 +58,7 @@ export class BoardViewState {
 
     static readonly EMPTY = this.create({
         camera: Camera.EMPTY,
-        size: Point.EMPTY,
+        size: Vector2.EMPTY,
         boardState: BoardState.EMPTY,
     });
 }
@@ -88,12 +88,12 @@ export class BoardViewController extends ReactiveStateMachine<BoardViewState> {
         return this.controller.linkRepository;
     }
 
-    setCameraOrigin(origin: Point) {
+    setCameraOrigin(origin: Vector2) {
         this.state = this.state.setCameraOrigin(origin);
         this.onCameraChange.fire(this.state.camera);
     }
 
-    setDisplaySize(displaySize: Point) {
+    setDisplaySize(displaySize: Vector2) {
         this.state = this.state.setDisplaySize(displaySize);
         this.onCameraChange.fire(this.state.camera);
     }
@@ -149,11 +149,11 @@ export class BoardViewController extends ReactiveStateMachine<BoardViewState> {
         this.state = this.state.copy({ boardState: this.controller.state });
     };
 
-    private getDisplayPointFromMouseEvent(ev: MouseEvent): Point {
-        return Point.create({ x: ev.clientX, y: ev.clientY });
+    private getDisplayPointFromMouseEvent(ev: MouseEvent): Vector2 {
+        return new Vector2({ x: ev.clientX, y: ev.clientY });
     }
 
-    private getViewportPointFromMouseEvent(ev: MouseEvent): Point {
+    private getViewportPointFromMouseEvent(ev: MouseEvent): Vector2 {
         return this.state.camera.toViewportPoint(this.getDisplayPointFromMouseEvent(ev));
     }
 }

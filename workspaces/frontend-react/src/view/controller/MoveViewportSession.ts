@@ -1,6 +1,6 @@
 import { DragSession, DragSessionState } from '../../controller/DragSession';
 import { Disposable, dispose } from '../../lib/Disposable';
-import { Point } from '../../lib/geometry/Point';
+import { Vector2 } from '../../lib/geometry/Vector2';
 import { AbstractSession } from '../../controller/AbstractSession';
 import { BoardViewController } from './BoardViewController';
 import { Camera } from '../model/Camera';
@@ -31,7 +31,7 @@ export class MoveViewportSession extends AbstractSession<void> {
         //         = origin0 - (size1 - size0)
 
         this.boardViewController.setCameraOrigin(
-            Point.create({
+            new Vector2({
                 x:
                     state.startCamera.origin.x -
                     (state.currentCamera.toViewportSize(state.currentDisplayPosition).x -

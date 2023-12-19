@@ -72,7 +72,6 @@ export function CreateTaskForm({
                                 type="text"
                                 value={title}
                                 onBlur={() => {
-                                    console.log('submit');
                                     createTaskSession.submit();
                                 }}
                                 autoFocus

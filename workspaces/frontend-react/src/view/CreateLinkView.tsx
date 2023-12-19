@@ -1,5 +1,5 @@
 import { getIntersectionPointForLineSegmentAndRect } from '../lib/geometry/Line';
-import { Point } from '../lib/geometry/Point';
+import { Vector2 } from '../lib/geometry/Vector2';
 import { LineSegment } from '../lib/geometry/LineSegment';
 import { CreateLinkSession } from '../controller/CreateLinkSession';
 import { COLOR_ACTIVE } from './style/colors';
@@ -22,16 +22,16 @@ export function CreateLinkView({
     if (sourceTask === null) return null;
 
     const linkDraftP1 = sourceTask.rect.center;
-    const linkDraftP2 = destinationTask ? destinationTask.rect.center : Point.create({ x: currentX, y: currentY });
+    const linkDraftP2 = destinationTask ? destinationTask.rect.center : new Vector2({ x: currentX, y: currentY });
 
     const point1 =
         getIntersectionPointForLineSegmentAndRect(
-            LineSegment.create({ p1: linkDraftP1, p2: linkDraftP2 }),
+            new LineSegment({ p1: linkDraftP1, p2: linkDraftP2 }),
             sourceTask.rect,
         )[0] ?? null;
     const point2 = destinationTask
         ? getIntersectionPointForLineSegmentAndRect(
-              LineSegment.create({ p1: linkDraftP1, p2: linkDraftP2 }),
+              new LineSegment({ p1: linkDraftP1, p2: linkDraftP2 }),
               destinationTask.rect,
           )[0] ?? null
         : null;
