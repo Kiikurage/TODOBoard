@@ -10,6 +10,7 @@ module.exports = {
             rules: {
                 '@typescript-eslint/prefer-namespace-keyword': 'off',
                 '@typescript-eslint/no-namespace': 'off',
+                '@typescript-eslint/no-this-alias': 'off',
             },
         },
         {
@@ -17,7 +18,5 @@ module.exports = {
             env: { node: true, es6: true },
         },
     ],
-    ignorePatterns: [
-        '**/build/**/*'
-    ],
+    ignorePatterns: ['**/build/**/*'],
 };
