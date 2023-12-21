@@ -2,6 +2,15 @@ import { Channel, Disposable, eventTarget } from '../lib';
 import { Logger } from '../lib/logger';
 import { dom } from '../lib/dom';
 
+interface InputReceiverKeyboardEvent {
+    key: string;
+    shiftKey: boolean;
+    ctrlKey: boolean;
+    altKey: boolean;
+    metaKey: boolean;
+    preventDefault(): void;
+}
+
 export class InputReceiver extends Disposable {
     readonly onFocus = this.register(new Channel());
     readonly onBlur = this.register(new Channel());
@@ -10,8 +19,8 @@ export class InputReceiver extends Disposable {
     readonly onInsert = this.register(new Channel<string>());
     readonly onCompositionChange = this.register(new Channel<string>());
     readonly onCompositionEnd = this.register(new Channel<string>());
-    readonly onKeyDown = this.register(new Channel<string>());
-    readonly onKeyUp = this.register(new Channel<string>());
+    readonly onKeyDown = this.register(new Channel<InputReceiverKeyboardEvent>());
+    readonly onKeyUp = this.register(new Channel<InputReceiverKeyboardEvent>());
 
     private readonly textarea: HTMLTextAreaElement;
     private active: boolean;
@@ -104,13 +113,13 @@ export class InputReceiver extends Disposable {
         // List of well-known inputTypes: https://www.w3.org/TR/input-events-1/#interface-InputEvent-Attributes
         switch (inputEvent.inputType) {
             case 'insertText':
+            case 'insertLineBreak':
                 this.onInsert.fire(this.textarea.value);
                 this.textarea.value = '';
                 break;
 
             case 'insertCompositionText':
                 this.onCompositionChange.fire(inputEvent.data ?? '');
-                this.textarea.value = '';
                 break;
 
             // Overridden by application
@@ -125,7 +134,6 @@ export class InputReceiver extends Disposable {
             case 'deleteContentBackward':
             case 'deleteByCut':
             case 'insertReplacementText':
-            case 'insertLineBreak':
             case 'insertParagraph':
             case 'insertOrderedList':
             case 'insertUnorderedList':
@@ -168,11 +176,11 @@ export class InputReceiver extends Disposable {
     };
 
     private readonly handleTextAreaKeyDown = (ev: KeyboardEvent) => {
-        this.onKeyDown.fire(ev.key);
+        this.onKeyDown.fire(ev);
     };
 
     private readonly handleTextAreaKeyUp = (ev: KeyboardEvent) => {
-        this.onKeyUp.fire(ev.key);
+        this.onKeyUp.fire(ev);
     };
 }
 

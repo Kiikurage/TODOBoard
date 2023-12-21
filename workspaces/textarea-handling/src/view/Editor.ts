@@ -13,42 +13,98 @@ export class Editor extends Disposable {
         super();
 
         this.inputReceiver.onInsert.addListener((text) => {
-            this.setState(this.#state.insertText(text));
+            this.state = this.state.insertText(text);
         });
-        this.inputReceiver.onKeyDown.addListener((key) => {
-            switch (key) {
+        this.inputReceiver.onCompositionChange.addListener((text) => {
+            this.state = this.state.setCompositionValue(text);
+        });
+        this.inputReceiver.onCompositionEnd.addListener(() => {
+            this.state = this.state.insertText(this.state.compositionValue).setCompositionValue('');
+        });
+        this.inputReceiver.onKeyDown.addListener((ev) => {
+            switch (ev.key) {
+                case 'a':
+                    if (ev.metaKey) {
+                        this.selectAll();
+                        ev.preventDefault();
+                    }
+                    break;
+
                 case 'Backspace':
                     this.removeBackward();
+                    ev.preventDefault();
                     break;
+
                 case 'Delete':
                     this.removeForward();
+                    ev.preventDefault();
                     break;
+
                 case 'ArrowLeft':
-                    this.moveBackward();
+                    if (ev.shiftKey) {
+                        if (ev.metaKey) {
+                            this.moveToLineBeginWithSelect();
+                            ev.preventDefault();
+                        } else {
+                            this.moveBackwardWithSelect();
+                            ev.preventDefault();
+                        }
+                    } else {
+                        if (ev.metaKey) {
+                            this.moveToLineBegin();
+                            ev.preventDefault();
+                        } else {
+                            this.moveBackward();
+                            ev.preventDefault();
+                        }
+                    }
                     break;
+
                 case 'ArrowRight':
-                    this.moveForward();
+                    if (ev.shiftKey) {
+                        if (ev.metaKey) {
+                            this.moveToLineEndWithSelect();
+                            ev.preventDefault();
+                        } else {
+                            this.moveForwardWithSelect();
+                            ev.preventDefault();
+                        }
+                    } else {
+                        if (ev.metaKey) {
+                            this.moveToLineEnd();
+                            ev.preventDefault();
+                        } else {
+                            this.moveForward();
+                            ev.preventDefault();
+                        }
+                    }
                     break;
+
                 default:
-                    logger.log(`onKeyDown key=${key}`);
+                    logger.log(`onKeyDown key=${ev.key}`);
             }
         });
         this.inputReceiver.onFocus.addListener(() => {
-            this.setState(this.#state.copy({ focused: true }));
+            this.state = this.state.copy({ focused: true });
         });
         this.inputReceiver.onBlur.addListener(() => {
-            this.setState(this.#state.copy({ focused: false }));
+            this.state = this.state.copy({ focused: false });
         });
         this.inputReceiver.onActivate.addListener(() => {
-            this.setState(this.#state.copy({ active: true }));
+            this.state = this.state.copy({ active: true });
         });
         this.inputReceiver.onDeactivate.addListener(() => {
-            this.setState(this.#state.copy({ active: false }));
+            this.state = this.state.copy({ active: false });
         });
     }
 
     get state() {
         return this.#state;
+    }
+
+    private set state(state: EditorState) {
+        this.#state = state;
+        this.onChange.fire(state);
     }
 
     focus() {
@@ -60,28 +116,51 @@ export class Editor extends Disposable {
     }
 
     insertText(text: string) {
-        this.setState(this.#state.insertText(text));
+        this.state = this.state.insertText(text);
     }
 
     removeBackward() {
-        this.setState(this.#state.removeBackward());
+        this.state = this.state.removeBackward();
     }
 
     removeForward() {
-        this.setState(this.#state.removeForward());
+        this.state = this.state.removeForward();
     }
 
     moveBackward() {
-        this.setState(this.#state.moveBackward());
+        this.state = this.state.moveBackward();
+    }
+
+    moveBackwardWithSelect() {
+        this.state = this.state.moveBackwardWithSelect();
+    }
+
+    moveToLineBegin() {
+        this.state = this.state.moveToLineBegin();
+    }
+
+    moveToLineBeginWithSelect() {
+        this.state = this.state.moveToLineBeginWithSelect();
     }
 
     moveForward() {
-        this.setState(this.#state.moveForward());
+        this.state = this.state.moveForward();
     }
 
-    private setState(state: EditorState) {
-        this.#state = state;
-        this.onChange.fire(state);
+    moveForwardWithSelect() {
+        this.state = this.state.moveForwardWithSelect();
+    }
+
+    moveToLineEnd() {
+        this.state = this.state.moveToLineEnd();
+    }
+
+    moveToLineEndWithSelect() {
+        this.state = this.state.moveToLineEndWithSelect();
+    }
+
+    selectAll() {
+        this.state = this.state.selectAll();
     }
 }
 
